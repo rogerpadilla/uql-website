@@ -7,7 +7,7 @@ root: true
 description: Go from zero to a working UQL query in under three minutes.
 ---
 
-**[UQL](/)** is the smartest ORM for TypeScript. It is engineered to be **fast**, **safe**, and **universally compatible**.
+**[UQL](/)** is the JSON-native query protocol for TypeScript. It is engineered to be **fast**, **safe**, and **universally compatible**.
 
 - **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
 - **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
@@ -60,7 +60,7 @@ import { User } from './entities.js';
 const users = await pool.transaction(async (querier) => {
   return await querier.findMany(User, {
     $select: ['id', 'name'],
-    $where: { email: { $endsWith: '@uql.app' } },
+    $where: { email: { $endsWith: '@uql.io' } },
     $limit: 10,
   });
 });

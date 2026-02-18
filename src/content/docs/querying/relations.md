@@ -3,7 +3,7 @@ title: Querying relations
 
 sidebar:
   order: 150
-description: This tutorial explain how to use relations in the queries with the UQL orm.
+description: This tutorial explains how to use relations in the queries with the UQL orm.
 ---
 
 ## Querying relations

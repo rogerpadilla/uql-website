@@ -2,7 +2,7 @@
 title: Soft-Delete for entities
 sidebar:
   order: 80
-description: This tutorial explain how to use soft-delete in the entities with the UQL orm.
+description: This tutorial explains how to use soft-delete in the entities with the UQL orm.
 ---
 
 ## Soft-Delete

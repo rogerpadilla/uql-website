@@ -2,7 +2,7 @@
 title: Inheritance between entities
 sidebar:
   order: 100
-description: This tutorial explain how to use inheritance between entities with the UQL orm.
+description: This tutorial explains how to use inheritance between entities with the UQL orm.
 ---
 
 ## Inheritance between entities

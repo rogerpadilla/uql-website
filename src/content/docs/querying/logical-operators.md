@@ -2,7 +2,7 @@
 title: Logical Operators
 sidebar:
   order: 110
-description: This tutorial explain how to use logical operators with the UQL orm.
+description: This tutorial explains how to use logical operators with the UQL orm.
 ---
 
 ## Logical Operators

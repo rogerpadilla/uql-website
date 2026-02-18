@@ -2,7 +2,7 @@
 title: Relations between entities
 sidebar:
   order: 70
-description: This tutorial explain how to use relations in the entities with the UQL orm.
+description: This tutorial explains how to use relations in the entities with the UQL orm.
 ---
 
 ## Relations between entities

@@ -2,7 +2,7 @@
 title: Sub-Queries
 sidebar:
   order: 170
-description: This tutorial explain how to use sub-queries with the UQL orm.
+description: This tutorial explains how to use sub-queries with the UQL orm.
 ---
 
 ## Sub-Queries

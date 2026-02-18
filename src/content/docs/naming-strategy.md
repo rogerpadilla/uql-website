@@ -2,7 +2,7 @@
 sidebar:
   order: 155
 title: Naming Strategy Overview
-description: This tutorial explain how to use naming strategies with UQL.
+description: This tutorial explains how to use naming strategies with UQL.
 ---
 
 ## Naming Strategies

@@ -20,7 +20,7 @@ export const pool = new PgQuerierPool(
     // Enable all log levels with colored output
     logger: true,
     // Threshold in ms to log slow queries
-    slowQueryThreshold: 200,
+    slowQuery: { threshold: 200 },
   }
 );
 ```
@@ -33,7 +33,7 @@ You can selectively enable log levels by passing an array:
 {
   // Only log errors, warnings, and slow queries
   logger: ['error', 'warn', 'slowQuery'],
-  slowQueryThreshold: 100
+  slowQuery: { threshold: 100 }
 }
 ```
 
@@ -42,7 +42,18 @@ For production, a common pattern is:
 ```ts
 {
   logger: ['error', 'warn', 'slowQuery', 'migration'],
-  slowQueryThreshold: 1000
+  slowQuery: { threshold: 1000 }
+}
+```
+
+### Omitting Parameters from Slow Query Logs
+
+For security-sensitive environments, you can suppress query parameters from slow query logs:
+
+```ts
+{
+  logger: true,
+  slowQuery: { threshold: 500, logParams: false }
 }
 ```
 
@@ -51,7 +62,7 @@ For production, a common pattern is:
 | Level              | Description                                                                               |
 | :----------------- | :---------------------------------------------------------------------------------------- |
 | `query`            | **Standard Queries**: Beautifully formatted SQL/Command logs with execution time.         |
-| `slowQuery`        | **Bottleneck Alerts**: Dedicated logging for queries exceeding your `slowQueryThreshold`. |
+| `slowQuery`        | **Bottleneck Alerts**: Dedicated logging for queries exceeding your `slowQuery.threshold`. Use `logParams: false` to omit params. |
 | `error` / `warn`   | **System Health**: Detailed error traces and potential issue warnings.                    |
 | `migration`        | **Audit Trail**: Step-by-step history of schema changes.                                  |
 | `skippedMigration` | **Safety**: Logs blocked unsafe schema changes during `autoSync`.                         |

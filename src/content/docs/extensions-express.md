@@ -2,7 +2,7 @@
 title: Express extension
 sidebar:
   order: 300
-description: This tutorial explain how to use the express extension with the UQL orm.
+description: This tutorial explains how to use the Express extension with the UQL orm.
 ---
 
 ## Express Extension
@@ -80,9 +80,11 @@ For an entity named `User`, the following endpoints are automatically generated:
 | `GET` | `/user/:id` | Get a single user by ID. |
 | `POST` | `/user` | Create a new user. |
 | `PATCH` | `/user/:id` | Update a user partially. |
+| `PUT` | `/user` | Upsert a user (insert or update based on conflict paths). |
 | `DELETE` | `/user/:id` | Delete a user (supports soft-delete if configured). |
 
 :::tip
 All `GET` endpoints support UQL's powerful [Serializable JSON Query Syntax](/querying/querier), allowing your frontend to perform complex joins and filters directly via URL parameters.
 :::
+
 

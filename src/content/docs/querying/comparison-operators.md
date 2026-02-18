@@ -2,7 +2,7 @@
 title: Comparison Operators
 sidebar:
   order: 130
-description: This tutorial explain how to use comparison operators with the UQL orm.
+description: This tutorial explains how to use comparison operators with the UQL orm.
 ---
 
 ## Comparison Operators
@@ -25,6 +25,12 @@ UQL provide a comprehensive set of operators for comparing field values. These o
 | `$iincludes`   | Contains substring (case-insensitive).                                             |
 | `$in`          | Value matches any in a given array.                                                |
 | `$nin`         | Value does not match any in a given array.                                         |
+| `$between`     | Value is between two bounds (inclusive). E.g. `{ age: { $between: [18, 65] } }`.   |
+| `$isNull`      | Field is null. E.g. `{ deletedAt: { $isNull: true } }`.                           |
+| `$isNotNull`   | Field is not null. E.g. `{ email: { $isNotNull: true } }`.                        |
+| `$all`         | Array contains all specified values. E.g. `{ tags: { $all: ['ts', 'orm'] } }`.    |
+| `$size`        | Array has the specified length. E.g. `{ tags: { $size: 3 } }`.                    |
+| `$elemMatch`   | Array contains an element matching the condition. E.g. `{ addresses: { $elemMatch: { city: 'NYC' } } }`. |
 | `$text`        | Full-text search (where supported by the database).                                |
 
 &nbsp;

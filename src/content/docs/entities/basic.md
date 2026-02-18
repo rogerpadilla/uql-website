@@ -2,7 +2,7 @@
 title: Basic entities
 sidebar:
   order: 60
-description: This tutorial explain how to define basic entities with the UQL orm.
+description: This tutorial explains how to define basic entities with the UQL orm.
 ---
 ## Basic entities
 
