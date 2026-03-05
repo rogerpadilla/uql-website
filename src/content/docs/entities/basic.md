@@ -64,7 +64,7 @@ UQL provides two levels for specifying column types. **Always prefer `type`** fo
 externalId?: string;
 
 @Field({ type: 'jsonb' })
-metadata?: object;
+metadata?: Json<{ theme?: string; priority?: number }>;
 
 @Field({ type: 'text' })
 bio?: string;
@@ -86,6 +86,10 @@ longBio?: string;
 
 :::tip[Prefer `type`]
 Using `type: 'uuid'` generates `UUID` on Postgres but `CHAR(36)` on MySQL — automatically. This makes your entities portable across databases without changes.
+:::
+
+:::tip[JSONB with `Json<T>`]
+Wrapping JSONB field types with `Json<T>` ensures the field is classified as a `FieldKey` (not a `RelationKey`), enabling type-safe usage in `$where`, `$select`, and `$sort`. It also provides **IDE autocompletion** for [dot-notation operator paths](/querying/comparison-operators#jsonb-dot-notation-operators).
 :::
 
 ### Field Options

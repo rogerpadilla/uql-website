@@ -89,3 +89,61 @@ const items = await querier.findMany(Item, {
   }
 });
 ```
+
+&nbsp;
+
+### Relation Filtering (EXISTS Subqueries)
+
+Filter parent entities based on conditions on their **ManyToMany** or **OneToMany** relations. UQL generates efficient `EXISTS` subqueries automatically.
+
+#### ManyToMany
+
+```ts
+// Find all posts that have a tag named 'typescript'
+const posts = await querier.findMany(Post, {
+  $where: { tags: { name: 'typescript' } },
+});
+```
+
+**Generated SQL (PostgreSQL):**
+```sql
+SELECT * FROM "Post"
+WHERE EXISTS (
+  SELECT 1 FROM "PostTag"
+  WHERE "PostTag"."postId" = "Post"."id"
+    AND "PostTag"."tagId" IN (
+      SELECT "Tag"."id" FROM "Tag" WHERE "Tag"."name" = $1
+    )
+)
+```
+
+#### OneToMany
+
+```ts
+// Find users who have authored posts with 'typescript' in the title
+const users = await querier.findMany(User, {
+  $where: { posts: { title: { $iincludes: 'typescript' } } },
+});
+```
+
+**Generated SQL (PostgreSQL):**
+```sql
+SELECT * FROM "User"
+WHERE EXISTS (
+  SELECT 1 FROM "Post"
+  WHERE "Post"."authorId" = "User"."id"
+    AND "Post"."title" ILIKE '%typescript%'
+)
+```
+
+:::tip[Combining with Other Filters]
+Relation filters compose naturally with regular field comparisons and logical operators:
+```ts
+const posts = await querier.findMany(Post, {
+  $where: {
+    title: { $istartsWith: 'guide' },
+    tags: { name: 'important' },
+  },
+});
+```
+:::
