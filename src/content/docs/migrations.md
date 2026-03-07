@@ -2,7 +2,7 @@
 sidebar:
   order: 150
 title: Migrations Overview
-description: This tutorial explain how to use database migrations with UQL.
+description: Learn how to manage database schema evolution with UQL's migration system, CLI commands, and Entity-First synchronization.
 ---
 
 ## Database Migrations
@@ -11,7 +11,7 @@ UQL includes a robust migration system and an "Entity-First" synchronization eng
 
 ### 1. Unified Configuration
 
-Ideally, reuse the same `uql.config.ts` for both your application bootstrap and the CLI. This ensures your app and migrations share the same settings (like [Naming Strategies](/naming-strategy)).
+Reuse the same `uql.config.ts` for both your application bootstrap and the CLI. This ensures your app and migrations share the same settings (like [Naming Strategies](/naming-strategy)).
 
 ```typescript
 // uql.config.ts
@@ -37,40 +37,68 @@ By default, the CLI looks for `uql.config.ts` in the project root, but you can s
 
 Use the CLI to manage your database schema evolution.
 
-| Command | Description |
-| :--- | :--- |
-| `generate <name>` | Creates an empty timestamped file for **manual** SQL migrations (e.g., data backfills). |
-| `generate:entities <name>` | **Auto-generates** a migration by diffing your entities against the current DB schema. |
-| `generate:from-db` | **Scaffolds Entities** from an existing database. Includes **Smart Relation Detection**. |
-| `drift:check` | **Drift Detection**: Compares your defined entities against the actual database schema and reports discrepancies. |
-| `up` | Applies all pending migrations. |
-| `down` | Rolls back the last applied migration batch. |
-| `status` | Shows which migrations have been executed and which are pending. |
+| Command                    | Description                                                                                                       |
+| :------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `generate <name>`          | Creates an empty timestamped file for **manual** SQL migrations (e.g., data backfills).                           |
+| `generate:entities <name>` | **Auto-generates** a migration by diffing your entities against the current DB schema.                            |
+| `generate:from-db`         | **Scaffolds Entities** from an existing database. Includes **Smart Relation Detection**.                          |
+| `drift:check`              | **Drift Detection**: Compares your defined entities against the actual database schema and reports discrepancies. |
+| `up`                       | Applies all pending migrations.                                                                                   |
+| `down`                     | Rolls back the last applied migration batch.                                                                      |
+| `status`                   | Shows which migrations have been executed and which are pending.                                                  |
+
+#### Common Workflows
+
+**Start a new project from scratch:**
 
 ```bash
-# Create a manual migration
-npx uql-migrate generate add_users_table
-
-# Generate a migration by comparing entities vs database
+# 1. Define your entities in TypeScript
+# 2. Auto-generate the initial migration
 npx uql-migrate generate:entities initial_schema
 
-# Run all pending migrations
+# 3. Apply it
 npx uql-migrate up
+```
 
-# Rollback the last migration
-npx uql-migrate down
+**Evolve an existing schema (add a field to your entity, then generate the diff):**
 
-# Check for schema drift (Production Safety)
-npx uql-migrate drift:check
+```bash
+# You added @Field() nickname?: string to User entity
+npx uql-migrate generate:entities add_user_nickname
 
-# Scaffold entities from an existing DB (Legacy Adoption)
+# Review the generated migration, then apply
+npx uql-migrate up
+```
+
+**Adopt UQL on an existing database:**
+
+```bash
+# Scaffold entities from your live DB
 npx uql-migrate generate:from-db --output ./src/entities
 
-# Using a custom config path
-npx uql-migrate up --config ./configs/uql.config.ts
+# Check if entities match the DB
+npx uql-migrate drift:check
+```
 
-# Check status of migrations
+**Manual migration for data backfills or custom SQL:**
+
+```bash
+npx uql-migrate generate seed_default_roles
+# Edit the generated file, then apply
+npx uql-migrate up
+```
+
+**Day-to-day commands:**
+
+```bash
+# Check migration status
 npx uql-migrate status
+
+# Rollback the last batch
+npx uql-migrate down
+
+# Use a custom config path
+npx uql-migrate up --config ./configs/uql.config.ts
 ```
 
 :::caution[Bun Users]
@@ -83,7 +111,7 @@ Or add a script to your `package.json`: `"uql": "bun run --bun uql-migrate"`.
 
 ### 3. Entity-First Synchronization (Development)
 
-In development, you can use `autoSync` to automatically keep your database in sync with your entities without manual migrations. It uses the new **Schema AST** engine to perform graph-based comparison and is **safe by default**, meaning it only adds missing tables and columns while **blocking** any destructive operations (column drops or type alterations) to prevent data loss.
+In development, you can use `autoSync` to automatically keep your database in sync with your entities without manual migrations. It uses the **Schema AST** engine to perform graph-based comparison and is **safe by default**, meaning it only adds missing tables and columns while **blocking** any destructive operations (column drops or type alterations) to prevent data loss.
 
 :::note[Important]
 For `autoSync` to detect your entities, they must be **loaded** (imported) before calling `autoSync`.
@@ -130,7 +158,7 @@ When scaffolding entities from an existing database (`generate:from-db`), UQL au
 *   **Explicit Foreign Keys**: Standard foreign keys are mapped to `@OneToMany` / `@ManyToOne`.
 *   **One-to-One Relations**: Detected when a foreign key column also has a **unique constraint**.
 *   **Many-to-Many Relations**: Automatically identified by detecting **Junction Tables** (tables with exactly two foreign keys and no other business data).
-*   **Naming Conventions**: If foreign keys are missing, UQL infers logical relations from column naming patterns like `user_id` -> `User`.
+*   **Naming Conventions**: If foreign keys are missing, UQL infers logical relations from column naming patterns like `user_id` → `User`.
 
 #### 3. Drift Detection
 Ensure production safety with `drift:check`. It compares your TypeScript entity definitions against the actual running database and reports:
@@ -139,8 +167,8 @@ Ensure production safety with `drift:check`. It compares your TypeScript entity 
 
 #### 4. Bidirectional Index Sync
 Indexes are synchronized in both directions:
-*   **Enity -> DB**: `@Field({ index: true })` creates an index in the database.
-*   **DB -> Entity**: Existing database indexes are reflected in generated entity files.
+*   **Entity → DB**: `@Field({ index: true })` creates an index in the database.
+*   **DB → Entity**: Existing database indexes are reflected in generated entity files.
 
 ### Other Features
 - **64-bit Primary Keys**: Auto-increment primary keys use `BIGINT` across all dialects for TypeScript `number` compatibility.
@@ -148,107 +176,170 @@ Indexes are synchronized in both directions:
 - **Safe Primary Keys**: Primary keys are immune to automated alterations during `autoSync`.
 - **Foreign Key Inheritance**: Foreign key columns automatically inherit the exact SQL type of their referenced primary keys.
 
-Check out the [getting started](/getting-started) guide for more details on setting up your project.
+---
 
 ## Migration Builder API
 
 When writing manual migrations (via `generate`), you have access to a fluent, type-safe API for defining your schema.
 
-### Comprehensive Example
+### Real-World Example
+
+A typical migration that adds a new table with relationships and modifies an existing one:
 
 ```typescript
 import { defineMigration, t } from '@uql/core/migrate';
 
 export default defineMigration({
   async up(m) {
-    // 1. Create a table with all supported column types
-    await m.createTable('all_types_demo', (table) => {
-      // --- Numeric Types ---
-      table.id(); // Auto-incrementing primary key (BigInt)
-      table.integer('user_age', { nullable: true });
-      table.smallint('status_id', { defaultValue: 0 });
-      table.bigint('view_count', { defaultValue: 0n });
-      table.float('rating'); // Standard float
-      table.double('precise_score'); // Double precision
-      table.decimal('price', { precision: 10, scale: 2 }); // DECIMAL(10,2)
+    // Create a new table
+    await m.createTable('articles', (t) => {
+      t.id();                                         // BIGINT auto-increment PK
+      t.string('title', { length: 200 });             // VARCHAR(200) NOT NULL
+      t.string('slug', { length: 200, unique: true });
+      t.text('body');                                  // TEXT NOT NULL
+      t.boolean('published', { defaultValue: false });
+      t.timestamp('published_at', { nullable: true });
+      t.timestamp('created_at', { defaultValue: t.now() });
 
-      // --- String Types ---
-      table.string('username', { length: 50, unique: true }); // VARCHAR(50)
-      table.string('email'); // VARCHAR(255) by default
-      table.char('country_code', { length: 2 }); // CHAR(2)
-      table.text('bio'); // TEXT (unlimited length)
-
-      // --- Boolean ---
-      table.boolean('is_active', { defaultValue: true });
-
-      // --- Date & Time ---
-      table.date('birth_date');
-      table.time('daily_alarm');
-      table.timestamp('created_at', { defaultValue: t.now() });
-      table.timestamptz('updated_at'); // With timezone
-
-      // --- JSON & Advanced ---
-      table.json('settings'); // Standard JSON
-      table.jsonb('metadata'); // Binary JSON (Postgres)
-      table.uuid('external_id', { defaultValue: t.uuid() }); // UUID v4
-      table.blob('file_data'); // Binary data
-      table.vector('embedding', { dimensions: 1536 }); // Vector for AI
-
-      // --- Relationships & Constraints ---
-      table.integer('author_id', {
-        references: { 
-          table: 'users', 
-          column: 'id', // optional (default: id)
-          onDelete: 'CASCADE',
-          onUpdate: 'NO ACTION'
-        }
+      // Foreign key to users table
+      t.integer('author_id', {
+        references: { table: 'users', column: 'id', onDelete: 'CASCADE' },
       });
-      
-      // Composite constraints
-      table.unique(['username', 'email']);
-      table.index(['is_active', 'created_at']);
-      
-      // Comments
-      table.comment('A comprehensive demo table');
+
+      // Composite index for common queries
+      t.index(['published', 'created_at']);
     });
 
-    // 2. Modify an existing table
-    await m.alterTable('users', (table) => {
-      table.addColumn('nickname', (c) => c.string({ length: 100 }));
-      table.dropColumn('legacy_field');
-      table.renameColumn('full_name', 'name');
-      table.alterColumn('email', (c) => c.string({ length: 300 })); // Expand length
-      
-      table.addIndex(['nickname']);
-      table.addForeignKey(['profile_id'], { 
-        table: 'profiles', 
-        columns: ['id'] 
-      });
+    // Modify an existing table
+    await m.alterTable('users', (t) => {
+      t.addColumn('bio', (c) => c.text());
+      t.addColumn('avatar_url', (c) => c.string({ length: 500 }).nullable());
+      t.addIndex(['email']);
     });
-
-    // 3. Raw SQL (Escape hatch)
-    await m.raw('CREATE VIEW active_users AS SELECT * FROM users WHERE is_active = true');
   },
 
   async down(m) {
-    await m.raw('DROP VIEW IF EXISTS active_users');
-    await m.dropTable('all_types_demo');
-    // ... reverse other changes
-  }
+    // Reverse in opposite order
+    await m.alterTable('users', (t) => {
+      t.dropIndex('idx_users_email');
+      t.dropColumn('avatar_url');
+      t.dropColumn('bio');
+    });
+
+    await m.dropTable('articles');
+  },
 });
+```
+
+### Comprehensive Column Types
+
+```typescript
+import { defineMigration, t } from '@uql/core/migrate';
+
+export default defineMigration({
+  async up(m) {
+    await m.createTable('all_types_demo', (t) => {
+      // --- Numeric Types ---
+      t.id();                                              // Auto-incrementing PK (BigInt)
+      t.integer('user_age', { nullable: true });
+      t.smallint('status_id', { defaultValue: 0 });
+      t.bigint('view_count', { defaultValue: 0n });
+      t.float('rating');
+      t.double('precise_score');
+      t.decimal('price', { precision: 10, scale: 2 });
+
+      // --- String Types ---
+      t.string('username', { length: 50, unique: true }); // VARCHAR(50)
+      t.string('email');                                   // VARCHAR(255) by default
+      t.char('country_code', { length: 2 });
+      t.text('bio');
+
+      // --- Boolean ---
+      t.boolean('is_active', { defaultValue: true });
+
+      // --- Date & Time ---
+      t.date('birth_date');
+      t.time('daily_alarm');
+      t.timestamp('created_at', { defaultValue: t.now() });
+      t.timestamptz('updated_at');
+
+      // --- JSON & Advanced ---
+      t.json('settings');
+      t.jsonb('metadata');                                 // Binary JSON (Postgres)
+      t.uuid('external_id', { defaultValue: t.uuid() });
+      t.blob('file_data');
+      t.vector('embedding', { dimensions: 1536 });        // Vector for AI/ML
+
+      // --- Relationships ---
+      t.integer('author_id', {
+        references: {
+          table: 'users',
+          column: 'id',
+          onDelete: 'CASCADE',
+          onUpdate: 'NO ACTION',
+        },
+      });
+
+      // --- Composite Constraints ---
+      t.unique(['username', 'email']);
+      t.index(['is_active', 'created_at']);
+      t.comment('A comprehensive demo table');
+    });
+  },
+
+  async down(m) {
+    await m.dropTable('all_types_demo');
+  },
+});
+```
+
+### Alter Table Operations
+
+```typescript
+await m.alterTable('users', (t) => {
+  // Add columns
+  t.addColumn('nickname', (c) => c.string({ length: 100 }));
+
+  // Drop columns
+  t.dropColumn('legacy_field');
+
+  // Rename columns
+  t.renameColumn('full_name', 'name');
+
+  // Alter column type
+  t.alterColumn('email', (c) => c.string({ length: 300 }));
+
+  // Indexes
+  t.addIndex(['nickname']);
+  t.dropIndex('idx_users_old_name');
+
+  // Foreign keys
+  t.addForeignKey(['profile_id'], {
+    table: 'profiles',
+    columns: ['id'],
+  });
+  t.dropForeignKey('fk_users_legacy');
+});
+
+// Raw SQL (escape hatch)
+await m.raw('CREATE VIEW active_users AS SELECT * FROM users WHERE is_active = true');
 ```
 
 ### Column Options Reference
 
 All column methods accept an optional settings object:
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `nullable` | `boolean` | `false` | Allow NULL values? (**Default is NOT NULL**) |
-| `defaultValue` | `any` | `undefined` | Default value (use `t.now()`, `t.uuid()` for expressions) |
-| `unique` | `boolean` | `false` | Add a unique constraint |
-| `primaryKey` | `boolean` | `false` | Mark as primary key |
-| `autoIncrement` | `boolean` | `false` | Enable auto-increment (integers only) |
-| `index` | `boolean` \| `string` | `false` | Create an index (bool=auto-name, string=custom-name) |
-| `comment` | `string` | - | Database comment for the column |
-| `references` | `object` | - | Define Foreign Key (see example above) |
+| Option          | Type                  | Default     | Description                                               |
+| :-------------- | :-------------------- | :---------- | :-------------------------------------------------------- |
+| `nullable`      | `boolean`             | `false`     | Allow NULL values? (**Default is NOT NULL**)              |
+| `defaultValue`  | `any`                 | `undefined` | Default value (use `t.now()`, `t.uuid()` for expressions) |
+| `unique`        | `boolean`             | `false`     | Add a unique constraint                                   |
+| `primaryKey`    | `boolean`             | `false`     | Mark as primary key                                       |
+| `autoIncrement` | `boolean`             | `false`     | Enable auto-increment (integers only)                     |
+| `index`         | `boolean` \| `string` | `false`     | Create an index (bool=auto-name, string=custom-name)      |
+| `comment`       | `string`              | -           | Database comment for the column                           |
+| `references`    | `object`              | -           | Define Foreign Key (see examples above)                   |
+
+---
+
+Check out the [getting started](/getting-started) guide for more details on setting up your project.
