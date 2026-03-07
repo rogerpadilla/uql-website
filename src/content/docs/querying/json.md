@@ -138,13 +138,17 @@ UPDATE `Company` SET `kind` = json_remove(`kind`, '$.private') WHERE `id` = ?
 
 ### Combined `$merge` + `$unset`
 
-Both operations can be combined in a single update — the merge runs first, then unset.
+Both operations can be combined in a single update.
 
 ```ts
 await querier.updateOneById(Company, id, {
   kind: { $merge: { public: 1 }, $unset: ['private'] },
 });
 ```
+
+:::caution[Array Merging]
+`$merge` uses RFC 7396 (`JSON_MERGE_PATCH`) under the hood in MySQL and SQLite. This means **arrays are replaced entirely**, not appended to. If `kind` contains an array like `tags: ['a']`, merging `{ tags: ['x'] }` results in `tags: ['x']`, not `tags: ['a', 'x']`.
+:::
 
 :::tip[Type Safety]
 Both `$merge` keys and `$unset` keys are validated against the JSON field's inner type `T` (from `Json<T>`). The IDE will autocomplete valid keys and reject invalid ones at compile time.
