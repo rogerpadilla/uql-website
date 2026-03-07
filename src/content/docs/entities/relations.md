@@ -162,10 +162,10 @@ const posts = await querier.findMany(Post, {
     id: true,
     title: true,
     author: {
-      $select: ['name', 'email']
+      $select: { name: true, email: true }
     },
     tags: {
-      $select: ['name'],
+      $select: { name: true },
       $where: { name: { $startsWith: 'typescript' } }
     }
   },

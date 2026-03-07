@@ -26,7 +26,7 @@ const querier = await pool.getQuerier();
 
 try {
   const users = await querier.findMany(User, {
-    $select: ['id', 'name'],
+    $select: { id: true, name: true },
     $where: { 
       $or: [
         { name: 'roger' }, 

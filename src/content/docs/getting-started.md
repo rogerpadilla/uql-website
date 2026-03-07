@@ -59,7 +59,7 @@ import { User } from './entities.js';
 
 const users = await pool.transaction(async (querier) => {
   return await querier.findMany(User, {
-    $select: ['id', 'name'],
+    $select: { id: true, name: true },
     $where: { email: { $endsWith: '@uql.io' } },
     $limit: 10,
   });

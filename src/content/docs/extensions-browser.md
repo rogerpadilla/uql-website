@@ -32,7 +32,7 @@ This extension is completely optional. UQL works perfectly fine as a standalone 
     const users = await querier.findMany(User, {
       $select: { 
         email: true, 
-        profile: { $select: ['picture'] } 
+        profile: { $select: { picture: true } } 
       },
       $where: { email: { $endsWith: '@domain.com' } },
       $sort: { createdAt: 'desc' },

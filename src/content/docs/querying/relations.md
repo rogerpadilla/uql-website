@@ -21,7 +21,7 @@ const users = await querier.findMany(User, {
   $select: {
     id: true,
     name: true,
-    profile: ['picture'] // Select specific fields from a 1-1 relation
+    profile: { $select: { picture: true } } // Select specific fields from a 1-1 relation
   },
   $where: {
     email: { $iincludes: '@example.com' }
@@ -41,7 +41,7 @@ const latestUsersWithProfiles = await querier.findOne(User, {
     id: true,
     name: true,
     profile: {
-      $select: ['picture', 'bio'],
+      $select: { picture: true, bio: true },
       $where: { bio: { $ne: null } },
       $required: true // Enforce INNER JOIN
     }
@@ -62,7 +62,7 @@ const authorsWithPopularPosts = await querier.findMany(User, {
     id: true,
     name: true,
     posts: {
-      $select: ['title', 'createdAt'],
+      $select: { title: true, createdAt: true },
       $where: { title: { $iincludes: 'typescript' } },
       $sort: { createdAt: 'desc' },
       $limit: 5
