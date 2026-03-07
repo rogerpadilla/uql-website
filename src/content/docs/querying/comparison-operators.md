@@ -76,39 +76,6 @@ LIMIT 50
 
 ### JSONB Dot-Notation Operators
 
-Query nested JSON fields using **type-safe dot-notation paths** directly in `$where`. All comparison operators are supported. Wrap fields with `Json<T>` to get IDE autocompletion for valid paths. UQL generates dialect-specific SQL automatically.
+All comparison operators listed above also work on nested JSON field paths using **dot-notation** (e.g., `'settings.isArchived': { $ne: true }`). UQL generates dialect-specific SQL automatically across PostgreSQL, MySQL, and SQLite.
 
-:::tip[Type-safe JSONB]
-Wrap JSONB field types with `Json<T>` to get IDE autocompletion for dot-notation paths:
-```ts
-@Field({ type: 'jsonb' })
-settings?: Json<{ isArchived?: boolean; priority?: number }>;
-```
-:::
-
-```ts
-const companies = await querier.findMany(Company, {
-  $where: {
-    'settings.isArchived': { $ne: true },
-    'settings.priority': { $gte: 5 },
-  },
-});
-```
-
-**SQL for PostgreSQL:**
-```sql
-SELECT * FROM "Company"
-WHERE ("settings"->>'isArchived') IS DISTINCT FROM $1 AND (("settings"->>'priority'))::numeric >= $2
-```
-
-**SQL for SQLite:**
-```sql
-SELECT * FROM `Company`
-WHERE json_extract(`settings`, '$.isArchived') IS NOT ? AND CAST(json_extract(`settings`, '$.priority') AS REAL) >= ?
-```
-
-:::note[Null-Safe `$ne`]
-UQL uses null-safe inequality operators for JSONB `$ne` (`IS DISTINCT FROM` on PostgreSQL, `IS NOT` on SQLite). This ensures that absent keys (which return SQL `NULL`) are correctly included in results, since standard `<>` treats `NULL <> value` as `NULL` (falsy).
-:::
-
-Supported operators on dot-notation paths include: `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$like`, `$ilike`, `$startsWith`, `$endsWith`, `$includes`, `$in`, `$nin`, and `$regex`.
+See the dedicated [JSON / JSONB](/querying/json) page for full documentation including filtering, `$merge`/`$unset` update operators, and sorting by JSON paths.
