@@ -124,7 +124,7 @@ For scenarios requiring granular control over the transaction lifecycle, you can
 import { pool } from './uql.config.js';
 import { User, Profile } from './shared/models/index.js';
 
-async function registerUser(userData: any, profileData: any) {
+async function registerUser(userData: Partial<User>, profileData: Partial<Profile>) {
   // 1. Obtain a querier from the pool
   const querier = await pool.getQuerier();
   

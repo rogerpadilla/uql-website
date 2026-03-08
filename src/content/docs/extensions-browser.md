@@ -2,7 +2,7 @@
 title: Browser extension
 sidebar:
   order: 400
-description: This tutorial explain how to use the browser extension with the UQL orm.
+description: This tutorial explains how to use the browser extension with the UQL orm.
 ---
 
 ## Browser Extension
@@ -81,11 +81,6 @@ const users = await querier.findMany(User, {
 ```
 
 :::tip
-For a truly seamless experience, wrap the `HttpQuerier` in a service that automatically injects the current user's token into every request.
-:::
-
-
-:::tip
-Combine this with the [Express Extension](/extensions-express) to create a full-stack, type-safe data layer in minutes.
+For a truly seamless experience, wrap the `HttpQuerier` in a service that automatically injects the current user's token into every request. Combine this with the [Express Extension](/extensions-express) to create a full-stack, type-safe data layer in minutes.
 :::
 

@@ -30,7 +30,7 @@ Here is a complete example of defining an entity, setting up a pool, and running
 
 ```ts
 // entities.ts
-import { Entity, Id, Field, Relation } from 'uql-orm';
+import { Entity, Id, Field } from 'uql-orm';
 
 @Entity()
 export class User {
@@ -60,7 +60,7 @@ import { User } from './entities.js';
 const users = await pool.transaction(async (querier) => {
   return await querier.findMany(User, {
     $select: { id: true, name: true },
-    $where: { email: { $endsWith: '@uql.io' } },
+    $where: { email: { $endsWith: '@uql-orm.dev' } },
     $limit: 10,
   });
 });

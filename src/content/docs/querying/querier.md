@@ -43,26 +43,26 @@ try {
 
 ### Available Methods
 
-| Method                                            | Description                                              |
-| :------------------------------------------------ | :------------------------------------------------------- |
-| `findMany(Entity, query)`                         | Find multiple records matching the query.                |
-| `findManyAndCount(Entity, query)`                 | Find records and return `[rows, totalCount]`.            |
-| `findOne(Entity, query)`                          | Find a single record matching the query.                 |
-| `findOneById(Entity, id, query?)`                 | Find a record by its primary key.                        |
-| `count(Entity, query)`                            | Count records matching the query.                        |
-| `insertOne(Entity, data)`                         | Insert a single record and return its ID.                |
-| `insertMany(Entity, data[])`                      | Insert multiple records and return their IDs.            |
-| `updateOneById(Entity, id, data)`                 | Update a record by its primary key.                      |
-| `updateMany(Entity, query, data)`                 | Update multiple records matching the query.              |
-| `saveOne(Entity, data)`                           | Insert or update based on ID presence.                   |
-| `saveMany(Entity, data[])`                        | Bulk insert or update based on ID presence.              |
-| `upsertOne(Entity, conflictPaths, data)`          | Insert or update based on conflict paths.                |
-| `upsertMany(Entity, conflictPaths, data[])`       | Bulk insert or update based on conflict paths.           |
-| `deleteOneById(Entity, id)`                       | Delete a record by its primary key.                      |
-| `deleteMany(Entity, query)`                       | Delete multiple records matching the query.              |
-| `run(sql, values?)`                               | Execute raw SQL.                                         |
-| `transaction(callback)`                           | Run a transaction within a callback.                     |
-| `release()`                                       | Return the connection to the pool.                       |
+| Method                                      | Description                                    |
+| :------------------------------------------ | :--------------------------------------------- |
+| `findMany(Entity, query)`                   | Find multiple records matching the query.      |
+| `findManyAndCount(Entity, query)`           | Find records and return `[rows, totalCount]`.  |
+| `findOne(Entity, query)`                    | Find a single record matching the query.       |
+| `findOneById(Entity, id, query?)`           | Find a record by its primary key.              |
+| `count(Entity, query)`                      | Count records matching the query.              |
+| `insertOne(Entity, data)`                   | Insert a single record and return its ID.      |
+| `insertMany(Entity, data[])`                | Insert multiple records and return their IDs.  |
+| `updateOneById(Entity, id, data)`           | Update a record by its primary key.            |
+| `updateMany(Entity, query, data)`           | Update multiple records matching the query.    |
+| `saveOne(Entity, data)`                     | Insert or update based on ID presence.         |
+| `saveMany(Entity, data[])`                  | Bulk insert or update based on ID presence.    |
+| `upsertOne(Entity, conflictPaths, data)`    | Insert or update based on conflict paths.      |
+| `upsertMany(Entity, conflictPaths, data[])` | Bulk insert or update based on conflict paths. |
+| `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
+| `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
+| `run(sql, values?)`                         | Execute raw SQL.                               |
+| `transaction(callback)`                     | Run a transaction within a callback.           |
+| `release()`                                 | Return the connection to the pool.             |
 
 :::note
 Read methods (`findOne`, `findMany`, `findManyAndCount`, `count`, `deleteMany`) also support an RPC-friendly call pattern: `querier.findMany({ $entity: User, ...query })`. This makes serialization for RPC/REST endpoints trivial.
@@ -76,7 +76,7 @@ Upsert (insert-or-update) resolves conflicts using **conflict paths** — the fi
 
 ```ts
 await querier.upsertOne(User, { email: true }, {
-  email: 'roger@uql.io',
+  email: 'roger@uql-orm.dev',
   name: 'Roger',
 });
 ```
@@ -93,9 +93,9 @@ Efficiently upsert multiple records in a single statement:
 
 ```ts
 await querier.upsertMany(User, { email: true }, [
-  { email: 'roger@uql.io', name: 'Roger' },
-  { email: 'ana@uql.io', name: 'Ana' },
-  { email: 'carlos@uql.io', name: 'Carlos' },
+  { email: 'roger@uql-orm.dev', name: 'Roger' },
+  { email: 'ana@uql-orm.dev', name: 'Ana' },
+  { email: 'freddy@uql-orm.dev', name: 'Freddy' },
 ]);
 ```
 
