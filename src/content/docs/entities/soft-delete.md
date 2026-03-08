@@ -14,7 +14,7 @@ Soft-delete allows you to mark records as "deleted" instead of physically removi
 To enable soft-delete, set `softDelete: true` in the `@Entity` decorator and specify a field with an `onDelete` callback.
 
 ```ts
-import { Entity, Id, Field } from '@uql/core';
+import { Entity, Id, Field } from 'uql-orm';
 
 @Entity({ softDelete: true })
 export class User {

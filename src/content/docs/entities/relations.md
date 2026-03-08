@@ -11,11 +11,11 @@ Relationships are a core part of any ORM. UQL makes it easy to define and query 
 
 ### Defining Relationships
 
-Take any class and annotate it with the decorators from `@uql/core`. You can use `mappedBy` as a string or a callback for better refactoring support.
+Take any class and annotate it with the decorators from `uql-orm`. You can use `mappedBy` as a string or a callback for better refactoring support.
 
 ```ts
 import { v7 as uuidv7 } from 'uuid';
-import { Entity, Id, Field, OneToOne, OneToMany, ManyToOne, ManyToMany, type Relation } from '@uql/core';
+import { Entity, Id, Field, OneToOne, OneToMany, ManyToOne, ManyToMany, type Relation } from 'uql-orm';
 
 @Entity()
 export class User {
@@ -133,7 +133,7 @@ export class PostTag {
 In modern ESM environments, circular dependencies between entity classes can sometimes cause issues. UQL provides a `Relation<T>` utility type to safely handle these scenarios while maintaining full type safety.
 
 ```ts
-import { Entity, Id, Field, OneToOne, type Relation } from '@uql/core';
+import { Entity, Id, Field, OneToOne, type Relation } from 'uql-orm';
 
 @Entity()
 export class User {

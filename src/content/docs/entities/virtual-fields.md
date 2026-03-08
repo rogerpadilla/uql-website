@@ -12,7 +12,7 @@ The `virtual` property of the `@Field` decorator allows you to define non-persis
 UQL's virtual fields use the `QueryContext` pattern, ensuring robust SQL generation and top-tier performance.
 
 ```ts
-import { Entity, Id, Field, ManyToMany, raw } from '@uql/core';
+import { Entity, Id, Field, ManyToMany, raw } from 'uql-orm';
 import { v7 as uuidv7 } from 'uuid';
 
 @Entity()

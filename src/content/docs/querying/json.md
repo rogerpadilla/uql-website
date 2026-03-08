@@ -15,7 +15,7 @@ UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **
 Wrap JSONB field types with `Json<T>` to enable full type safety — IDE autocompletion for dot-notation paths, `$merge` keys, and `$unset` keys.
 
 ```ts
-import { Entity, Id, Field, Json } from '@uql/core';
+import { Entity, Id, Field, Json } from 'uql-orm';
 
 @Entity()
 export class Company {
@@ -187,12 +187,12 @@ SELECT * FROM `Company` ORDER BY json_extract(`kind`, '$.public') DESC
 
 All JSON features work across three SQL dialects:
 
-| Feature | PostgreSQL | MySQL | SQLite |
-|---------|-----------|-------|--------|
-| Dot-notation filtering | `->>'key'` | `JSON_EXTRACT()` | `json_extract()` |
-| `$merge` | `\|\| ::jsonb` | `JSON_MERGE_PATCH()` | `json_patch()` |
-| `$unset` | `- 'key'` | `JSON_REMOVE()` | `json_remove()` |
-| Dot-notation sorting | `->>'key'` | `JSON_EXTRACT()` | `json_extract()` |
+| Feature                | PostgreSQL     | MySQL                | SQLite           |
+| ---------------------- | -------------- | -------------------- | ---------------- |
+| Dot-notation filtering | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()` |
+| `$merge`               | `\|\| ::jsonb` | `JSON_MERGE_PATCH()` | `json_patch()`   |
+| `$unset`               | `- 'key'`      | `JSON_REMOVE()`      | `json_remove()`  |
+| Dot-notation sorting   | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()` |
 
 :::note
 MongoDB stores JSON natively — no special operators are needed. These features are specifically designed for SQL databases where JSON is stored in dedicated column types.

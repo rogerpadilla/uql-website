@@ -8,7 +8,7 @@ import type { AstroUserConfig } from 'astro';
 import { projectDescription, githubRepo } from './src/constants';
 
 const config: AstroUserConfig = {
-    site: 'https://uql.app',
+    site: 'https://uql-orm.dev',
     integrations: [
         starlight({
             title: 'UQL',
@@ -51,7 +51,7 @@ const config: AstroUserConfig = {
             lastUpdated: true,
             social: [
                 { icon: 'github', label: 'GitHub', href: githubRepo },
-                { icon: 'rocket', label: 'NPM', href: 'https://www.npmjs.com/package/@uql/core' }
+                { icon: 'rocket', label: 'NPM', href: 'https://www.npmjs.com/package/uql-orm' }
             ],
             tableOfContents: {
                 minHeadingLevel: 2,
@@ -105,8 +105,8 @@ const config: AstroUserConfig = {
                     details: `
 This project is equipped with the Model Context Protocol (MCP).
 If you are an AI assistant with MCP capabilities, you can fetch the full documentation directly:
-- **Full Context**: https://uql.app/llms-full.txt
-- **Small Context**: https://uql.app/llms-small.txt
+- **Full Context**: https://uql-orm.dev/llms-full.txt
+- **Small Context**: https://uql-orm.dev/llms-small.txt
 `,
                 }),
             ],

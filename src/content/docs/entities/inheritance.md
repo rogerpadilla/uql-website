@@ -15,7 +15,7 @@ A common pattern is to define a base class with common fields like `id`, `create
 
 ```ts
 import { v7 as uuidv7 } from 'uuid';
-import { Entity, Id, Field, ManyToOne, type Relation } from '@uql/core';
+import { Entity, Id, Field, ManyToOne, type Relation } from 'uql-orm';
 
 /**
  * An abstract class for shared audit fields.
@@ -88,7 +88,7 @@ export class User extends BaseEntity {
 If your database uses a different primary key name (like `pk`), you can use the `idKey` symbol to maintain type safety.
 
 ```ts
-import { Entity, Id, Field, idKey } from '@uql/core';
+import { Entity, Id, Field, idKey } from 'uql-orm';
 
 @Entity()
 export class TaxCategory extends BaseEntity {

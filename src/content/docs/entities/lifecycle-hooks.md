@@ -11,15 +11,15 @@ Lifecycle hooks let you run custom logic at key moments in an entity's lifecycle
 
 UQL provides **7 decorator hooks** and a **global listener** system:
 
-| Decorator | Fires when |
-| :--- | :--- |
-| `@BeforeInsert()` | Before a new record is inserted |
-| `@AfterInsert()` | After a new record is inserted |
-| `@BeforeUpdate()` | Before a record is updated |
-| `@AfterUpdate()` | After a record is updated |
-| `@BeforeDelete()` | Before a record is deleted |
-| `@AfterDelete()` | After a record is deleted |
-| `@AfterLoad()` | After a record is loaded from the database |
+| Decorator         | Fires when                                 |
+| :---------------- | :----------------------------------------- |
+| `@BeforeInsert()` | Before a new record is inserted            |
+| `@AfterInsert()`  | After a new record is inserted             |
+| `@BeforeUpdate()` | Before a record is updated                 |
+| `@AfterUpdate()`  | After a record is updated                  |
+| `@BeforeDelete()` | Before a record is deleted                 |
+| `@AfterDelete()`  | After a record is deleted                  |
+| `@AfterLoad()`    | After a record is loaded from the database |
 
 All hooks receive a `HookContext` with the active `querier`, so you can perform additional DB operations within the same transaction.
 
@@ -30,7 +30,7 @@ Define hooks as methods on your entity class using decorator annotations.
 ### Basic Example
 
 ```ts
-import { Entity, Id, Field, BeforeInsert, AfterLoad } from '@uql/core';
+import { Entity, Id, Field, BeforeInsert, AfterLoad } from 'uql-orm';
 
 @Entity()
 export class Article {
@@ -174,7 +174,7 @@ class Post extends BaseEntity {
 For cross-cutting concerns (audit logging, automatic timestamps across all entities, cache invalidation), register **global listeners** on the querier pool:
 
 ```ts
-import { PgQuerierPool, type QuerierListener } from '@uql/core';
+import { PgQuerierPool, type QuerierListener } from 'uql-orm';
 
 const auditListener: QuerierListener = {
   afterInsert({ entity, payloads, querier }) {
@@ -195,12 +195,12 @@ const pool = new PgQuerierPool(connectionConfig, {
 
 Global listeners receive a `ListenerContext` with:
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `entity` | `Type<E>` | The entity class |
-| `querier` | `Querier` | The active querier (same transaction) |
-| `payloads` | `E[]` | The entity payloads |
-| `event` | `HookEvent` | The event name |
+| Property   | Type        | Description                           |
+| :--------- | :---------- | :------------------------------------ |
+| `entity`   | `Type<E>`   | The entity class                      |
+| `querier`  | `Querier`   | The active querier (same transaction) |
+| `payloads` | `E[]`       | The entity payloads                   |
+| `event`    | `HookEvent` | The event name                        |
 
 ### Execution Order
 

@@ -19,7 +19,7 @@ description: Go from zero to a working UQL query in under three minutes.
 Install the core and your preferred driver:
 
 ```sh
-npm install @uql/core pg # or mysql2, better-sqlite3, mongodb, etc.
+npm install uql-orm pg # or mysql2, better-sqlite3, mongodb, etc.
 ```
 
 ---
@@ -30,7 +30,7 @@ Here is a complete example of defining an entity, setting up a pool, and running
 
 ```ts
 // entities.ts
-import { Entity, Id, Field, Relation } from '@uql/core';
+import { Entity, Id, Field, Relation } from 'uql-orm';
 
 @Entity()
 export class User {
@@ -45,7 +45,7 @@ export class User {
 }
 
 // uql.config.ts
-import { PgQuerierPool } from '@uql/core/postgres';
+import { PgQuerierPool } from 'uql-orm/postgres';
 import { User } from './entities.js';
 
 export const pool = new PgQuerierPool(

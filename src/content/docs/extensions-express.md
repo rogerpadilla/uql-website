@@ -18,7 +18,7 @@ This extension is completely optional. UQL works perfectly fine as a standalone 
 
 ```ts
 import express from 'express';
-import { querierMiddleware } from '@uql/core/express';
+import { querierMiddleware } from 'uql-orm/express';
 import { pool } from './uql.config.js';
 import { User, Post } from './shared/models/index.js';
 
@@ -63,25 +63,25 @@ app.use('/api', querierMiddleware({
 
 ### Hook Reference
 
-| Hook | Lifecycle | Use Case |
-| :--- | :--- | :--- |
-| `pre` | Before every operation. | Logging, auditing, global validation. |
-| `preSave` | Before `POST`, `PATCH`, `PUT`. | Injecting `creatorId`, `updatedAt`, or data sanitization. |
-| `preFilter` | Before `GET`, `DELETE`. | Row-level security, tenant isolation, enforcing `softDelete`. |
+| Hook        | Lifecycle                      | Use Case                                                      |
+| :---------- | :----------------------------- | :------------------------------------------------------------ |
+| `pre`       | Before every operation.        | Logging, auditing, global validation.                         |
+| `preSave`   | Before `POST`, `PATCH`, `PUT`. | Injecting `creatorId`, `updatedAt`, or data sanitization.     |
+| `preFilter` | Before `GET`, `DELETE`.        | Row-level security, tenant isolation, enforcing `softDelete`. |
 
 
 ### Generated Endpoints
 
 For an entity named `User`, the following endpoints are automatically generated:
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/user` | List users (supports pagination, filtering, and sorting). |
-| `GET` | `/user/:id` | Get a single user by ID. |
-| `POST` | `/user` | Create a new user. |
-| `PATCH` | `/user/:id` | Update a user partially. |
-| `PUT` | `/user` | Upsert a user (insert or update based on conflict paths). |
-| `DELETE` | `/user/:id` | Delete a user (supports soft-delete if configured). |
+| Method   | Endpoint    | Description                                               |
+| :------- | :---------- | :-------------------------------------------------------- |
+| `GET`    | `/user`     | List users (supports pagination, filtering, and sorting). |
+| `GET`    | `/user/:id` | Get a single user by ID.                                  |
+| `POST`   | `/user`     | Create a new user.                                        |
+| `PATCH`  | `/user/:id` | Update a user partially.                                  |
+| `PUT`    | `/user`     | Upsert a user (insert or update based on conflict paths). |
+| `DELETE` | `/user/:id` | Delete a user (supports soft-delete if configured).       |
 
 :::tip
 All `GET` endpoints support UQL's powerful [Serializable JSON Query Syntax](/querying/querier), allowing your frontend to perform complex joins and filters directly via URL parameters.

@@ -12,7 +12,7 @@ UQL features a professional-grade, structured logging system designed for high v
 Logging is configured at the pool level, typically within your `uql.config.ts`. You can enable it by passing `logger: true` in the extra options, which uses the built-in `DefaultLogger`.
 
 ```ts
-import { PgQuerierPool } from '@uql/core/postgres';
+import { PgQuerierPool } from 'uql-orm/postgres';
 
 export const pool = new PgQuerierPool(
   { /* connection options */ },
@@ -59,14 +59,14 @@ For security-sensitive environments, you can suppress query parameters from slow
 
 ## Log Levels
 
-| Level              | Description                                                                               |
-| :----------------- | :---------------------------------------------------------------------------------------- |
-| `query`            | **Standard Queries**: Beautifully formatted SQL/Command logs with execution time.         |
+| Level              | Description                                                                                                                       |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `query`            | **Standard Queries**: Beautifully formatted SQL/Command logs with execution time.                                                 |
 | `slowQuery`        | **Bottleneck Alerts**: Dedicated logging for queries exceeding your `slowQuery.threshold`. Use `logParams: false` to omit params. |
-| `error` / `warn`   | **System Health**: Detailed error traces and potential issue warnings.                    |
-| `migration`        | **Audit Trail**: Step-by-step history of schema changes.                                  |
-| `skippedMigration` | **Safety**: Logs blocked unsafe schema changes during `autoSync`.                         |
-| `schema` / `info`  | **Lifecycle**: Informative logs about ORM initialization and sync events.                 |
+| `error` / `warn`   | **System Health**: Detailed error traces and potential issue warnings.                                                            |
+| `migration`        | **Audit Trail**: Step-by-step history of schema changes.                                                                          |
+| `skippedMigration` | **Safety**: Logs blocked unsafe schema changes during `autoSync`.                                                                 |
+| `schema` / `info`  | **Lifecycle**: Informative logs about ORM initialization and sync events.                                                         |
 
 ## Visual Feedback
 
@@ -96,7 +96,7 @@ You can provide your own logger by implementing the `Logger` interface or by pas
 ### Custom Class
 
 ```ts
-import type { Logger } from '@uql/core';
+import type { Logger } from 'uql-orm';
 
 class MyLogger implements Logger {
   logQuery(query: string, values?: unknown[], duration?: number) {

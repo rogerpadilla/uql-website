@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://uql.app/sitemap-index.xml
+Sitemap: https://uql-orm.dev/sitemap-index.xml

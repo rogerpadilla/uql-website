@@ -14,7 +14,7 @@ UQL provides a powerful way to write sub-queries using `raw` expressions that in
 The simplest use of a sub-query is adding a raw SQL condition to your `$where` clause.
 
 ```ts
-import { raw } from '@uql/core';
+import { raw } from 'uql-orm';
 import { Item } from './shared/models/index.js';
 
 const items = await querier.findMany(Item, {
@@ -38,7 +38,7 @@ SELECT "id" FROM "Item" WHERE "companyId" = 1 AND SUM(salePrice) > 500
 For complex sub-queries like `EXISTS` or `IN`, you can pass a callback to `raw`. This callback provides access to the `QueryContext` and the `dialect`, allowing you to generate sub-queries that are correctly prefixed and compatible with your database.
 
 ```ts
-import { raw } from '@uql/core';
+import { raw } from 'uql-orm';
 import { User, Item } from './shared/models/index.js';
 
 const items = await querier.findMany(Item, {

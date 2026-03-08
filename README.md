@@ -1,6 +1,6 @@
 # UQL Website
 
-The official documentation for **[UQL](https://uql.app)**, the smartest ORM for TypeScript.
+The official documentation for **[UQL](https://uql-orm.dev)**, the smartest ORM for TypeScript.
 
 Built with **[Astro Starlight](https://starlight.astro.build)** for extreme performance and ease of use.
 

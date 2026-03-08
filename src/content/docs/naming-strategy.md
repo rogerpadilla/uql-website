@@ -24,8 +24,8 @@ Configure the naming strategy when initializing your `pool` in your `uql.config.
 
 ```ts
 // uql.config.ts
-import { SnakeCaseNamingStrategy, type Config } from '@uql/core';
-import { PgQuerierPool } from '@uql/core/postgres';
+import { SnakeCaseNamingStrategy, type Config } from 'uql-orm';
+import { PgQuerierPool } from 'uql-orm/postgres';
 
 export const pool = new PgQuerierPool(
   { host: 'localhost', database: 'my_db' },
@@ -54,7 +54,7 @@ When using `SnakeCaseNamingStrategy`:
 You can implement your own naming strategy by extending the `NamingStrategy` interface or inheriting from `DefaultNamingStrategy`.
 
 ```ts
-import { DefaultNamingStrategy } from '@uql/core';
+import { DefaultNamingStrategy } from 'uql-orm';
 
 export class MyCustomNamingStrategy extends DefaultNamingStrategy {
   // Add a prefix to all table names

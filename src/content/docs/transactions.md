@@ -47,7 +47,7 @@ Transactions ensure that a series of database operations either all succeed or a
 Perfect for **NestJS** and other Dependency Injection frameworks and/or where you have Services or Repositories. Use `@Transactional()` to wrap a method and `@InjectQuerier()` to access the managed connection as a parameter of the function. UQL automatically handles the entire lifecycle: acquiring/starting the transaction, committing on success, rolling back on error, and releasing the connection.
 
 ```ts
-import { Transactional, InjectQuerier, type Querier } from '@uql/core';
+import { Transactional, InjectQuerier, type Querier } from 'uql-orm';
 import { User, Profile } from './shared/models/index.js';
 
 export class UserService {
@@ -150,8 +150,8 @@ async function registerUser(userData: any, profileData: any) {
 
 ## Summary Table
 
-| Approach                | Lifecycle Management | Use Case                                       |
-| :---------------------- | :------------------- | :--------------------------------------------- |
+| Approach                | Lifecycle Management | Use Case                                        |
+| :---------------------- | :------------------- | :---------------------------------------------- |
 | `pool.withQuerier()`    | **Automatic**        | Scoped connection without transaction overhead. |
 | `@Transactional()`      | **Automatic**        | NestJS and DI frameworks.                       |
 | `querier.transaction()` | **Semi-Automatic**   | When you already have a querier.                |

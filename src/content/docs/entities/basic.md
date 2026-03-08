@@ -23,7 +23,7 @@ The following are the steps to define a basic `entity`:
 
 ```ts
 import { v7 as uuidv7 } from 'uuid';
-import { Entity, Id, Field, Index } from '@uql/core';
+import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Entity()
 export class User {

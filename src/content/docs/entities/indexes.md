@@ -35,7 +35,7 @@ When you need an index that spans multiple columns (e.g., for queries filtering 
 Consider an audit log where you frequently search for entries by `entityType` and `entityId`, ordered by `createdAt`. A composite index on these three columns will make your audit history lookups extremely fast.
 
 ```ts
-import { Entity, Id, Field, Index } from '@uql/core';
+import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Index(['entityType', 'entityId', 'createdAt'], { name: 'idx_audit_lookup' })
 @Entity()

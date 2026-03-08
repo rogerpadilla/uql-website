@@ -15,8 +15,8 @@ Reuse the same `uql.config.ts` for both your application bootstrap and the CLI. 
 
 ```typescript
 // uql.config.ts
-import type { Config } from '@uql/core';
-import { PgQuerierPool } from '@uql/core/postgres';
+import type { Config } from 'uql-orm';
+import { PgQuerierPool } from 'uql-orm/postgres';
 import { User, Post } from './entities';
 
 export default {
@@ -120,7 +120,7 @@ For `autoSync` to detect your entities, they must be **loaded** (imported) befor
 **Using Your Config (Recommended)**
 
 ```ts
-import { Migrator } from '@uql/core/migrate';
+import { Migrator } from 'uql-orm/migrate';
 import config from './uql.config.js';
 
 const migrator = new Migrator(config.pool, {
@@ -134,7 +134,7 @@ await migrator.autoSync({ logging: true });
 **Explicit Entities**
 
 ```ts
-import { Migrator } from '@uql/core/migrate';
+import { Migrator } from 'uql-orm/migrate';
 import { User, Profile, Post } from './entities/index.js';
 import { pool } from './uql.config.js';
 
@@ -187,7 +187,7 @@ When writing manual migrations (via `generate`), you have access to a fluent, ty
 A typical migration that adds a new table with relationships and modifies an existing one:
 
 ```typescript
-import { defineMigration, t } from '@uql/core/migrate';
+import { defineMigration, t } from 'uql-orm/migrate';
 
 export default defineMigration({
   async up(m) {
@@ -234,7 +234,7 @@ export default defineMigration({
 ### Comprehensive Column Types
 
 ```typescript
-import { defineMigration, t } from '@uql/core/migrate';
+import { defineMigration, t } from 'uql-orm/migrate';
 
 export default defineMigration({
   async up(m) {
