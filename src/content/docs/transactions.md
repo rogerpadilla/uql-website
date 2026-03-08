@@ -226,12 +226,9 @@ const result = await pool.transaction(async (querier) => {
 If the inner callback throws, the error propagates to the outer transaction which rolls back **everything** — both outer and inner operations.
 
 :::note
-`beginTransaction()` is the low-level API and **does not** support reuse — it throws `TypeError('pending transaction')` if called inside an existing transaction. Use `querier.transaction()` or `@Transactional()` for composable code.
+`beginTransaction()` is the lowest-level API and **does not** support composable transactions — it throws `TypeError('pending transaction')` if called inside an existing transaction. Use `querier.transaction()` or `@Transactional()` for that use case.
 :::
 
-:::tip[Why reuse instead of savepoints?]
-Some ORMs (TypeORM, Drizzle, MikroORM) create SQL `SAVEPOINT`s for nested transactions, allowing partial rollbacks. UQL opts for **reuse** because it's simpler, portable across all databases (including MongoDB and SQLite where savepoints don't exist or have quirks), and covers the vast majority of real-world nesting scenarios — composable service methods that should join the existing transaction. If you need independent units of work, use separate `pool.transaction()` calls instead or raise an issue, we'll be happy to consider adding support for it.
-:::
 
 ---
 
