@@ -53,7 +53,7 @@ const config: AstroUserConfig = {
 				Head: "./src/components/Head.astro",
 			},
 			editLink: {
-				baseUrl: "https://github.com/rogerpadilla/nukak-website/edit/main/",
+				baseUrl: "https://github.com/rogerpadilla/uql-website/edit/main/",
 			},
 			lastUpdated: true,
 			social: [
