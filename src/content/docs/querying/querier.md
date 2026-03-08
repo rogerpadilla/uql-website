@@ -1,7 +1,7 @@
 ---
 title: Querier
 sidebar:
-  order: 180
+  order: 105
 description: Learn how to use the querier to interact with any database through UQL.
 ---
 
@@ -61,7 +61,10 @@ try {
 | `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
 | `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
 | `run(sql, values?)`                         | Execute raw SQL.                               |
-| `transaction(callback)`                     | Run a transaction within a callback.           |
+| `transaction(callback, opts?)`              | Run a transaction within a callback.           |
+| `beginTransaction(opts?)`                   | Start a transaction manually.                  |
+| `commitTransaction()`                       | Commit the active transaction.                 |
+| `rollbackTransaction()`                     | Roll back the active transaction.              |
 | `release()`                                 | Return the connection to the pool.             |
 
 :::note
@@ -136,4 +139,13 @@ const result = await querier.transaction(async () => {
 });
 ```
 
-See [transactions](/transactions) for more patterns.
+You can also specify an **isolation level** via `TransactionOptions`:
+
+```ts
+const result = await pool.transaction(async (querier) => {
+  // operations run under serializable isolation
+  return querier.findMany(Account, {});
+}, { isolationLevel: 'serializable' });
+```
+
+See [transactions](/transactions) for all patterns and isolation level details.

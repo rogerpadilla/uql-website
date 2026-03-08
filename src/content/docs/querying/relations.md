@@ -12,7 +12,7 @@ UQL's query syntax is context-aware. When you query a relation, the available fi
 
 ### Basic Selection
 
-You can select specific fields from a related entity using an array or a nested object.
+You can select specific fields from a related entity using a nested object.
 
 ```ts
 import { User } from './shared/models/index.js';

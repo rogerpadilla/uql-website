@@ -1,7 +1,7 @@
 ---
 title: Sub-Queries
 sidebar:
-  order: 170
+  order: 165
 description: This tutorial explains how to use sub-queries with the UQL orm.
 ---
 

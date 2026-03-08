@@ -69,7 +69,7 @@ UQL is designed to be **unobtrusive**. You don't need to change your architectur
 		Use abstract types like `'uuid'`, `'json'`, `'vector'` that map correctly across all databases without dialect-specific code.
 	</Card>
 	<Card title="Thread-Safe Transactions" icon="random">
-		Centralized serialization engine guarantees race-condition-free operations across all drivers.
+		Centralized serialization engine with configurable isolation levels across all drivers. Portable across PostgreSQL, MySQL, SQLite, and MongoDB.
 	</Card>
 	<Card title="Professional Logging" icon="list-format">
 		Built-in slow-query detection, colored output, and customizable log levels for production monitoring.
