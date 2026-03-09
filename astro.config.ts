@@ -4,6 +4,7 @@ import vercel from '@astrojs/vercel';
 import type { AstroUserConfig } from 'astro';
 import { defineConfig } from 'astro/config';
 import starlightLlmsTxt from 'starlight-llms-txt';
+import starlightPackageManagers from 'starlight-package-managers';
 
 import { githubRepo, projectDescription } from './src/constants';
 
@@ -110,6 +111,7 @@ const config: AstroUserConfig = {
         useThemedScrollbars: false,
       },
       plugins: [
+        starlightPackageManagers(),
         starlightLlmsTxt({
           projectName: 'UQL',
           description: projectDescription,
