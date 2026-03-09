@@ -1,6 +1,9 @@
 ---
 sidebar:
   order: 155
+  badge:
+    text: New
+    variant: success
 title: Naming Strategy Overview
 description: This tutorial explains how to use naming strategies with UQL.
 ---
