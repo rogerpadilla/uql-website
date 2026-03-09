@@ -50,6 +50,7 @@ try {
 | `findOne(Entity, query)`                    | Find a single record matching the query.       |
 | `findOneById(Entity, id, query?)`           | Find a record by its primary key.              |
 | `count(Entity, query)`                      | Count records matching the query.              |
+| `aggregate(Entity, query)`                  | Run an [aggregate query](/querying/aggregate) (`GROUP BY`, `HAVING`, etc.). |
 | `insertOne(Entity, data)`                   | Insert a single record and return its ID.      |
 | `insertMany(Entity, data[])`                | Insert multiple records and return their IDs.  |
 | `updateOneById(Entity, id, data)`           | Update a record by its primary key.            |
