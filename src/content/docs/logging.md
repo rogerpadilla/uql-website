@@ -3,9 +3,6 @@ title: Logging & Monitoring
 description: Professional-grade monitoring and logging with UQL.
 sidebar:
   order: 175
-  badge:
-    text: New
-    variant: success
 ---
 
 UQL features a professional-grade, structured logging system designed for high visibility and sub-millisecond performance monitoring.

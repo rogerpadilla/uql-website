@@ -16,11 +16,27 @@ description: Go from zero to a working UQL query in under three minutes.
 
 ## 1. Install
 
-import { PackageManagers } from 'starlight-package-managers'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Install the core and your preferred driver:
 
-<PackageManagers pkg="uql-orm pg" pkgManagers={['npm', 'bun', 'pnpm']} comment="or mysql2, better-sqlite3, mongodb, etc." />
+<Tabs>
+  <TabItem label="npm">
+    ```sh
+    npm install uql-orm pg # or mysql2, better-sqlite3, mongodb, etc.
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```sh
+    bun add uql-orm pg # or mysql2, better-sqlite3, mongodb, etc.
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add uql-orm pg # or mysql2, better-sqlite3, mongodb, etc.
+    ```
+  </TabItem>
+</Tabs>
 
 ---
 

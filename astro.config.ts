@@ -4,7 +4,6 @@ import vercel from '@astrojs/vercel';
 import type { AstroUserConfig } from 'astro';
 import { defineConfig } from 'astro/config';
 import starlightLlmsTxt from 'starlight-llms-txt';
-import starlightPackageManagers from 'starlight-package-managers';
 
 import { githubRepo, projectDescription } from './src/constants';
 
@@ -88,8 +87,8 @@ const config: AstroUserConfig = {
           items: [
             { label: 'Transactions', link: '/transactions' },
             { label: 'Migrations', link: '/migrations', badge: { text: 'New', variant: 'success' } },
-            { label: 'Logging & Monitoring', link: '/logging', badge: { text: 'New', variant: 'success' } },
-            { label: 'Naming Strategy', link: '/naming-strategy', badge: { text: 'New', variant: 'success' } },
+            { label: 'Logging & Monitoring', link: '/logging' },
+            { label: 'Naming Strategy', link: '/naming-strategy' },
           ],
         },
         {
@@ -111,7 +110,6 @@ const config: AstroUserConfig = {
         useThemedScrollbars: false,
       },
       plugins: [
-        starlightPackageManagers(),
         starlightLlmsTxt({
           projectName: 'UQL',
           description: projectDescription,
