@@ -37,7 +37,7 @@ UQL provide a comprehensive set of operators for comparing field values. These o
 
 ### Practical Example
 
-```ts
+```ts title="You write"
 import { User } from './shared/models/index.js';
 
 const users = await querier.findMany(User, {
@@ -56,16 +56,14 @@ const users = await querier.findMany(User, {
 
 UQL transparently handles the differences between database vendors. For example, `$istartsWith` is translated to `ILIKE` in PostgreSQL, but to `LOWER(field) LIKE 'some%'` in MySQL.
 
-**SQL for PostgreSQL:**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT "id", "name" FROM "User"
 WHERE "name" ILIKE 'Some%' AND "name" <> 'Something' AND "age" >= 18 AND "age" <= 65
 ORDER BY "name" ASC
 LIMIT 50
 ```
 
-**SQL for MySQL/SQLite:**
-```sql
+```sql title="Generated SQL (MySQL/SQLite)"
 SELECT `id`, `name` FROM `User`
 WHERE LOWER(`name`) LIKE 'some%' AND `name` <> 'Something' AND `age` >= 18 AND `age` <= 65
 ORDER BY `name` ASC

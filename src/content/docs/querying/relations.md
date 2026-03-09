@@ -14,7 +14,7 @@ UQL's query syntax is context-aware. When you query a relation, the available fi
 
 You can select specific fields from a related entity using a nested object.
 
-```ts
+```ts title="You write"
 import { User } from './shared/models/index.js';
 
 const users = await querier.findMany(User, {
@@ -33,7 +33,7 @@ const users = await querier.findMany(User, {
 
 Use `$required: true` to enforce an `INNER JOIN` (by default UQL uses `LEFT JOIN` for nullable relations).
 
-```ts
+```ts title="You write"
 import { User } from './shared/models/index.js';
 
 const latestUsersWithProfiles = await querier.findOne(User, {
@@ -54,7 +54,7 @@ const latestUsersWithProfiles = await querier.findOne(User, {
 
 You can filter and sort when querying collections (One-to-Many or Many-to-Many).
 
-```ts
+```ts title="You write"
 import { User } from './shared/models/index.js';
 
 const authorsWithPopularPosts = await querier.findMany(User, {
@@ -79,7 +79,7 @@ const authorsWithPopularPosts = await querier.findMany(User, {
 
 UQL allows sorting by fields of related entities directly in the `$sort` object.
 
-```ts
+```ts title="You write"
 const items = await querier.findMany(Item, {
   $select: { id: true, name: true },
   $sort: { 
@@ -98,15 +98,14 @@ Filter parent entities based on conditions on their **ManyToMany** or **OneToMan
 
 #### ManyToMany
 
-```ts
+```ts title="You write"
 // Find all posts that have a tag named 'typescript'
 const posts = await querier.findMany(Post, {
   $where: { tags: { name: 'typescript' } },
 });
 ```
 
-**Generated SQL (PostgreSQL):**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT * FROM "Post"
 WHERE EXISTS (
   SELECT 1 FROM "PostTag"
@@ -119,15 +118,14 @@ WHERE EXISTS (
 
 #### OneToMany
 
-```ts
+```ts title="You write"
 // Find users who have authored posts with 'typescript' in the title
 const users = await querier.findMany(User, {
   $where: { posts: { title: { $iincludes: 'typescript' } } },
 });
 ```
 
-**Generated SQL (PostgreSQL):**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT * FROM "User"
 WHERE EXISTS (
   SELECT 1 FROM "Post"

@@ -13,7 +13,7 @@ UQL provides a powerful way to write sub-queries using `raw` expressions that in
 
 The simplest use of a sub-query is adding a raw SQL condition to your `$where` clause.
 
-```ts
+```ts title="You write"
 import { raw } from 'uql-orm';
 import { Item } from './shared/models/index.js';
 
@@ -28,8 +28,7 @@ const items = await querier.findMany(Item, {
 });
 ```
 
-**Resulting SQL:**
-```sql
+```sql title="Generated SQL"
 SELECT "id" FROM "Item" WHERE "companyId" = 1 AND SUM(salePrice) > 500
 ```
 
@@ -37,7 +36,7 @@ SELECT "id" FROM "Item" WHERE "companyId" = 1 AND SUM(salePrice) > 500
 
 For complex sub-queries like `EXISTS` or `IN`, you can pass a callback to `raw`. This callback provides access to the `QueryContext` and the `dialect`, allowing you to generate sub-queries that are correctly prefixed and compatible with your database.
 
-```ts
+```ts title="You write"
 import { raw } from 'uql-orm';
 import { User, Item } from './shared/models/index.js';
 
@@ -62,8 +61,7 @@ const items = await querier.findMany(Item, {
 ```
 
 
-**Resulting SQL:**
-```sql
+```sql title="Generated SQL"
 SELECT "id"
 FROM "Item"
 WHERE NOT EXISTS
@@ -73,4 +71,3 @@ WHERE NOT EXISTS
 :::tip
 When using `raw` callbacks, `escapedPrefix` automatically refers to the alias of the current table in the main query, ensuring your sub-query correctly joins back to the parent record.
 :::
-

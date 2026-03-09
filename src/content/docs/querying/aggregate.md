@@ -14,7 +14,7 @@ Use `querier.aggregate()` for analytics that involve `GROUP BY`, aggregate funct
 
 ### Basic Usage
 
-```ts
+```ts title="You write"
 const results = await querier.aggregate(Order, {
   $group: {
     status: true,                    // GROUP BY column
@@ -27,8 +27,7 @@ const results = await querier.aggregate(Order, {
 });
 ```
 
-**SQL (PostgreSQL):**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT "status", SUM("amount") "total", COUNT(*) "count"
 FROM "Order"
 GROUP BY "status"
@@ -37,8 +36,7 @@ ORDER BY SUM("amount") DESC
 LIMIT 10
 ```
 
-**MongoDB Pipeline:**
-```json
+```json title="Generated MongoDB Pipeline"
 [
   { "$group": { "_id": { "status": "$status" }, "total": { "$sum": "$amount" }, "count": { "$sum": 1 } } },
   { "$project": { "_id": 0, "status": "$_id.status", "total": 1, "count": 1 } },
@@ -59,12 +57,15 @@ The `$group` map defines both the grouping columns and the aggregate functions. 
 - **`{ $min: 'field' }`** — `MIN("field")`
 - **`{ $max: 'field' }`** — `MAX("field")`
 
-```ts
+```ts title="You write"
 // Total revenue with no grouping
 const [{ revenue }] = await querier.aggregate(Order, {
   $group: { revenue: { $sum: 'amount' } },
 });
-// → SELECT SUM("amount") "revenue" FROM "Order"
+```
+
+```sql title="Generated SQL"
+SELECT SUM("amount") "revenue" FROM "Order"
 ```
 
 ### `$where` vs `$having`
@@ -72,7 +73,7 @@ const [{ revenue }] = await querier.aggregate(Order, {
 - **`$where`** — Filters rows **before** grouping (`WHERE` clause).
 - **`$having`** — Filters groups **after** aggregation (`HAVING` clause).
 
-```ts
+```ts title="You write"
 const results = await querier.aggregate(Order, {
   $group: {
     status: true,
@@ -83,7 +84,7 @@ const results = await querier.aggregate(Order, {
 });
 ```
 
-```sql
+```sql title="Generated SQL"
 SELECT "status", COUNT(*) "count"
 FROM "Order"
 WHERE "createdAt" >= $1
@@ -110,7 +111,7 @@ The `$having` map supports the same comparison operators as `$where`:
 
 Aggregate results can be sorted by any alias and paginated using `$skip` and `$limit`:
 
-```ts
+```ts title="You write"
 const results = await querier.aggregate(User, {
   $group: {
     status: true,
@@ -126,14 +127,14 @@ const results = await querier.aggregate(User, {
 
 For simple `SELECT DISTINCT` queries (without aggregation), add `$distinct: true` to any find query:
 
-```ts
+```ts title="You write"
 const names = await querier.findMany(User, {
   $select: { name: true },
   $distinct: true,
 });
 ```
 
-```sql
+```sql title="Generated SQL"
 SELECT DISTINCT "name" FROM "User"
 ```
 

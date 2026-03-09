@@ -70,3 +70,38 @@ button {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--sl-color-accent);
 }
+
+/* ── Custom View Transitions ── */
+
+/* Only the main content participates in the transition */
+.main-frame {
+    view-transition-name: main-content;
+}
+
+/* Disable the default root animation so sidebar/header stay untouched */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+/* Animate only the content area */
+::view-transition-old(main-content) {
+    animation: vt-fade-out 120ms ease-out both;
+}
+
+::view-transition-new(main-content) {
+    animation: vt-slide-fade-in 220ms ease-out both;
+}
+
+@keyframes vt-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes vt-slide-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

@@ -108,15 +108,14 @@ Upsert (insert-or-update) resolves conflicts using **conflict paths** — the fi
 
 #### `upsertOne`
 
-```ts
+```ts title="You write"
 await querier.upsertOne(User, { email: true }, {
   email: 'roger@uql-orm.dev',
   name: 'Roger',
 });
 ```
 
-**SQL (PostgreSQL):**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 INSERT INTO "User" ("email", "name") VALUES ($1, $2)
 ON CONFLICT ("email") DO UPDATE SET "name" = EXCLUDED."name"
 ```
@@ -125,7 +124,7 @@ ON CONFLICT ("email") DO UPDATE SET "name" = EXCLUDED."name"
 
 Efficiently upsert multiple records in a single statement:
 
-```ts
+```ts title="You write"
 await querier.upsertMany(User, { email: true }, [
   { email: 'roger@uql-orm.dev', name: 'Roger' },
   { email: 'ana@uql-orm.dev', name: 'Ana' },
@@ -133,14 +132,12 @@ await querier.upsertMany(User, { email: true }, [
 ]);
 ```
 
-**SQL (PostgreSQL):**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 INSERT INTO "User" ("email", "name") VALUES ($1, $2), ($3, $4), ($5, $6)
 ON CONFLICT ("email") DO UPDATE SET "name" = EXCLUDED."name"
 ```
 
-**SQL (MySQL/MariaDB):**
-```sql
+```sql title="Generated SQL (MySQL/MariaDB)"
 INSERT INTO `User` (`email`, `name`) VALUES (?, ?), (?, ?), (?, ?)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`)
 ```

@@ -22,7 +22,7 @@ Logical operators allow you to combine multiple conditions in a single query. UQ
 
 The `$and` operator is implicit when you specify multiple fields in the `$where` object.
 
-```ts
+```ts title="You write"
 import { User } from './shared/models/index.js';
 
 // Implicit AND
@@ -34,7 +34,7 @@ const users = await querier.findMany(User, {
 
 The same query with an explicit `$and`:
 
-```ts
+```ts title="You write"
 const users = await querier.findMany(User, {
   $where: { 
     $and: [{ name: 'roger' }, { status: 'active' }] 
@@ -48,7 +48,7 @@ const users = await querier.findMany(User, {
 
 Logical operators can be nested to create complex filters.
 
-```ts
+```ts title="You write"
 const users = await querier.findMany(User, {
   $where: { 
     $or: [
@@ -64,9 +64,7 @@ const users = await querier.findMany(User, {
 });
 ```
 
-That &#9650; code will generate clean, parameterized SQL:
-
-```sql
+```sql title="Generated SQL"
 SELECT * FROM "User" 
 WHERE "name" LIKE 'A%' 
    OR ("status" = 'pending' AND "createdAt" < '2025-01-01')

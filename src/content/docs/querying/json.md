@@ -43,7 +43,7 @@ Without `Json<T>`, plain object types like `{ public?: number }` are classified 
 
 Query nested JSON properties using dot-notation paths in `$where`. All [comparison operators](/querying/comparison-operators) are supported.
 
-```ts
+```ts title="You write"
 const companies = await querier.findMany(Company, {
   $where: {
     'settings.isArchived': { $ne: true },
@@ -52,22 +52,19 @@ const companies = await querier.findMany(Company, {
 });
 ```
 
-**PostgreSQL:**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT * FROM "Company"
 WHERE ("settings"->>'isArchived') IS DISTINCT FROM $1
   AND "settings"->>'theme' = $2
 ```
 
-**MySQL:**
-```sql
+```sql title="Generated SQL (MySQL)"
 SELECT * FROM `Company`
 WHERE JSON_EXTRACT(`settings`, '$.isArchived') <> ?
   AND JSON_EXTRACT(`settings`, '$.theme') = ?
 ```
 
-**SQLite:**
-```sql
+```sql title="Generated SQL (SQLite)"
 SELECT * FROM `Company`
 WHERE json_extract(`settings`, '$.isArchived') IS NOT ?
   AND json_extract(`settings`, '$.theme') = ?
@@ -87,26 +84,23 @@ Atomically merge or remove keys in JSON fields directly from update payloads. No
 
 Merge new key-value pairs into an existing JSON field. Existing keys not in `$merge` are preserved.
 
-```ts
+```ts title="You write"
 await querier.updateOneById(Company, id, {
   kind: { $merge: { public: 1 } },
 });
 ```
 
-**PostgreSQL:**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 UPDATE "Company" SET "kind" = COALESCE("kind", '{}') || $1::jsonb WHERE "id" = $2
 -- values: ['{"public":1}', id]
 ```
 
-**MySQL:**
-```sql
+```sql title="Generated SQL (MySQL)"
 UPDATE `Company` SET `kind` = JSON_MERGE_PATCH(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
 -- values: ['{"public":1}', id]
 ```
 
-**SQLite:**
-```sql
+```sql title="Generated SQL (SQLite)"
 UPDATE `Company` SET `kind` = json_patch(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
 -- values: ['{"public":1}', id]
 ```
@@ -115,24 +109,21 @@ UPDATE `Company` SET `kind` = json_patch(COALESCE(`kind`, '{}'), ?) WHERE `id` =
 
 Remove specific keys from a JSON field.
 
-```ts
+```ts title="You write"
 await querier.updateOneById(Company, id, {
   kind: { $unset: ['private'] },
 });
 ```
 
-**PostgreSQL:**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 UPDATE "Company" SET "kind" = ("kind") - 'private' WHERE "id" = $1
 ```
 
-**MySQL:**
-```sql
+```sql title="Generated SQL (MySQL)"
 UPDATE `Company` SET `kind` = JSON_REMOVE(`kind`, '$.private') WHERE `id` = ?
 ```
 
-**SQLite:**
-```sql
+```sql title="Generated SQL (SQLite)"
 UPDATE `Company` SET `kind` = json_remove(`kind`, '$.private') WHERE `id` = ?
 ```
 
@@ -140,7 +131,7 @@ UPDATE `Company` SET `kind` = json_remove(`kind`, '$.private') WHERE `id` = ?
 
 Both operations can be combined in a single update.
 
-```ts
+```ts title="You write"
 await querier.updateOneById(Company, id, {
   kind: { $merge: { public: 1 }, $unset: ['private'] },
 });
@@ -160,24 +151,21 @@ Both `$merge` keys and `$unset` keys are validated against the JSON field's inne
 
 Sort by nested JSON field values using the same dot-notation syntax.
 
-```ts
+```ts title="You write"
 const companies = await querier.findMany(Company, {
   $sort: { 'kind.public': 'desc' },
 });
 ```
 
-**PostgreSQL:**
-```sql
+```sql title="Generated SQL (PostgreSQL)"
 SELECT * FROM "Company" ORDER BY "kind"->>'public' DESC
 ```
 
-**MySQL:**
-```sql
+```sql title="Generated SQL (MySQL)"
 SELECT * FROM `Company` ORDER BY JSON_EXTRACT(`kind`, '$.public') DESC
 ```
 
-**SQLite:**
-```sql
+```sql title="Generated SQL (SQLite)"
 SELECT * FROM `Company` ORDER BY json_extract(`kind`, '$.public') DESC
 ```
 
