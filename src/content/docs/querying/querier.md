@@ -9,11 +9,6 @@ description: Learn how to use the querier to interact with any database through 
 
 A `querier` is UQL's abstraction over database drivers to dynamically generate queries for _any_ given entity. It allows interaction with different databases in a consistent way.
 
-With a `querier` you can:
-
-- Manipulate the data related to _any_ `entity`.
-- Use [transactions](/transactions).
-
 ### Obtaining a Querier
 
 A querier is obtained from a [pool](/getting-started#2-fast-track-example). Always remember to release it when done:
@@ -72,6 +67,8 @@ await pool.withQuerier((querier) =>
 );
 ```
 
+---
+
 ### Available Methods
 
 | Method                                      | Description                                    |
@@ -93,8 +90,8 @@ await pool.withQuerier((querier) =>
 | `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
 | `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
 | `run(sql, values?)`                         | Execute raw SQL.                               |
-| `transaction(callback, opts?)`              | Run a transaction within a callback.           |
-| `beginTransaction(opts?)`                   | Start a transaction manually.                  |
+| `transaction(callback, opts?)`              | Run a [transaction](/transactions) within a callback. |
+| `beginTransaction(opts?)`                   | Start a [transaction](/transactions) manually. |
 | `commitTransaction()`                       | Commit the active transaction.                 |
 | `rollbackTransaction()`                     | Roll back the active transaction.              |
 | `release()`                                 | Return the connection to the pool.             |
@@ -102,6 +99,8 @@ await pool.withQuerier((querier) =>
 :::note
 Read methods (`findOne`, `findMany`, `findManyAndCount`, `count`, `deleteMany`) also support an RPC-friendly call pattern: `querier.findMany({ $entity: User, ...query })`. This makes serialization for RPC/REST endpoints trivial.
 :::
+
+---
 
 ### Upsert Operations
 
@@ -149,35 +148,3 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`)
 :::tip
 `upsertMany` is ideal for data synchronization, bulk imports, or seeding. It reduces round-trips to a single statement regardless of the number of records.
 :::
-
-### Transactions
-
-For multi-step operations, you can use the pool's `transaction` method which automatically handles the entire querier lifecycle:
-
-```ts
-const result = await pool.transaction(async (querier) => {
-  const user = await querier.findOne(User, { $where: { email: '...' } });
-  await querier.insertOne(Profile, { userId: user.id, bio: '...' });
-  return user;
-});
-// Querier is automatically released
-```
-
-If you already have a `querier` instance, you can use its `transaction` method to achieve the same automatic commit/rollback behavior:
-
-```ts
-const result = await querier.transaction(async () => {
-  await querier.insertOne(Profile, { userId: user.id, bio: '...' });
-});
-```
-
-You can also specify an **isolation level** via `TransactionOptions`:
-
-```ts
-const result = await pool.transaction(async (querier) => {
-  // operations run under serializable isolation
-  return querier.findMany(Account, {});
-}, { isolationLevel: 'serializable' });
-```
-
-See [transactions](/transactions) for all patterns and isolation level details.
