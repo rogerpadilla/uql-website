@@ -9,47 +9,7 @@ description: Learn how to manage transactions and configure isolation levels in 
 
 Transactions ensure that a series of database operations either all succeed or all fail, maintaining data integrity. UQL provides several ways to handle transactions depending on your needs.
 
-### 1. Declarative Transactions
-
-Perfect for **NestJS** and other Dependency Injection frameworks. Use `@Transactional()` to wrap a method and `@InjectQuerier()` to access the managed connection. UQL automatically handles the entire lifecycle: acquiring/starting the transaction, committing on success, rolling back on error, and releasing the connection.
-
-```ts
-import { Transactional, InjectQuerier, type Querier } from 'uql-orm';
-import { User, Profile } from './shared/models/index.js';
-
-export class UserService {
-  @Transactional()
-  async register(
-    userData: Partial<User>, 
-    profileData: Partial<Profile>, 
-    @InjectQuerier() 
-    querier?: Querier
-  ) {
-    const userId = await querier.insertOne(User, userData);
-    await querier.insertOne(Profile, { ...profileData, userId });
-  }
-}
-```
-
-You can specify an isolation level directly at the decorator level:
-
-```ts
-@Transactional({ isolationLevel: 'serializable' })
-async transferFunds(
-  fromId: string, toId: string, amount: number,
-  @InjectQuerier() querier?: Querier
-) {
-  // runs under serializable isolation
-}
-```
-
-:::note
-The `@Transactional()` decorator requires `experimentalDecorators` and `emitDecoratorMetadata` to be enabled in your `tsconfig.json`.
-:::
-
----
-
-### 2. Functional Transactions
+### Functional Transactions
 
 The functional approach is the most convenient way to run transactions. UQL handles the entire lifecycle automatically.
 
@@ -89,7 +49,47 @@ try {
 
 ---
 
-### 3. Imperative Transactions
+### Declarative Transactions
+
+Perfect for **NestJS** and other Dependency Injection frameworks. Use `@Transactional()` to wrap a method and `@InjectQuerier()` to access the managed connection. UQL automatically handles the entire lifecycle: acquiring/starting the transaction, committing on success, rolling back on error, and releasing the connection.
+
+```ts
+import { Transactional, InjectQuerier, type Querier } from 'uql-orm';
+import { User, Profile } from './shared/models/index.js';
+
+export class UserService {
+  @Transactional()
+  async register(
+    userData: Partial<User>, 
+    profileData: Partial<Profile>, 
+    @InjectQuerier() 
+    querier?: Querier
+  ) {
+    const userId = await querier.insertOne(User, userData);
+    await querier.insertOne(Profile, { ...profileData, userId });
+  }
+}
+```
+
+You can specify an isolation level directly at the decorator level:
+
+```ts
+@Transactional({ isolationLevel: 'serializable' })
+async transferFunds(
+  fromId: string, toId: string, amount: number,
+  @InjectQuerier() querier?: Querier
+) {
+  // runs under serializable isolation
+}
+```
+
+:::note
+The `@Transactional()` decorator requires `experimentalDecorators` and `emitDecoratorMetadata` to be enabled in your `tsconfig.json`.
+:::
+
+---
+
+### Imperative Transactions
 
 For scenarios requiring granular control, you can manually manage the transaction lifecycle.
 
@@ -204,7 +204,6 @@ If the inner callback throws, the error propagates to the outer transaction whic
 | Method | Lifecycle | Isolation Level | Nesting |
 | :--- | :--- | :--- | :--- |
 | `pool.transaction(callback, opts?)` | **Automatic** — acquires, commits/rollbacks, releases. | ✅ via `opts` | Fresh querier |
-| `pool.withQuerier(callback)` | **Automatic** — acquires and releases (no transaction). | N/A | N/A |
 | `querier.transaction(callback, opts?)` | **Semi-Automatic** — commits/rollbacks (caller releases). | ✅ via `opts` | Reuses outer |
 | `querier.beginTransaction(opts?)` | **Manual** — caller commits/rollbacks/releases. | ✅ via `opts` | Throws |
 | `querier.commitTransaction()` | Commits the active transaction. | — | — |
