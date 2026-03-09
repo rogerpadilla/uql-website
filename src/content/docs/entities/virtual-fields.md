@@ -51,14 +51,13 @@ export class Item {
 Virtual fields behave exactly like regular fields in your queries. You can select them or filter by them.
 
 #### 1. Selection
-```ts
+```ts title="You write"
 const items = await querier.findMany(Item, { 
   $select: { id: true, tagsCount: true } 
 });
 ```
 
-**Generated SQL:**
-```sql
+```sql title="Generated SQL"
 SELECT
   "id",
   (SELECT COUNT(*) FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") "tagsCount"
@@ -66,7 +65,7 @@ FROM "Item"
 ```
 
 #### 2. Filtering
-```ts
+```ts title="You write"
 const items = await querier.findMany(Item, {
   $select: { id: true },
   $where: {
@@ -76,8 +75,7 @@ const items = await querier.findMany(Item, {
 ```
 
 
-**Generated SQL:**
-```sql
+```sql title="Generated SQL"
 SELECT "id" FROM "Item"
 WHERE (SELECT COUNT(*) FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") >= 10
 ```

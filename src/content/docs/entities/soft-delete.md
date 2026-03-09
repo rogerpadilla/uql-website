@@ -41,24 +41,22 @@ export class User {
 When soft-delete is enabled, UQL automatically transforms `delete` operations into `update` operations and adds filters to all `find` operations.
 
 #### 1. Deleting a record
-```ts
+```ts title="You write"
 await querier.deleteOneById(User, 1);
 ```
 
-**Resulting SQL:**
-```sql
+```sql title="Generated SQL"
 UPDATE "User" SET "deletedAt" = '2025-12-30T12:00:00Z' WHERE "id" = 1
 ```
 
 #### 2. Querying records
 By default, soft-deleted records are excluded from all queries.
 
-```ts
+```ts title="You write"
 const users = await querier.findMany(User, { $select: { id: true, name: true } });
 ```
 
-**Resulting SQL:**
-```sql
+```sql title="Generated SQL"
 SELECT "id", "name" FROM "User" WHERE "deletedAt" IS NULL
 ```
 
