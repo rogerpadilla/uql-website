@@ -41,6 +41,37 @@ try {
 }
 ```
 
+### Scoped Querier
+
+When you need a querier for one or more operations but don't need a transaction, use `pool.withQuerier()`. It acquires a querier, runs your callback, and guarantees release — even if an error is thrown.
+
+```ts
+import { pool } from './uql.config.js';
+import { User } from './shared/models/index.js';
+
+const users = await pool.withQuerier(async (querier) => 
+  querier.findMany(User, { $limit: 10 })
+);
+// querier is automatically released here
+```
+
+This is especially useful when you want to **release the connection before doing slow non-DB work** (e.g. calling an external API or LLM), preventing connection pool starvation:
+
+```ts
+// Phase 1 — read from DB (connection held briefly)
+const data = await pool.withQuerier((querier) => 
+  querier.findOne(Resource, { $where: { id: resourceId } })
+);
+
+// Phase 2 — slow external call (no connection held)
+const result = await callExternalApi(data);
+
+// Phase 3 — write result back (connection held briefly)
+await pool.withQuerier((querier) => 
+  querier.updateOneById(Resource, resourceId, { result })
+);
+```
+
 ### Available Methods
 
 | Method                                      | Description                                    |
