@@ -110,7 +110,3 @@ export class TaxCategory extends BaseEntity {
 - **Consistency**: Ensure all entities have standard audit fields.
 - **Refactoring**: Change a base field type in one place, and it propagates to all children.
 - **Type Safety**: UQL's query engine understands inherited fields, giving you full auto-completion on `Company.id` or `Profile.createdAt`.
-
----
-
-Continue reading about [Indexes](/entities/indexes).

@@ -9,18 +9,16 @@ description: Learn how to use the querier to interact with any database through 
 
 A `querier` is UQL's abstraction over database drivers to dynamically generate queries for _any_ given entity. It allows interaction with different databases in a consistent way.
 
-### Obtaining a Querier
+### Using a Querier
 
-A querier is obtained from a [pool](/getting-started#2-fast-track-example). Always remember to release it when done:
+The recommended way to use a querier is `pool.withQuerier()`. It acquires a querier from the [pool](/getting-started#2-fast-track-example), runs your callback, and guarantees release — even if an error is thrown.
 
 ```ts
-import { User } from './entities/index.js';
 import { pool } from './uql.config.js';
+import { User } from './shared/models/index.js';
 
-const querier = await pool.getQuerier();
-
-try {
-  const users = await querier.findMany(User, {
+const users = await pool.withQuerier(async (querier) => 
+  querier.findMany(User, {
     $select: { id: true, name: true },
     $where: { 
       $or: [
@@ -30,22 +28,7 @@ try {
     },
     $sort: { createdAt: 'desc' },
     $limit: 10
-  });
-} finally {
-  await querier.release(); // Essential for pool health
-}
-```
-
-### Scoped Querier
-
-When you need a querier for one or more operations but don't need a transaction, use `pool.withQuerier()`. It acquires a querier, runs your callback, and guarantees release — even if an error is thrown.
-
-```ts
-import { pool } from './uql.config.js';
-import { User } from './shared/models/index.js';
-
-const users = await pool.withQuerier(async (querier) => 
-  querier.findMany(User, { $limit: 10 })
+  })
 );
 // querier is automatically released here
 ```
@@ -65,6 +48,26 @@ const result = await callExternalApi(data);
 await pool.withQuerier((querier) => 
   querier.updateOneById(Resource, resourceId, { result })
 );
+```
+
+### Manual Querier Management
+
+For advanced scenarios where you need full control over the querier lifecycle, use `pool.getQuerier()`. Always release it in a `finally` block:
+
+```ts
+import { User } from './entities/index.js';
+import { pool } from './uql.config.js';
+
+const querier = await pool.getQuerier();
+
+try {
+  const users = await querier.findMany(User, {
+    $select: { id: true, name: true },
+    $limit: 10
+  });
+} finally {
+  await querier.release(); // Essential for pool health
+}
 ```
 
 ---

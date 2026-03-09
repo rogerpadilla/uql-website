@@ -176,7 +176,3 @@ const posts = await querier.findMany(Post, {
 ```
 
 Check the [querying relations](/querying/relations) section for more advanced examples on deep filtering and selection.
-
----
-
-Continue reading about [Soft Delete](/entities/soft-delete).

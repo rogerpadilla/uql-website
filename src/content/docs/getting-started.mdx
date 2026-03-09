@@ -16,7 +16,7 @@ description: Go from zero to a working UQL query in under three minutes.
 
 ## 1. Install
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 Install the core and your preferred driver:
 
@@ -37,6 +37,19 @@ Install the core and your preferred driver:
     ```
   </TabItem>
 </Tabs>
+
+:::tip[TypeScript Setup]
+UQL uses decorators. Make sure your `tsconfig.json` has:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+:::
 
 ---
 
@@ -86,12 +99,44 @@ console.log(users);
 
 ---
 
+## Supported Databases
+
+| Database | Driver Package | Status |
+| :--- | :--- | :--- |
+| PostgreSQL | `pg` | ✅ Full |
+| MySQL | `mysql2` | ✅ Full |
+| MariaDB | `mysql2` | ✅ Full |
+| SQLite | `better-sqlite3` | ✅ Full |
+| LibSQL / Turso | `@libsql/client` | ✅ Full |
+| Cloudflare D1 | — | ✅ Full |
+| Neon | `@neondatabase/serverless` | ✅ Full |
+| MongoDB | `mongodb` | ✅ Full |
+
+---
+
+## Import Paths
+
+UQL uses subpath exports to keep your bundles lean:
+
+| Path | Purpose |
+| :--- | :--- |
+| `uql-orm` | Core decorators, types, and query utilities |
+| `uql-orm/postgres` | PostgreSQL driver pool |
+| `uql-orm/mysql` | MySQL / MariaDB driver pool |
+| `uql-orm/sqlite` | SQLite / LibSQL driver pool |
+| `uql-orm/mongo` | MongoDB driver pool |
+| `uql-orm/express` | Express middleware (auto-generated REST APIs) |
+| `uql-orm/browser` | Browser HTTP querier |
+| `uql-orm/migrate` | Migration engine & CLI |
+
+---
+
 ## Next Steps
 
-Now that you've seen the basics, dive deeper into the core concepts:
-
-- **[Define Entities](/entities/basic)**: Explore all decorators and type abstractions.
-* **[Define Relations](/entities/relations)**: Map complex relationships with ease.
-- **[Querying](/querying/querier)**: Learn about deep selection, filtering, and sorting.
-- **[Transactions](/transactions)**: Master automatic and manual transaction patterns.
-- **[Migrations](/migrations)**: Manage your schema evolution with the CLI and Drift Detection.
+<CardGrid>
+	<LinkCard title="Define Entities" href="/entities/basic" description="Explore all decorators and type abstractions." />
+	<LinkCard title="Define Relations" href="/entities/relations" description="Map complex relationships with ease." />
+	<LinkCard title="Querying" href="/querying/querier" description="Deep selection, filtering, and sorting." />
+	<LinkCard title="Transactions" href="/transactions" description="Automatic and manual transaction patterns." />
+	<LinkCard title="Migrations" href="/migrations" description="Schema evolution with the CLI and Drift Detection." />
+</CardGrid>

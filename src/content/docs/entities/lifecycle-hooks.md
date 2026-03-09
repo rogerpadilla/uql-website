@@ -212,7 +212,3 @@ This ordering lets global listeners perform setup (e.g., inject audit metadata) 
 ## Cross-Dialect Compatibility
 
 Lifecycle hooks work identically across all supported databases — PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Cloudflare D1, and MongoDB. Hooks operate at the querier abstraction layer, not at the dialect level.
-
----
-
-Continue reading about [Virtual Fields](/entities/virtual-fields).

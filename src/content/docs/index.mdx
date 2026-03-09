@@ -1,5 +1,5 @@
 ---
-title: UQL - The smartest ORM for TypeScript and modern JavaScript
+title: UQL
 description: The smartest ORM for TypeScript and modern JavaScript designed to be fast, safe, and easy to integrate into any application.
 template: splash
 hero:
@@ -21,7 +21,7 @@ hero:
       variant: secondary
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## Elegant, Fast, and Type-Safe
 
@@ -62,18 +62,21 @@ UQL is designed to be **unobtrusive**. You don't need to change your architectur
 ## Key Features
 
 <CardGrid>
-	<Card title="Entity-First Migrations" icon="rocket">
-		Define your schema in TypeScript and let UQL generate migrations automatically. Safe by default — only adds, never drops.
-	</Card>
-	<Card title="Semantic Type System" icon="document">
-		Use abstract types like `'uuid'`, `'json'`, `'vector'` that map correctly across all databases without dialect-specific code.
-	</Card>
-	<Card title="Thread-Safe Transactions" icon="random">
-		Centralized serialization engine with configurable isolation levels across all drivers. Portable across PostgreSQL, MySQL, SQLite, and MongoDB.
-	</Card>
-	<Card title="Professional Logging" icon="list-format">
-		Built-in slow-query detection, colored output, and customizable log levels for production monitoring.
-	</Card>
+	<LinkCard title="Entity-First Migrations" href="/migrations" description="Define your schema in TypeScript and let UQL generate migrations automatically. Safe by default — only adds, never drops." />
+	<LinkCard title="Semantic Type System" href="/entities/basic" description="Use abstract types like 'uuid', 'json', 'vector' that map correctly across all databases without dialect-specific code." />
+	<LinkCard title="Thread-Safe Transactions" href="/transactions" description="Configurable isolation levels across all drivers. Portable across PostgreSQL, MySQL, SQLite, and MongoDB." />
+	<LinkCard title="Professional Logging" href="/logging" description="Built-in slow-query detection, colored output, and customizable log levels for production monitoring." />
+</CardGrid>
+
+---
+
+## Explore the Documentation
+
+<CardGrid>
+	<LinkCard title="Entities" href="/entities/basic" description="Decorators, type abstractions, relations, soft-delete, lifecycle hooks, and inheritance." />
+	<LinkCard title="Querying" href="/querying/querier" description="Deep selection, filtering, sorting, aggregation, JSON operators, and sub-queries." />
+	<LinkCard title="Advanced" href="/transactions" description="Transactions, migrations, logging, and naming strategies." />
+	<LinkCard title="Extensions" href="/extensions-express" description="Auto-generated REST APIs with Express and type-safe browser queries." />
 </CardGrid>
 
 ---

@@ -75,9 +75,3 @@ const allUsers = await querier.findMany(User, {
 });
 ```
 
----
-
-Continue reading about [Virtual Fields](/entities/virtual-fields).
-
-
-

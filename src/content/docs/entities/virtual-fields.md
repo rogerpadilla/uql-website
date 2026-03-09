@@ -81,8 +81,3 @@ const items = await querier.findMany(Item, {
 SELECT "id" FROM "Item"
 WHERE (SELECT COUNT(*) FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") >= 10
 ```
-
----
-
-Continue reading about [Inheritance](/entities/inheritance).
-

@@ -138,7 +138,3 @@ id?: string;
 - **`@Id()`**: Use for simple numeric auto-increment keys. The database manages ID generation.
 - **`@Id({ type: 'uuid', onInsert: ... })`**: Use for distributed systems, APIs, or when you need IDs before database insertion. UUIDs are portable across databases.
 :::
-
----
-
-Continue reading about [Relationships](/entities/relations) or [Indexes](/entities/indexes).
