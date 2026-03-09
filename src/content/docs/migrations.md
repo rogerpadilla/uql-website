@@ -4,7 +4,7 @@ sidebar:
   badge:
     text: New
     variant: success
-title: Migrations Overview
+title: Migrations
 description: Learn how to manage database schema evolution with UQL's migration system, CLI commands, and Entity-First synchronization.
 ---
 

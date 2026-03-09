@@ -1,5 +1,5 @@
 ---
-title: Relations between entities
+title: Relations
 sidebar:
   order: 70
 description: This tutorial explains how to use relations in the entities with the UQL orm.

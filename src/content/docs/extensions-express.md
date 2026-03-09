@@ -1,5 +1,5 @@
 ---
-title: Express extension
+title: Express
 sidebar:
   order: 300
 description: This tutorial explains how to use the Express extension with the UQL orm.

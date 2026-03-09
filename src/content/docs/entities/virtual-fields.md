@@ -1,5 +1,5 @@
 ---
-title: Virtual-Fields for entities
+title: Virtual Fields
 sidebar:
   order: 90
 description: This tutorial explains how to use virtual-fields in the entities with the UQL orm.

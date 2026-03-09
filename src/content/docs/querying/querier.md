@@ -93,8 +93,8 @@ try {
 | `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
 | `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
 | `run(sql, values?)`                         | Execute raw SQL.                               |
-| `transaction(callback, opts?)`              | Run a [transaction](/transactions) within a callback. |
-| `beginTransaction(opts?)`                   | Start a [transaction](/transactions) manually. |
+| `transaction(callback, opts?)`              | Run a [transaction](/querying/transactions) within a callback. |
+| `beginTransaction(opts?)`                   | Start a [transaction](/querying/transactions) manually. |
 | `commitTransaction()`                       | Commit the active transaction.                 |
 | `rollbackTransaction()`                     | Roll back the active transaction.              |
 | `release()`                                 | Return the connection to the pool.             |

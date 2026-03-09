@@ -1,5 +1,5 @@
 ---
-title: Inheritance between entities
+title: Inheritance
 sidebar:
   order: 100
 description: This tutorial explains how to use inheritance between entities with the UQL orm.

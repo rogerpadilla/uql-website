@@ -85,7 +85,6 @@ const config: AstroUserConfig = {
         {
           label: 'Advanced',
           items: [
-            { label: 'Transactions', link: '/transactions' },
             { label: 'Migrations', link: '/migrations', badge: { text: 'New', variant: 'success' } },
             { label: 'Logging & Monitoring', link: '/logging' },
             { label: 'Naming Strategy', link: '/naming-strategy' },

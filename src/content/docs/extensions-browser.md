@@ -1,5 +1,5 @@
 ---
-title: Browser extension
+title: Browser
 sidebar:
   order: 400
 description: This tutorial explains how to use the browser extension with the UQL orm.

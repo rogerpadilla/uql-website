@@ -1,5 +1,5 @@
 ---
-title: Querying relations
+title: Deep Relations
 
 sidebar:
   order: 150

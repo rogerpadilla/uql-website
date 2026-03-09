@@ -1,5 +1,5 @@
 ---
-title: Basic entities
+title: Basics
 sidebar:
   order: 60
 description: This tutorial explains how to define basic entities with the UQL orm.

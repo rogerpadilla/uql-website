@@ -1,5 +1,5 @@
 ---
-title: Soft-Delete for entities
+title: Soft Delete
 sidebar:
   order: 80
 description: This tutorial explains how to use soft-delete in the entities with the UQL orm.
