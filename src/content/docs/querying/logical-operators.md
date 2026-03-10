@@ -58,7 +58,7 @@ Logical operators can be nested to create complex filters.
 const users = await querier.findMany(User, {
   $where: { 
     $or: [
-      { name: { $startsWith: 'A' } },
+      { name: { $istartsWith: 'A' } },
       { 
         $and: [
           { status: 'pending' },
@@ -72,6 +72,6 @@ const users = await querier.findMany(User, {
 
 ```sql title="Generated SQL (PostgreSQL)"
 SELECT * FROM "User"
-WHERE "name" LIKE $1
+WHERE "name" ILIKE $1
    OR ("status" = $2 AND "createdAt" < $3)
 ```
