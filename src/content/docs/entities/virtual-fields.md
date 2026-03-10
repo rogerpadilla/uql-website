@@ -60,7 +60,7 @@ const items = await querier.findMany(Item, {
 ```sql title="Generated SQL"
 SELECT
   "id",
-  (SELECT COUNT(*) FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") "tagsCount"
+  (SELECT COUNT(*) "count" FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") "tagsCount"
 FROM "Item"
 ```
 
@@ -77,5 +77,5 @@ const items = await querier.findMany(Item, {
 
 ```sql title="Generated SQL"
 SELECT "id" FROM "Item"
-WHERE (SELECT COUNT(*) FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") >= 10
+WHERE (SELECT COUNT(*) "count" FROM "ItemTag" WHERE "ItemTag"."itemId" = "id") >= $1
 ```

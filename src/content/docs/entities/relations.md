@@ -166,7 +166,7 @@ const posts = await querier.findMany(Post, {
     },
     tags: {
       $select: { name: true },
-      $where: { name: { $startsWith: 'typescript' } }
+      $where: { name: { $istartsWith: 'typescript' } }
     }
   },
   $where: {
@@ -193,7 +193,7 @@ SELECT "Tag"."name", "PostTag"."postId"
 FROM "Tag"
 INNER JOIN "PostTag" ON "PostTag"."tagId" = "Tag"."id"
 WHERE "PostTag"."postId" IN ($1, $2, ...)
-  AND "Tag"."name" LIKE 'typescript%'
+  AND "Tag"."name" ILIKE $2
 ```
 
 Check the [querying relations](/querying/relations) section for more advanced examples on deep filtering and selection.

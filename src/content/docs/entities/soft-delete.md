@@ -46,7 +46,7 @@ await querier.deleteOneById(User, 1);
 ```
 
 ```sql title="Generated SQL"
-UPDATE "User" SET "deletedAt" = '2025-12-30T12:00:00Z' WHERE "id" = 1
+UPDATE "User" SET "deletedAt" = $1 WHERE "id" = $2
 ```
 
 #### 2. Querying records
