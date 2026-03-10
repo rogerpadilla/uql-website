@@ -15,18 +15,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.13",
-    "@astrojs/react": "^4.4.2",
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/react": "^5.0.0",
     "@astrojs/starlight": "^0.37.7",
-    "@astrojs/vercel": "^9.0.4",
-    "astro": "^5.18.0",
+    "@astrojs/vercel": "^9.0.5",
+    "astro": "^6.0.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "sharp": "^0.34.5",
     "starlight-llms-txt": "^0.7.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.6",
+    "@astrojs/check": "^0.9.7",
     "@biomejs/biome": "^2.4.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
