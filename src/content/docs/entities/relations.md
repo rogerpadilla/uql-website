@@ -155,7 +155,7 @@ Always use `Relation<T>` for properties decorated with `@OneToOne`, `@OneToMany`
 
 When you query relations in UQL, the syntax remains consistent and type-safe. You can select specific fields from related entities or filter based on them.
 
-```ts
+```ts title="You write"
 // Assuming `querier` is obtained from the pool
 const posts = await querier.findMany(Post, {
   $select: {
@@ -173,6 +173,27 @@ const posts = await querier.findMany(Post, {
     author: { name: 'Roger' }
   }
 });
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+-- Main query with LEFT JOIN for ManyToOne
+SELECT "Post"."id", "Post"."title",
+       "author"."name" "author.name", "author"."email" "author.email"
+FROM "Post"
+LEFT JOIN "User" "author" ON "author"."id" = "Post"."authorId"
+WHERE EXISTS (
+  SELECT 1 FROM "User"
+  WHERE "User"."id" = "Post"."authorId" AND "User"."name" = $1
+)
+```
+
+```sql title="Generated SQL (PostgreSQL) — separate query"
+-- ManyToMany tags loaded via a second query
+SELECT "Tag"."name", "PostTag"."postId"
+FROM "Tag"
+INNER JOIN "PostTag" ON "PostTag"."tagId" = "Tag"."id"
+WHERE "PostTag"."postId" IN ($1, $2, ...)
+  AND "Tag"."name" LIKE 'typescript%'
 ```
 
 Check the [querying relations](/querying/relations) section for more advanced examples on deep filtering and selection.

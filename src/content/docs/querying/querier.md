@@ -13,7 +13,7 @@ A `querier` is UQL's abstraction over database drivers to dynamically generate q
 
 The recommended way to use a querier is `pool.withQuerier()`. It acquires a querier from the [pool](/getting-started#2-fast-track-example), runs your callback, and guarantees release — even if an error is thrown.
 
-```ts
+```ts title="You write"
 import { pool } from './uql.config.js';
 import { User } from './shared/models/index.js';
 
@@ -31,6 +31,13 @@ const users = await pool.withQuerier(async (querier) =>
   })
 );
 // querier is automatically released here
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT "id", "name" FROM "User"
+WHERE "name" = $1 OR "creatorId" = $2
+ORDER BY "createdAt" DESC
+LIMIT 10
 ```
 
 This is especially useful when you want to **release the connection before doing slow non-DB work** (e.g. calling an external API or LLM), preventing connection pool starvation:
