@@ -31,6 +31,9 @@ const users = await querier.findMany(User, {
 });
 ```
 
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User" WHERE "name" = $1 AND "status" = $2
+```
 
 The same query with an explicit `$and`:
 
@@ -42,7 +45,10 @@ const users = await querier.findMany(User, {
 });
 ```
 
-&nbsp;
+```sql title="Generated SQL (PostgreSQL)"
+-- Same result as implicit AND
+SELECT * FROM "User" WHERE "name" = $1 AND "status" = $2
+```
 
 ### Complex Logical Nesting
 

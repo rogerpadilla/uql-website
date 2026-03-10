@@ -29,6 +29,15 @@ const users = await querier.findMany(User, {
 });
 ```
 
+```sql title="Generated SQL (PostgreSQL)"
+-- Main query with LEFT JOIN for OneToOne relation
+SELECT "User"."id", "User"."name",
+       "profile"."picture" "profile.picture"
+FROM "User"
+LEFT JOIN "Profile" "profile" ON "profile"."userId" = "User"."id"
+WHERE "User"."email" ILIKE '%@example.com%'
+```
+
 ### Advanced: Deep Selection & Mandatory Relations
 
 Use `$required: true` to enforce an `INNER JOIN` (by default UQL uses `LEFT JOIN` for nullable relations).
@@ -48,6 +57,17 @@ const latestUsersWithProfiles = await querier.findOne(User, {
   },
   $sort: { createdAt: 'desc' },
 });
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+-- INNER JOIN enforced by $required: true
+SELECT "User"."id", "User"."name",
+       "profile"."picture" "profile.picture", "profile"."bio" "profile.bio"
+FROM "User"
+INNER JOIN "Profile" "profile" ON "profile"."userId" = "User"."id"
+  AND "profile"."bio" IS NOT NULL
+ORDER BY "User"."createdAt" DESC
+LIMIT 1
 ```
 
 ### Filtering on Related Collections
@@ -74,6 +94,21 @@ const authorsWithPopularPosts = await querier.findMany(User, {
 });
 ```
 
+```sql title="Generated SQL (PostgreSQL)"
+-- Main query (parent rows)
+SELECT "User"."id", "User"."name" FROM "User"
+WHERE LOWER("User"."name") LIKE 'a%'
+```
+
+```sql title="Generated SQL (PostgreSQL) — separate query"
+-- OneToMany relation loaded via a second query
+SELECT "Post"."title", "Post"."createdAt", "Post"."authorId"
+FROM "Post"
+WHERE "Post"."authorId" IN ($1, $2, ...)
+  AND "Post"."title" ILIKE '%typescript%'
+ORDER BY "Post"."createdAt" DESC
+LIMIT 5
+```
 
 ### Sorting by Related Fields
 
@@ -88,6 +123,14 @@ const items = await querier.findMany(Item, {
     createdAt: 'desc' 
   }
 });
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT "Item"."id", "Item"."name"
+FROM "Item"
+LEFT JOIN "Tax" "tax" ON "tax"."id" = "Item"."taxId"
+LEFT JOIN "MeasureUnit" "measureUnit" ON "measureUnit"."id" = "Item"."measureUnitId"
+ORDER BY "tax"."name" ASC, "measureUnit"."name" ASC, "Item"."createdAt" DESC
 ```
 
 &nbsp;
