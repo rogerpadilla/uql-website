@@ -162,7 +162,7 @@ const posts = await querier.findMany(Post, {
     id: true,
     title: true,
     author: {
-      $select: { name: true, email: true }
+      $select: { id: true, name: true }
     },
     tags: {
       $select: { name: true },
@@ -178,7 +178,7 @@ const posts = await querier.findMany(Post, {
 ```sql title="Generated SQL (PostgreSQL)"
 -- Main query with LEFT JOIN for ManyToOne
 SELECT "Post"."id", "Post"."title",
-       "author"."name" "author.name", "author"."email" "author.email"
+       "author"."id" "author.id", "author"."name" "author.name"
 FROM "Post"
 LEFT JOIN "User" "author" ON "author"."id" = "Post"."authorId"
 WHERE EXISTS (
