@@ -58,15 +58,15 @@ UQL transparently handles the differences between database vendors. For example,
 
 ```sql title="Generated SQL (PostgreSQL)"
 SELECT "id", "name" FROM "User"
-WHERE "name" ILIKE 'Some%' AND "name" <> 'Something' AND "age" >= 18 AND "age" <= 65
-ORDER BY "name" ASC
+WHERE ("name" ILIKE $1 AND "name" <> $2) AND ("age" >= $3 AND "age" <= $4)
+ORDER BY "name"
 LIMIT 50
 ```
 
 ```sql title="Generated SQL (MySQL/SQLite)"
 SELECT `id`, `name` FROM `User`
-WHERE LOWER(`name`) LIKE 'some%' AND `name` <> 'Something' AND `age` >= 18 AND `age` <= 65
-ORDER BY `name` ASC
+WHERE (LOWER(`name`) LIKE ? AND `name` <> ?) AND (`age` >= ? AND `age` <= ?)
+ORDER BY `name`
 LIMIT 50
 ```
 

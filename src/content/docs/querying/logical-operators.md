@@ -70,8 +70,8 @@ const users = await querier.findMany(User, {
 });
 ```
 
-```sql title="Generated SQL"
-SELECT * FROM "User" 
-WHERE "name" LIKE 'A%' 
-   OR ("status" = 'pending' AND "createdAt" < '2025-01-01')
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User"
+WHERE "name" LIKE $1
+   OR ("status" = $2 AND "createdAt" < $3)
 ```

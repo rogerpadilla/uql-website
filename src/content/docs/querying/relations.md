@@ -97,7 +97,7 @@ const authorsWithPopularPosts = await querier.findMany(User, {
 ```sql title="Generated SQL (PostgreSQL)"
 -- Main query (parent rows)
 SELECT "User"."id", "User"."name" FROM "User"
-WHERE LOWER("User"."name") LIKE 'a%'
+WHERE "User"."name" ILIKE $1
 ```
 
 ```sql title="Generated SQL (PostgreSQL) — separate query"
@@ -130,7 +130,7 @@ SELECT "Item"."id", "Item"."name"
 FROM "Item"
 LEFT JOIN "Tax" "tax" ON "tax"."id" = "Item"."taxId"
 LEFT JOIN "MeasureUnit" "measureUnit" ON "measureUnit"."id" = "Item"."measureUnitId"
-ORDER BY "tax"."name" ASC, "measureUnit"."name" ASC, "Item"."createdAt" DESC
+ORDER BY "tax"."name", "measureUnit"."name", "Item"."createdAt" DESC
 ```
 
 &nbsp;
