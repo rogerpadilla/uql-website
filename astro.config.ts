@@ -3,6 +3,7 @@ import starlight from '@astrojs/starlight';
 import vercel from '@astrojs/vercel';
 import type { AstroUserConfig } from 'astro';
 import { defineConfig } from 'astro/config';
+import starlightBlog from 'starlight-blog';
 import starlightLlmsTxt from 'starlight-llms-txt';
 
 import { githubRepo, projectDescription } from './src/constants';
@@ -109,6 +110,15 @@ const config: AstroUserConfig = {
         useThemedScrollbars: false,
       },
       plugins: [
+        starlightBlog({
+          title: 'Blog',
+          authors: {
+            rogerpadilla: {
+              name: 'Roger Padilla',
+              url: 'https://github.com/rogerpadilla',
+            },
+          },
+        }),
         starlightLlmsTxt({
           projectName: 'UQL',
           description: projectDescription,

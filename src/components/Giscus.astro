@@ -1,0 +1,37 @@
+---
+/**
+ * Giscus comments widget — GitHub Discussions-backed.
+ * Usage: <Giscus /> at the bottom of any .mdx page.
+ *
+ * Setup: enable Discussions on the repo, create a "Blog Comments" category,
+ * then get IDs from https://giscus.app and replace the placeholders below.
+ */
+---
+
+<section class="giscus-container">
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="rogerpadilla/uql"
+    data-repo-id="MDEwOlJlcG9zaXRvcnkyOTYzOTIwOTE="
+    data-category="Blog Comments"
+    data-category-id="DIC_kwDOEaqVm84C4HwJ"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async
+  ></script>
+</section>
+
+<style>
+  .giscus-container {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+  }
+</style>
