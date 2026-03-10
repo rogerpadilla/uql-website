@@ -12,6 +12,12 @@ description: Learn how to manage database schema evolution with UQL's migration 
 
 UQL includes a robust migration system and an "Entity-First" synchronization engine built directly into the core.
 
+:::important[Your entities are the single source of truth]
+You only modify your TypeScript entity classes — UQL auto-generates migration files by diffing your entities against the database. There is no need to manually write DDL or keep entities and migrations in sync; entities drive everything.
+
+Still you can create manual migrations for data backfills or custom SQL, so you can have the best of both worlds (full automation + full control if you want).
+:::
+
 ### 1. Unified Configuration
 
 Reuse the same `uql.config.ts` for both your application bootstrap and the CLI. This ensures your app and migrations share the same settings (like [Naming Strategies](/naming-strategy)).
