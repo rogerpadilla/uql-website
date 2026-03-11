@@ -188,3 +188,51 @@ const posts = await querier.findMany(Post, {
 });
 ```
 :::
+
+### Relation Count Filtering (`$size` Subqueries)
+
+Filter parent entities by the **number** of related records using `$size`. UQL generates efficient `COUNT(*)` subqueries. Accepts a number for exact match or any [comparison operator](/querying/comparison-operators) (`$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$between`).
+
+#### OneToMany
+
+```ts title="You write"
+// Find categories with at least 2 measure units
+const categories = await querier.findMany(MeasureUnitCategory, {
+  $where: { measureUnits: { $size: { $gte: 2 } } },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "MeasureUnitCategory"
+WHERE (SELECT COUNT(*) FROM "MeasureUnit"
+       WHERE "MeasureUnit"."categoryId" = "MeasureUnitCategory"."id") >= $1
+  AND "deletedAt" IS NULL
+```
+
+#### ManyToMany
+
+```ts title="You write"
+// Find items with more than 5 tags
+const items = await querier.findMany(Item, {
+  $where: { tags: { $size: { $gt: 5 } } },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "Item"
+WHERE (SELECT COUNT(*) FROM "ItemTag"
+       WHERE "ItemTag"."itemId" = "Item"."id") > $1
+```
+
+#### Multiple Comparison Operators
+
+```ts title="You write"
+// Find items with between 2 and 10 tags
+const items = await querier.findMany(Item, {
+  $where: { tags: { $size: { $between: [2, 10] } } },
+});
+```
+
+:::note
+`$size` with an exact number (`$size: 3`) also works for relation count — equivalent to `$size: { $eq: 3 }`.
+:::

@@ -29,7 +29,7 @@ UQL provide a comprehensive set of operators for comparing field values. These o
 | `$isNull`      | Field is null. E.g. `{ deletedAt: { $isNull: true } }`.                           |
 | `$isNotNull`   | Field is not null. E.g. `{ email: { $isNotNull: true } }`.                        |
 | `$all`         | Array contains all specified values. E.g. `{ tags: { $all: ['ts', 'orm'] } }`.    |
-| `$size`        | Array has the specified length. E.g. `{ tags: { $size: 3 } }`.                    |
+| `$size`        | Array has the specified length. Accepts a number for exact match (`{ tags: { $size: 3 } }`) or comparison operators (`{ tags: { $size: { $gte: 2 } } }`). Also works on [relation count filtering](/querying/relations#relation-count-filtering-size-subqueries). |
 | `$elemMatch`   | Array contains an element matching the condition. E.g. `{ addresses: { $elemMatch: { city: 'NYC' } } }`. |
 | `$text`        | Full-text search (where supported by the database).                                |
 

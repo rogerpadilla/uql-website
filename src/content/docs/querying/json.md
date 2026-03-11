@@ -175,12 +175,19 @@ SELECT * FROM `Company` ORDER BY json_extract(`kind`, '$.public') DESC
 
 All JSON features work across three SQL dialects:
 
-| Feature                | PostgreSQL     | MySQL                | SQLite           |
-| ---------------------- | -------------- | -------------------- | ---------------- |
-| Dot-notation filtering | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()` |
-| `$merge`               | `\|\| ::jsonb` | `JSON_MERGE_PATCH()` | `json_patch()`   |
-| `$unset`               | `- 'key'`      | `JSON_REMOVE()`      | `json_remove()`  |
-| Dot-notation sorting   | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()` |
+| Feature                | PostgreSQL             | MySQL                | SQLite               |
+| ---------------------- | ---------------------- | -------------------- | -------------------- |
+| Dot-notation filtering | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()`     |
+| `$merge`               | `\|\| ::jsonb`         | `JSON_MERGE_PATCH()` | `json_patch()`       |
+| `$unset`               | `- 'key'`              | `JSON_REMOVE()`      | `json_remove()`      |
+| Dot-notation sorting   | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()`     |
+| `$size`                | `jsonb_array_length()` | `JSON_LENGTH()`      | `json_array_length()`|
+| `$all`                 | `@> ::jsonb`           | `JSON_CONTAINS()`    | `json_each()`        |
+| `$elemMatch`           | `jsonb_array_elements` | `JSON_TABLE()`       | `json_each()`        |
+
+:::tip[PostgreSQL: Use `jsonb` over `json`]
+For PostgreSQL, always prefer `type: 'jsonb'` over `type: 'json'`. JSONB is binary-stored, indexable, and faster for queries. Array operators (`$size`, `$all`, `$elemMatch`) use JSONB-specific functions (`jsonb_array_length`, `@>`, `jsonb_array_elements`) which require JSONB columns.
+:::
 
 :::note
 MongoDB stores JSON natively — no special operators are needed. These features are specifically designed for SQL databases where JSON is stored in dedicated column types.
