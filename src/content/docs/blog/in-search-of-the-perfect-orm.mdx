@@ -1,0 +1,270 @@
+---
+title: "In Search of the Perfect TypeScript ORM"
+date: 2024-06-15
+authors:
+  - rogerpadilla
+tags:
+  - orm
+  - typescript
+  - architecture
+excerpt: "What makes a perfect ORM? I evaluated the top 5 features every TypeScript ORM should have — and why the existing ones fall short."
+cover:
+  alt: "Colorful illustration of database connections"
+  image: ../../../assets/orm-databases.webp
+---
+
+import { Image } from 'astro:assets';
+import onceUponATime from '../../../assets/once-upon-a-time.webp';
+
+*Originally published on [Medium](https://medium.com/@rogerpadillac/in-search-of-the-perfect-orm-e01fcc9bce3d).*
+
+<Image src={onceUponATime} alt="Once upon a time — handwritten" />
+
+## What is an ORM?
+
+An ORM provides a simpler way to interact with databases in an app — it allows developers to work with data using objects.
+
+## What is a Perfect ORM for TypeScript?
+
+Below are the ideal features a TypeScript ORM should have, why such features are the most important ones, and how the existing ORMs fall short in most of these areas.
+
+**The top 5 features a perfect TypeScript ORM should have are:**
+
+### 1. Serializable Queries
+
+The ability to transport queries between the layers of a system is great for flexibility and simplicity. For example, via HTTP requests, APIs, websockets, or even the frontend/client (optional) could transmit the queries to the backend/server using the same (ORM) syntax and avoid the need for an additional syntax layer like what happens with GraphQL in the flow `GraphQL => ORM => Database`. The flow could instead be simplified as `ORM => Database`; with the following advantages:
+
+- Keep away from the need for pseudo-languages to define the queries (context-switching). Instead, use standard JSON as the syntax for the queries so they are entirely declarative and serializable.
+- Avoid additional servers and steps in the build process of the app.
+- Native support of the editors/IDEs for the queries without any custom plugins/extensions.
+
+### 2. Native TypeScript
+
+Squeeze TypeScript's power with JSON, classes, and decorators.
+
+- Type-safe queries and models that are natively validated by the same language that you use to write your app.
+- Context-aware queries allow auto-completion of the appropriate operators and fields according to the different parts of a query.
+- Entity definition with standard classes and decorators to avoid the need for proprietary DSLs (as happens with Prisma), extra steps in the build process, and custom extensions for the editors.
+
+### 3. Multi-level Operators
+
+Operations such as filter, sort, limit, project, and others work on any level of the queries (including relations and their fields).
+
+### 4. Consistent API Across Databases
+
+Write the queries for any database in a consistent way and then transparently optimize these queries for the configured database dialect.
+
+### 5. Universal Syntax (Language Agnostic)
+
+The ability to write queries in any language opens the door to many possibilities, even porting the ORM to other languages. For example, JSON is a first-class citizen format on almost any modern language out there, including Python, Rust, and others (besides JavaScript).
+
+---
+
+## Why Do the Current Top 3 TypeScript ORMs Fall Short?
+
+### What does TypeORM lack to be a perfect ORM?
+
+**1. Lack of 100% serializable queries:**
+
+Notice how the `LessThan` operator is a function that has to be imported and called — this precludes any capability to serialize the query.
+
+```ts
+import { LessThan } from 'typeorm';
+
+const loadedPosts = await dataSource.getRepository(Post).findBy({
+  likes: LessThan(10),
+});
+```
+
+**2. Lack of Native TypeScript:**
+
+The query dissolves into strings because `relations` and `where` can accept any string, thus any invalid string can be put there.
+
+```ts
+const posts = await connection.manager.find(Post, {
+  select: ['id'],
+  relations: ['< anything can go here >'],
+});
+```
+
+**3. Lack of consistent API across databases:**
+
+In the section that TypeORM has for MongoDB, there is a self-explanatory warning about this.
+
+**4. Lack of Universal Syntax (language agnostic):**
+
+It relies on closures to support advanced queries (and not every language out there supports closures).
+
+---
+
+### What does Prisma lack to be a perfect ORM?
+
+**1. Lack of Native TypeScript:**
+
+- Context-switching between the custom DSL and TypeScript makes this process obtrusive.
+- Extra steps in the build process to generate the corresponding files from the custom DSL.
+- It is required to install a custom extension for VS Code to get (basic) autocompletion from the editor for the DSL, which is far from being as good and reliable as with TypeScript.
+
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER)
+  posts     Post[]
+}
+```
+
+**2. Lack of consistent API across databases:**
+
+Prisma exposes low-level details about MongoDB that could be encapsulated by the ORM.
+
+```prisma
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  // Other fields
+}
+```
+
+**3. Lack of Universal Syntax (language agnostic):**
+
+It relies on its own proprietary DSL to define the models.
+
+---
+
+### What does MikroORM lack to be a perfect ORM?
+
+**1. Lack of 100% serializable queries:**
+
+Notice how that query uses two separate methods, one for the update and another for the where — this disallows the serialization of its queries.
+
+```ts
+const qb = orm.em.createQueryBuilder(Author);
+
+qb.update({ name: 'test 123', type: PublisherType.GLOBAL }).where({
+  id: 123,
+  type: PublisherType.LOCAL,
+});
+```
+
+**2. Lack of Native TypeScript:**
+
+Dissolves into strings — any string can go inside the `fields` array, so the query loses the possibility of being type-safe.
+
+```ts
+const author = await em.findOne(
+  Author,
+  {},
+  {
+    fields: ['name', 'books.title', 'books.author', 'books.price'],
+  }
+);
+```
+
+**3. Lack of Multi-level operators:**
+
+What if you need to filter the records of a relation or sort them? This seems unachievable in a type-safe way from what can be seen in the MikroORM docs.
+
+**4. Lack of consistent API across databases:**
+
+```ts
+import { EntityManager } from '@mikro-orm/mongodb';
+const em = orm.em as EntityManager;
+const qb = em.aggregate(/* ... */);
+```
+
+MikroORM exposes low-level details about MongoDB that could be encapsulated by the ORM.
+
+---
+
+## Why is UQL the Closest to a Perfect ORM?
+
+In short, because it was designed from the beginning with all of the above foundations. Let's see how.
+
+### 1. 100% Serializable Queries
+
+Even the insert and update operations have a fully serializable API.
+
+```ts
+const lastUsers = await querier.findMany(User, {
+  $select: { id: true, name: true, email: true },
+  $sort: { createdAt: -1 },
+  $limit: 20,
+});
+```
+
+### 2. Native TypeScript with Truly Type-safe Queries
+
+Every operator and field is validated according to the context. For example, the possible values for the `$select` operator will automatically depend on the level.
+
+```ts
+const lastUsersWithProfiles = await querier.findMany(User, {
+  $select: {
+    id: true,
+    name: true,
+    profile: {
+      $select: { id: true, picture: true },
+      $required: true,
+    },
+  },
+  $sort: { createdAt: -1 },
+  $limit: 20,
+});
+```
+
+### 3. Multi-level Operators
+
+The operators work on any level. For example, `$sort` and `$where` can be applied to the relations and their fields in a type-safe and context-aware way.
+
+```ts
+const items = await querier.findMany(Item, {
+  $select: {
+    id: true,
+    name: true,
+    measureUnit: {
+      $select: { id: true, name: true },
+      $where: { name: { $ne: 'unidad' } },
+      $required: true,
+    },
+    tax: { $select: { id: true, name: true } },
+  },
+  $where: {
+    salePrice: { $gte: 1000 },
+    name: { $istartsWith: 'A' },
+  },
+  $sort: {
+    tax: { name: 1 },
+    measureUnit: { name: 1 },
+    createdAt: -1,
+  },
+  $limit: 100,
+});
+```
+
+### 4. Consistent API Across Databases
+
+Its API is unified across different databases — it does the magic under the hood so the same entities and queries could transparently work on any supported database. This makes it easier to switch from a Document to a Relational database (or vice-versa).
+
+### 5. Universal Syntax Across Languages
+
+Its syntax is 100% standard JSON, opening the door for many possibilities with other languages — like interoperation or even creating versions of UQL in other languages such as Python or Rust with ease.
+
+---
+
+See more at **[uql-orm.dev](https://uql-orm.dev)**. Please star it ⭐ on **[GitHub](https://github.com/rogerpadilla/uql)** if you like the idea!
+
+---
+
+import Giscus from '../../../components/Giscus.astro';
+
+<Giscus />

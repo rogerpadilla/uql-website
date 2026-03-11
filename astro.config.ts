@@ -52,19 +52,13 @@ const config: AstroUserConfig = {
       },
       components: {
         Head: './src/components/Head.astro',
+        SocialIcons: './src/components/SocialIcons.astro',
       },
       editLink: {
         baseUrl: 'https://github.com/rogerpadilla/uql-website/edit/main/',
       },
       lastUpdated: true,
-      social: [
-        { icon: 'github', label: 'GitHub', href: githubRepo },
-        {
-          icon: 'rocket',
-          label: 'NPM',
-          href: 'https://www.npmjs.com/package/uql-orm',
-        },
-      ],
+
       tableOfContents: {
         minHeadingLevel: 2,
         maxHeadingLevel: 3,
