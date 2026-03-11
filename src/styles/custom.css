@@ -105,3 +105,15 @@ button {
         transform: translateY(-10px);
     }
 }
+
+/* Make blog preview cards fully clickable (cover image + text) */
+.preview {
+    position: relative;
+    cursor: pointer;
+}
+
+.preview h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+}
