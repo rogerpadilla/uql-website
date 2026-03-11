@@ -6,7 +6,7 @@ import { defineConfig } from 'astro/config';
 import starlightBlog from 'starlight-blog';
 import starlightLlmsTxt from 'starlight-llms-txt';
 
-import { githubRepo, projectDescription } from './src/constants';
+import { projectDescription } from './src/constants';
 
 const config: AstroUserConfig = {
   site: 'https://uql-orm.dev',
