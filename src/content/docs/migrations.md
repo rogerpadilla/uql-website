@@ -10,12 +10,23 @@ description: Learn how to manage database schema evolution with UQL's migration 
 
 ## Database Migrations
 
-UQL includes a robust migration system and an "Entity-First" synchronization engine built directly into the core.
+UQL takes an **Entity-First** approach: you modify your TypeScript entity classes, and UQL auto-generates the migration files for you.
 
 :::important[Your entities are the single source of truth]
-You only modify your TypeScript entity classes — UQL auto-generates migration files by diffing your entities against the database. There is no need to manually write DDL or keep entities and migrations in sync; entities drive everything.
+**No need to write DDL manually.** UQL diffs your entities against the live database and generates the exact SQL needed. The only thing you maintain is your entity classes — UQL handles everything else.
 
-Still you can create manual migrations for data backfills or custom SQL, so you can have the best of both worlds (full automation + full control if you want).
+```bash
+# 1. Update your entity (add a field, change a type, add a relation...)
+# 2. Auto-generate the migration
+npx uql-migrate generate:entities add_user_nickname
+
+# 3. Review and apply
+npx uql-migrate up
+```
+
+That's it. No manual `ALTER TABLE`, no keeping entities and migrations in sync, no schema DSLs.
+
+Want manual migrations for data backfills or custom SQL? You can do that too — full automation + full control when you need it.
 :::
 
 ### 1. Unified Configuration
