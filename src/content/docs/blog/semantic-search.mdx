@@ -7,12 +7,12 @@ tags:
   - release
   - semantic-search
   - vector
-excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, and SQLite — one API, automatic index creation, and zero raw SQL."
+excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas — one API, automatic index creation, and zero raw SQL."
 ---
 
 AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you're forced to use raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
 
-**UQL 0.3 changes that.** Semantic search can now be used as a first-class citizen, with a single, unified interface for all modern databases.
+**UQL 0.3 changes that.** Semantic search can now be used as a first-class citizen, all within a unified API.
 
 ## What It Looks Like
 
@@ -46,6 +46,14 @@ LIMIT 10
 
 No raw SQL. No dialect checks. Same query everywhere.
 
+For MongoDB, UQL translates into an Atlas `$vectorSearch` pipeline — same API, zero config:
+
+```json title="MongoDB Atlas"
+[
+  { "$vectorSearch": { "index": "embedding_index", "path": "embedding", "queryVector": ["..."], "numCandidates": 100, "limit": 10 } }
+]
+```
+
 ## Entity Setup
 
 Define your vector field and index — UQL handles schema generation, extension creation, and index building:
@@ -54,7 +62,7 @@ Define your vector field and index — UQL handles schema generation, extension 
 import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Entity()
-@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+@Index(['embedding'], { type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
 export class Article {
   @Id() id?: number;
   @Field() title?: string;
@@ -88,13 +96,13 @@ results[0].similarity; // autocomplete works ✓
 
 ### 5 Distance Metrics
 
-| Metric | Postgres | MariaDB | SQLite |
-| :--- | :--- | :--- | :--- |
-| `cosine` | `<=>` | ✅ | ✅ |
-| `l2` | `<->` | ✅ | ✅ |
-| `inner` | `<#>` | — | — |
-| `l1` | `<+>` | — | — |
-| `hamming` | `<~>` | — | ✅ |
+| Metric | Postgres | MariaDB | SQLite | MongoDB Atlas |
+| :--- | :--- | :--- | :--- | :--- |
+| `cosine` | `<=>` | ✅ | ✅ | ✅ (index-defined) |
+| `l2` | `<->` | ✅ | ✅ | ✅ (index-defined) |
+| `inner` | `<#>` | — | — | ✅ (index-defined) |
+| `l1` | `<+>` | — | — | — |
+| `hamming` | `<~>` | — | ✅ | — |
 
 ### 3 Vector Types
 
@@ -108,11 +116,11 @@ results[0].similarity; // autocomplete works ✓
 
 ### Vector Indexes
 
-| Type | Postgres | MariaDB |
-| :--- | :--- | :--- |
-| HNSW | ✅ with `m`, `efConstruction` | ❌ |
-| IVFFlat | ✅ with `lists` | ❌ |
-| Native | — | ✅ `VECTOR INDEX` |
+| Type | Postgres | MariaDB | MongoDB Atlas |
+| :--- | :--- | :--- | :--- |
+| HNSW | ✅ with `m`, `efConstruction` | ❌ | ❌ |
+| IVFFlat | ✅ with `lists` | ❌ | ❌ |
+| Native | — | ✅ `VECTOR INDEX` | ✅ `$vectorSearch` |
 
 ## Why `$sort`?
 
