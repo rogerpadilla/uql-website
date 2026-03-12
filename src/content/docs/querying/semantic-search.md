@@ -8,13 +8,11 @@ sidebar:
 description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, MariaDB, and SQLite.
 ---
 
-## Semantic Search
-
 UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Works across **PostgreSQL** (pgvector), **MariaDB**, and **SQLite** (sqlite-vec).
 
-### Define a Vector Field
+## Entity Setup
 
-```ts title="Entity"
+```ts
 import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Entity()
@@ -30,7 +28,9 @@ export class Article {
 
 For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns.
 
-### Query by Similarity
+---
+
+## Query by Similarity
 
 Use `$sort` on a vector field with `$vector` and an optional `$distance` metric:
 
@@ -42,25 +42,27 @@ const results = await querier.findMany(Article, {
 });
 ```
 
-```sql title="PostgreSQL"
+```sql title="Generated SQL (PostgreSQL)"
 SELECT "id", "title" FROM "Article"
 ORDER BY "embedding" <=> $1::vector
 LIMIT 10
 ```
 
-```sql title="MariaDB"
+```sql title="Generated SQL (MariaDB)"
 SELECT `id`, `title` FROM `Article`
 ORDER BY VEC_DISTANCE_COSINE(`embedding`, ?)
 LIMIT 10
 ```
 
-```sql title="SQLite"
+```sql title="Generated SQL (SQLite)"
 SELECT `id`, `title` FROM `Article`
 ORDER BY vec_distance_cosine(`embedding`, ?)
 LIMIT 10
 ```
 
-### Distance Metrics
+---
+
+## Distance Metrics
 
 | Metric | Postgres Operator | MariaDB Function | SQLite Function | Use Case |
 | :--- | :--- | :--- | :--- | :--- |
@@ -72,7 +74,9 @@ LIMIT 10
 
 If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field in the entity `@Field({ distance: 'l2' })`.
 
-### Distance Projection
+---
+
+## Distance Projection
 
 Project the computed distance as a named field in the result with `$project`:
 
@@ -87,13 +91,27 @@ const results = await querier.findMany(Article, {
 results.forEach((r) => console.log(r.title, r.similarity));
 ```
 
-```sql title="PostgreSQL"
+```sql title="Generated SQL (PostgreSQL)"
 SELECT "id", "title", ("embedding" <=> $1::vector) AS "similarity" FROM "Article"
 ORDER BY "similarity"
 LIMIT 10
 ```
 
-### Vector Types
+```sql title="Generated SQL (MariaDB)"
+SELECT `id`, `title`, VEC_DISTANCE_COSINE(`embedding`, ?) AS `similarity` FROM `Article`
+ORDER BY `similarity`
+LIMIT 10
+```
+
+```sql title="Generated SQL (SQLite)"
+SELECT `id`, `title`, vec_distance_cosine(`embedding`, ?) AS `similarity` FROM `Article`
+ORDER BY `similarity`
+LIMIT 10
+```
+
+---
+
+## Vector Types
 
 UQL supports three vector storage types — use the one that best fits your model and performance needs:
 
@@ -118,7 +136,9 @@ sparseEmbedding?: number[];
 `halfvec` and `sparsevec` are Postgres-only (pgvector). MariaDB and SQLite map them to their native `VECTOR` type.
 :::
 
-### Vector Indexes
+---
+
+## Vector Indexes
 
 Define vector indexes with `@Index()` for efficient approximate nearest-neighbor (ANN) search:
 
