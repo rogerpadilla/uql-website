@@ -8,9 +8,13 @@ tags:
   - semantic-search
   - vector
 excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, and SQLite — one API, automatic index creation, and zero raw SQL."
+sidebar:
+  badge:
+    text: New
+    variant: success
 ---
 
-AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you drop down to raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
+AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you're forced to use raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
 
 **UQL 0.3 changes that.** Semantic search is now a first-class citizen in UQL, works across PostgreSQL, MariaDB, and SQLite with a single, unified interface.
 
