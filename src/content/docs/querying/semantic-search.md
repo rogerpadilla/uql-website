@@ -1,0 +1,141 @@
+---
+title: Semantic Search
+sidebar:
+  order: 108
+  badge:
+    text: New
+    variant: success
+description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, MariaDB, and SQLite.
+---
+
+## Semantic Search
+
+UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Works across **PostgreSQL** (pgvector), **MariaDB**, and **SQLite** (sqlite-vec).
+
+### Define a Vector Field
+
+```ts title="Entity"
+import { Entity, Id, Field, Index } from 'uql-orm';
+
+@Entity()
+@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+export class Article {
+  @Id() id?: number;
+  @Field() title?: string;
+
+  @Field({ type: 'vector', dimensions: 1536 })
+  embedding?: number[];
+}
+```
+
+For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns.
+
+### Query by Similarity
+
+Use `$sort` on a vector field with `$vector` and an optional `$distance` metric:
+
+```ts title="You write"
+const results = await querier.findMany(Article, {
+  $select: { id: true, title: true },
+  $sort: { embedding: { $vector: queryEmbedding, $distance: 'cosine' } },
+  $limit: 10,
+});
+```
+
+```sql title="PostgreSQL"
+SELECT "id", "title" FROM "Article"
+ORDER BY "embedding" <=> $1::vector
+LIMIT 10
+```
+
+```sql title="MariaDB"
+SELECT `id`, `title` FROM `Article`
+ORDER BY VEC_DISTANCE_COSINE(`embedding`, ?)
+LIMIT 10
+```
+
+```sql title="SQLite"
+SELECT `id`, `title` FROM `Article`
+ORDER BY vec_distance_cosine(`embedding`, ?)
+LIMIT 10
+```
+
+### Distance Metrics
+
+| Metric | Postgres Operator | MariaDB Function | SQLite Function | Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| `cosine` | `<=>` | `VEC_DISTANCE_COSINE` | `vec_distance_cosine` | Text embeddings (OpenAI, Cohere) |
+| `l2` | `<->` | `VEC_DISTANCE_EUCLIDEAN` | `vec_distance_L2` | Image search, spatial data |
+| `inner` | `<#>` | — | — | Maximum inner product |
+| `l1` | `<+>` | — | — | Manhattan distance |
+| `hamming` | `<~>` | — | `vec_distance_hamming` | Binary embeddings |
+
+If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field in the entity `@Field({ distance: 'l2' })`.
+
+### Distance Projection
+
+Project the computed distance as a named field in the result with `$project`:
+
+```ts title="You write"
+import type { WithDistance } from 'uql-orm';
+
+const results = await querier.findMany(Article, {
+  $sort: { embedding: { $vector: queryVec, $distance: 'cosine', $project: 'similarity' } },
+  $limit: 10,
+}) as WithDistance<Article, 'similarity'>[];
+
+results.forEach((r) => console.log(r.title, r.similarity));
+```
+
+```sql title="PostgreSQL"
+SELECT "id", "title", ("embedding" <=> $1::vector) AS "similarity" FROM "Article"
+ORDER BY "similarity"
+LIMIT 10
+```
+
+### Vector Types
+
+UQL supports three vector storage types — use the one that best fits your model and performance needs:
+
+| Type | SQL (Postgres) | Storage | Max Dimensions | Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| `'vector'` | `VECTOR(n)` | 32-bit float | 2,000 | Standard embeddings (OpenAI, etc.) |
+| `'halfvec'` | `HALFVEC(n)` | 16-bit float | 4,000 | 50% storage savings, near-identical accuracy |
+| `'sparsevec'` | `SPARSEVEC(n)` | Sparse | 1,000,000 | SPLADE, BM25-style sparse retrieval |
+
+```ts title="Examples"
+@Field({ type: 'vector', dimensions: 1536 })    // OpenAI ada-002
+embedding?: number[];
+
+@Field({ type: 'halfvec', dimensions: 1536 })   // Same model, half storage
+embedding?: number[];
+
+@Field({ type: 'sparsevec', dimensions: 30000 }) // SPLADE sparse
+sparseEmbedding?: number[];
+```
+
+:::note
+`halfvec` and `sparsevec` are Postgres-only (pgvector). MariaDB and SQLite map them to their native `VECTOR` type.
+:::
+
+### Vector Indexes
+
+Define vector indexes with `@Index()` for efficient approximate nearest-neighbor (ANN) search:
+
+| Index Type | Postgres | MariaDB | Notes |
+| :--- | :--- | :--- | :--- |
+| `hnsw` | ✅ `USING hnsw` with operator classes | ❌ | Best accuracy, higher memory |
+| `ivfflat` | ✅ `USING ivfflat` with `lists` param | ❌ | Faster build, large datasets |
+| `vector` | — | ✅ Inline `VECTOR INDEX` | MariaDB's native vector index |
+
+```ts title="Postgres HNSW"
+@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+```
+
+```ts title="Postgres IVFFlat"
+@Index({ columns: ['embedding'], type: 'ivfflat', distance: 'l2', lists: 100 })
+```
+
+```ts title="MariaDB"
+@Index({ columns: ['embedding'], type: 'vector', distance: 'cosine', m: 8 })
+```
