@@ -12,7 +12,9 @@ UQL provides first-class vector similarity search, enabling AI-powered semantic 
 
 ## Entity Setup
 
-```ts
+Define a vector field with `type: 'vector'` and `dimensions`. Optionally, add a vector index for efficient approximate nearest-neighbor (ANN) search.
+
+```ts title="You write"
 import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Entity()
@@ -20,13 +22,16 @@ import { Entity, Id, Field, Index } from 'uql-orm';
 export class Article {
   @Id() id?: number;
   @Field() title?: string;
+  @Field() category?: string;
 
   @Field({ type: 'vector', dimensions: 1536 })
   embedding?: number[];
 }
 ```
 
-For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns.
+:::tip[Automatic Extension]
+For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns. No manual setup needed.
+:::
 
 ---
 
@@ -60,6 +65,39 @@ ORDER BY vec_distance_cosine(`embedding`, ?)
 LIMIT 10
 ```
 
+### Combined with Filtering
+
+Vector search composes naturally with `$where` and regular `$sort` fields:
+
+```ts title="You write"
+const results = await querier.findMany(Article, {
+  $where: { category: 'science' },
+  $sort: { embedding: { $vector: queryVec, $distance: 'cosine' }, title: 'asc' },
+  $limit: 10,
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "Article"
+WHERE "category" = $1
+ORDER BY "embedding" <=> $2::vector, "title" ASC
+LIMIT 10
+```
+
+```sql title="Generated SQL (MariaDB)"
+SELECT * FROM `Article`
+WHERE `category` = ?
+ORDER BY VEC_DISTANCE_COSINE(`embedding`, ?), `title` ASC
+LIMIT 10
+```
+
+```sql title="Generated SQL (SQLite)"
+SELECT * FROM `Article`
+WHERE `category` = ?
+ORDER BY vec_distance_cosine(`embedding`, ?), `title` ASC
+LIMIT 10
+```
+
 ---
 
 ## Distance Metrics
@@ -72,7 +110,14 @@ LIMIT 10
 | `l1` | `<+>` | — | — | Manhattan distance |
 | `hamming` | `<~>` | — | `vec_distance_hamming` | Binary embeddings |
 
-If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field in the entity `@Field({ distance: 'l2' })`.
+If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field:
+
+```ts
+@Field({ type: 'vector', dimensions: 1536, distance: 'l2' })
+embedding?: number[];
+```
+
+Queries on this field will use `l2` unless overridden with `$distance` at query time.
 
 ---
 
@@ -109,6 +154,14 @@ ORDER BY `similarity`
 LIMIT 10
 ```
 
+:::tip[Type Safety]
+`WithDistance<Article, 'similarity'>` adds a typed `similarity: number` property to each result. Your IDE autocompletes `r.similarity` and catches typos at compile time.
+:::
+
+:::note[Performance]
+When `$project` is set, UQL references the projected alias in `ORDER BY` instead of recomputing the distance expression — the distance is calculated only once per row.
+:::
+
 ---
 
 ## Vector Types
@@ -133,7 +186,7 @@ sparseEmbedding?: number[];
 ```
 
 :::note
-`halfvec` and `sparsevec` are Postgres-only (pgvector). MariaDB and SQLite map them to their native `VECTOR` type.
+`halfvec` and `sparsevec` are Postgres-only (pgvector). MariaDB and SQLite map them to their native `VECTOR` type — your entities work everywhere, UQL handles the translation.
 :::
 
 ---
@@ -159,3 +212,7 @@ Define vector indexes with `@Index()` for efficient approximate nearest-neighbor
 ```ts title="MariaDB"
 @Index({ columns: ['embedding'], type: 'vector', distance: 'cosine', m: 8 })
 ```
+
+:::note
+SQLite (sqlite-vec) does not support vector-specific index creation syntax. Standard indexes apply.
+:::
