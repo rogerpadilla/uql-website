@@ -5,10 +5,10 @@ sidebar:
   badge:
     text: New
     variant: success
-description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, MariaDB, and SQLite.
+description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas.
 ---
 
-UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Works across **PostgreSQL** (pgvector), **MariaDB**, and **SQLite** (sqlite-vec).
+UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Works across **PostgreSQL** (pgvector), **MariaDB**, **SQLite** (sqlite-vec), and **MongoDB Atlas** (`$vectorSearch`).
 
 ## Entity Setup
 
@@ -18,7 +18,7 @@ Define a vector field with `type: 'vector'` and `dimensions`. Optionally, add a 
 import { Entity, Id, Field, Index } from 'uql-orm';
 
 @Entity()
-@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+@Index(['embedding'], { type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
 export class Article {
   @Id() id?: number;
   @Field() title?: string;
@@ -65,6 +65,26 @@ ORDER BY vec_distance_cosine(`embedding`, ?)
 LIMIT 10
 ```
 
+For MongoDB, UQL translates into a [`$vectorSearch`](https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-stage/) aggregation pipeline:
+
+```json title="Generated Pipeline (MongoDB Atlas)"
+[
+  {
+    "$vectorSearch": {
+      "index": "embedding_index",
+      "path": "embedding",
+      "queryVector": [/* queryEmbedding */],
+      "numCandidates": 100,
+      "limit": 10
+    }
+  }
+]
+```
+
+:::note[MongoDB Atlas Requirement]
+MongoDB vector search requires an Atlas cluster with a [vector search index](https://www.mongodb.com/docs/atlas/atlas-vector-search/create-index/) configured on the target field. The distance metric is defined in the Atlas index — the `$distance` parameter is accepted for API consistency but ignored by MongoDB.
+:::
+
 ### Combined with Filtering
 
 Vector search composes naturally with `$where` and regular `$sort` fields:
@@ -98,17 +118,39 @@ ORDER BY vec_distance_cosine(`embedding`, ?), `title` ASC
 LIMIT 10
 ```
 
+For MongoDB, `$where` is merged into the `$vectorSearch.filter` for optimal pre-filtering, and secondary sorts become a separate `$sort` stage:
+
+```json title="Generated Pipeline (MongoDB Atlas)"
+[
+  {
+    "$vectorSearch": {
+      "index": "embedding_index",
+      "path": "embedding",
+      "queryVector": [/* queryVec */],
+      "numCandidates": 100,
+      "limit": 10,
+      "filter": { "category": "science" }
+    }
+  },
+  { "$sort": { "title": 1 } }
+]
+```
+
+:::tip[MongoDB Pre-Filtering]
+UQL merges `$where` into the `$vectorSearch.filter` instead of adding a separate `$match` stage. This is the recommended Atlas approach — it uses the search index for filtering, avoiding a full collection scan after the vector search.
+:::
+
 ---
 
 ## Distance Metrics
 
-| Metric | Postgres Operator | MariaDB Function | SQLite Function | Use Case |
-| :--- | :--- | :--- | :--- | :--- |
-| `cosine` | `<=>` | `VEC_DISTANCE_COSINE` | `vec_distance_cosine` | Text embeddings (OpenAI, Cohere) |
-| `l2` | `<->` | `VEC_DISTANCE_EUCLIDEAN` | `vec_distance_L2` | Image search, spatial data |
-| `inner` | `<#>` | — | — | Maximum inner product |
-| `l1` | `<+>` | — | — | Manhattan distance |
-| `hamming` | `<~>` | — | `vec_distance_hamming` | Binary embeddings |
+| Metric | Postgres Operator | MariaDB Function | SQLite Function | MongoDB Atlas | Use Case |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `cosine` | `<=>` | `VEC_DISTANCE_COSINE` | `vec_distance_cosine` | ✅ (index-defined) | Text embeddings (OpenAI, Cohere) |
+| `l2` | `<->` | `VEC_DISTANCE_EUCLIDEAN` | `vec_distance_L2` | ✅ (index-defined) | Image search, spatial data |
+| `inner` | `<#>` | — | — | ✅ (index-defined) | Maximum inner product |
+| `l1` | `<+>` | — | — | — | Manhattan distance |
+| `hamming` | `<~>` | — | `vec_distance_hamming` | — | Binary embeddings |
 
 If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field:
 
@@ -155,12 +197,21 @@ ORDER BY `similarity`
 LIMIT 10
 ```
 
+For MongoDB, `$project` adds a `$meta: 'vectorSearchScore'` projection:
+
+```json title="Generated Pipeline (MongoDB Atlas)"
+[
+  { "$vectorSearch": { "index": "embedding_index", "path": "embedding", "queryVector": ["..."], "numCandidates": 100, "limit": 10 } },
+  { "$project": { "id": true, "title": true, "similarity": { "$meta": "vectorSearchScore" } } }
+]
+```
+
 :::tip[Type Safety]
 `WithDistance<Article, 'similarity'>` adds a typed `similarity: number` property to each result. Your IDE autocompletes `r.similarity` and catches typos at compile time.
 :::
 
 :::note[Performance]
-When `$project` is set, UQL references the projected alias in `ORDER BY` instead of recomputing the distance expression — the distance is calculated only once per row.
+For SQL dialects, when `$project` is set, UQL references the projected alias in `ORDER BY` instead of recomputing the distance expression. For MongoDB, Atlas returns the score via `$meta` with no extra computation.
 :::
 
 ---
@@ -196,24 +247,33 @@ sparseEmbedding?: number[];
 
 Define vector indexes with `@Index()` for efficient approximate nearest-neighbor (ANN) search:
 
-| Index Type | Postgres | MariaDB | Notes |
-| :--- | :--- | :--- | :--- |
-| `hnsw` | ✅ `USING hnsw` with operator classes | ❌ | Best accuracy, higher memory |
-| `ivfflat` | ✅ `USING ivfflat` with `lists` param | ❌ | Faster build, large datasets |
-| `vector` | — | ✅ Inline `VECTOR INDEX` | MariaDB's native vector index |
+| Index Type | Postgres | MariaDB | MongoDB Atlas | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `hnsw` | ✅ `USING hnsw` with operator classes | ❌ | ❌ | Best accuracy, higher memory |
+| `ivfflat` | ✅ `USING ivfflat` with `lists` param | ❌ | ❌ | Faster build, large datasets |
+| `vector` | — | ✅ Inline `VECTOR INDEX` | ❌ | MariaDB's native vector index |
+| `vectorSearch` | — | — | ✅ Atlas vector search index | MongoDB's managed ANN index |
 
 ```ts title="Postgres HNSW"
-@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+@Index(['embedding'], { type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
 ```
 
 ```ts title="Postgres IVFFlat"
-@Index({ columns: ['embedding'], type: 'ivfflat', distance: 'l2', lists: 100 })
+@Index(['embedding'], { type: 'ivfflat', distance: 'l2', lists: 100 })
 ```
 
 ```ts title="MariaDB"
-@Index({ columns: ['embedding'], type: 'vector', distance: 'cosine', m: 8 })
+@Index(['embedding'], { type: 'vector', distance: 'cosine', m: 8 })
+```
+
+```ts title="MongoDB Atlas"
+@Index(['embedding'], { type: 'vectorSearch', name: 'my_search_index' })
 ```
 
 :::note
 SQLite (sqlite-vec) does not support vector-specific index creation syntax. Standard indexes apply.
+:::
+
+:::note[MongoDB Atlas]
+For MongoDB, the `@Index` decorator with `type: 'vectorSearch'` tells UQL which Atlas index to reference in the `$vectorSearch` stage. The actual index must be created in Atlas — UQL does not manage Atlas search index creation.
 :::
