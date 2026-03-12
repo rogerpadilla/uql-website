@@ -1,0 +1,142 @@
+---
+title: "Semantic Search: First-Class Vector Similarity in a Multi-Dialect ORM"
+date: 2026-03-12
+authors:
+  - rogerpadilla
+tags:
+  - release
+  - semantic-search
+  - vector
+excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, and SQLite — one API, automatic index creation, and zero raw SQL."
+---
+
+AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you drop down to raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
+
+**UQL 0.3 changes that.** Semantic search is now a first-class citizen in UQL, works across PostgreSQL, MariaDB, and SQLite with a single, unified interface.
+
+## What It Looks Like
+
+```ts title="You write"
+const results = await querier.findMany(Article, {
+  $select: { id: true, title: true },
+  $sort: { embedding: { $vector: queryEmbedding, $distance: 'cosine' } },
+  $limit: 10,
+});
+```
+
+UQL generates the right SQL for your database:
+
+```sql title="PostgreSQL"
+SELECT "id", "title" FROM "Article"
+ORDER BY "embedding" <=> $1::vector
+LIMIT 10
+```
+
+```sql title="MariaDB"
+SELECT `id`, `title` FROM `Article`
+ORDER BY VEC_DISTANCE_COSINE(`embedding`, ?)
+LIMIT 10
+```
+
+```sql title="SQLite"
+SELECT `id`, `title` FROM `Article`
+ORDER BY vec_distance_cosine(`embedding`, ?)
+LIMIT 10
+```
+
+No raw SQL. No dialect checks. Same query everywhere.
+
+## Entity Setup
+
+Define your vector field and index — UQL handles schema generation, extension creation, and index building:
+
+```ts
+import { Entity, Id, Field, Index } from 'uql-orm';
+
+@Entity()
+@Index({ columns: ['embedding'], type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+export class Article {
+  @Id() id?: number;
+  @Field() title?: string;
+
+  @Field({ type: 'vector', dimensions: 1536 })
+  embedding?: number[];
+}
+```
+
+For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector`. MariaDB and SQLite just work — no extensions needed.
+
+## Key Features
+
+### Distance Projection
+
+Project the computed distance into your results with `$project` — no duplicate computation:
+
+```ts
+import type { WithDistance } from 'uql-orm';
+
+const results = await querier.findMany(Article, {
+  $select: { id: true, title: true },
+  $sort: { embedding: { $vector: queryVec, $distance: 'cosine', $project: 'similarity' } },
+  $limit: 10,
+}) as WithDistance<Article, 'similarity'>[];
+
+results[0].similarity; // autocomplete works ✓
+```
+
+`WithDistance<E, K>` adds a typed distance property to each result — your IDE autocompletes it, and typos are caught at compile time.
+
+### 5 Distance Metrics
+
+| Metric | Postgres | MariaDB | SQLite |
+| :--- | :--- | :--- | :--- |
+| `cosine` | `<=>` | ✅ | ✅ |
+| `l2` | `<->` | ✅ | ✅ |
+| `inner` | `<#>` | — | — |
+| `l1` | `<+>` | — | — |
+| `hamming` | `<~>` | — | ✅ |
+
+### 3 Vector Types
+
+| Type | Storage | Use Case |
+| :--- | :--- | :--- |
+| `'vector'` | 32-bit float | Standard embeddings (OpenAI, etc.) |
+| `'halfvec'` | 16-bit float | 50% storage savings, near-identical accuracy |
+| `'sparsevec'` | Sparse | SPLADE, BM25-style sparse retrieval |
+
+`halfvec` and `sparsevec` are Postgres-only. MariaDB and SQLite transparently map them to their native `VECTOR` type — your entities work everywhere.
+
+### Vector Indexes
+
+| Type | Postgres | MariaDB |
+| :--- | :--- | :--- |
+| HNSW | ✅ with `m`, `efConstruction` | ❌ |
+| IVFFlat | ✅ with `lists` | ❌ |
+| Native | — | ✅ `VECTOR INDEX` |
+
+## Why `$sort`?
+
+Vector similarity search is fundamentally sorting by distance. UQL reuses the existing `$sort` API, which composes naturally with `$where`, `$select`, `$limit`, and regular sort fields:
+
+```ts
+const results = await querier.findMany(Article, {
+  $where: { category: 'science' },
+  $sort: { embedding: { $vector: queryVec, $distance: 'cosine' }, title: 'asc' },
+  $limit: 10,
+});
+```
+
+No new concepts to learn. The query API you already know now handles AI search.
+
+## Get Started
+
+```bash
+npm i uql-orm
+```
+
+- **[Full documentation →](/querying/semantic-search)**
+- **[GitHub](https://github.com/rogerpadilla/uql)**
+- **[Discord](https://discord.gg/DHJYp6MDS7)**
+
+
+We'd love to hear how you're using vector search in your projects — join the [Discord](https://discord.gg/DHJYp6MDS7) and let us know!
