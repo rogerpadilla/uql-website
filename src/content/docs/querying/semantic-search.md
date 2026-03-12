@@ -129,6 +129,7 @@ Project the computed distance as a named field in the result with `$project`:
 import type { WithDistance } from 'uql-orm';
 
 const results = await querier.findMany(Article, {
+  $select: { id: true, title: true },
   $sort: { embedding: { $vector: queryVec, $distance: 'cosine', $project: 'similarity' } },
   $limit: 10,
 }) as WithDistance<Article, 'similarity'>[];
@@ -137,7 +138,7 @@ results.forEach((r) => console.log(r.title, r.similarity));
 ```
 
 ```sql title="Generated SQL (PostgreSQL)"
-SELECT "id", "title", ("embedding" <=> $1::vector) AS "similarity" FROM "Article"
+SELECT "id", "title", "embedding" <=> $1::vector AS "similarity" FROM "Article"
 ORDER BY "similarity"
 LIMIT 10
 ```
