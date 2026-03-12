@@ -118,8 +118,9 @@ button {
     inset: 0;
 }
 
-/* "New" badge for the latest blog post in sidebar */
-#starlight__sidebar [href="/blog/benchmark-typescript-orms/"]::after {
+/* "New" badge for the latest blog posts in sidebar */
+#starlight__sidebar [href="/blog/benchmark-typescript-orms/"]::after,
+#starlight__sidebar [href="/blog/semantic-search/"]::after {
     content: 'New';
     display: inline-block;
     background-color: var(--sl-color-green-low);
