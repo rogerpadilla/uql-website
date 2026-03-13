@@ -110,7 +110,7 @@ The `@Field` and `@Id` decorators accept several options for both query validati
 | `dimensions`   | `number`            | Number of dimensions for vector fields. E.g., `@Field({ type: 'vector', dimensions: 1536 })`.                                                                      |
 | `distance`     | `VectorDistance`    | Default distance metric for vector similarity queries: `'cosine'`, `'l2'`, `'inner'`, `'l1'`, `'hamming'`.                                                          |
 | `onInsert`     | `function`          | Generator function for new records (e.g., for UUIDs).                                                                                                               |
-| `reference`    | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                         |
+| `references`  | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                         |
 | `foreignKey`   | `string \| false`   | Custom foreign key constraint name, or `false` to disable physical constraints while maintaining logical references.                                                |
 
 ### Primary Key Options

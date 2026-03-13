@@ -84,6 +84,7 @@ try {
 | Method                                      | Description                                    |
 | :------------------------------------------ | :--------------------------------------------- |
 | `findMany(Entity, query)`                   | Find multiple records matching the query.      |
+| `findManyStream(Entity, query)`             | Stream records as an `AsyncIterable` for memory-efficient row-by-row iteration. |
 | `findManyAndCount(Entity, query)`           | Find records and return `[rows, totalCount]`.  |
 | `findOne(Entity, query)`                    | Find a single record matching the query.       |
 | `findOneById(Entity, id, query?)`           | Find a record by its primary key.              |
