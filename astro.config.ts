@@ -14,7 +14,7 @@ const config: AstroUserConfig = {
     starlight({
       title: 'UQL',
       favicon: '/logo.svg',
-      tagline: 'The smartest ORM for TypeScript',
+      tagline: 'The best ORM for TypeScript',
       description: projectDescription,
       head: [
         {
