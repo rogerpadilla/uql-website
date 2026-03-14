@@ -107,7 +107,7 @@ console.log(users);
 | :--- | :--- | :--- |
 | PostgreSQL | `pg` | ✅ Full |
 | MySQL | `mysql2` | ✅ Full |
-| MariaDB | `mysql2` | ✅ Full |
+| MariaDB | `mariadb` or `mysql2` | ✅ Full |
 | SQLite | `better-sqlite3` | ✅ Full |
 | LibSQL / Turso | `@libsql/client` | ✅ Full |
 | Cloudflare D1 | — | ✅ Full |
@@ -124,8 +124,12 @@ UQL uses subpath exports to keep your bundles lean:
 | :--- | :--- |
 | `uql-orm` | Core decorators, types, and query utilities |
 | `uql-orm/postgres` | PostgreSQL driver pool |
-| `uql-orm/mysql` | MySQL / MariaDB driver pool |
-| `uql-orm/sqlite` | SQLite / LibSQL driver pool |
+| `uql-orm/mysql` | MySQL driver pool (also works with MariaDB) |
+| `uql-orm/maria` | MariaDB driver pool (dedicated `mariadb` driver) |
+| `uql-orm/sqlite` | SQLite driver pool |
+| `uql-orm/libsql` | LibSQL / Turso driver pool |
+| `uql-orm/neon` | Neon serverless driver pool |
+| `uql-orm/d1` | Cloudflare D1 driver pool |
 | `uql-orm/mongo` | MongoDB driver pool |
 | `uql-orm/express` | Express middleware (auto-generated REST APIs) |
 | `uql-orm/browser` | Browser HTTP querier |

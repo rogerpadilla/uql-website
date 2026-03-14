@@ -72,6 +72,20 @@ LIMIT 50
 
 &nbsp;
 
+### `$between` — Range Queries
+
+```ts title="You write"
+const users = await querier.findMany(User, {
+  $where: { age: { $between: [18, 65] } },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User" WHERE "age" BETWEEN $1 AND $2
+```
+
+&nbsp;
+
 ### JSONB Dot-Notation Operators
 
 All comparison operators listed above also work on nested JSON field paths using **dot-notation** (e.g., `'settings.isArchived': { $ne: true }`). UQL generates dialect-specific SQL automatically across PostgreSQL, MySQL, and SQLite.

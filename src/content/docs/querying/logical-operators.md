@@ -75,3 +75,52 @@ SELECT * FROM "User"
 WHERE "name" ILIKE $1
    OR ("status" = $2 AND "createdAt" < $3)
 ```
+
+### `$not` — Negate a Condition
+
+`$not` wraps conditions with `NOT`. It can be used at the **field level** or at the **top level** as an array of clauses.
+
+```ts title="Field-level $not"
+const users = await querier.findMany(User, {
+  $where: { 
+    status: 'active',
+    name: { $not: { $startsWith: 'test' } },
+  },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User"
+WHERE "status" = $1 AND NOT ("name" LIKE $2)
+```
+
+```ts title="Top-level $not"
+const users = await querier.findMany(User, {
+  $where: { 
+    $not: [{ name: 'admin' }, { status: 'banned' }],
+  },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User"
+WHERE NOT ("name" = $1 AND "status" = $2)
+```
+
+### `$nor` — Negate an `OR`
+
+`$nor` negates combined `OR` conditions — records match only if **none** of the clauses are true.
+
+```ts title="You write"
+const users = await querier.findMany(User, {
+  $where: { 
+    $nor: [{ name: 'admin' }, { status: 'banned' }],
+  },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT * FROM "User"
+WHERE NOT ("name" = $1 OR "status" = $2)
+```
+

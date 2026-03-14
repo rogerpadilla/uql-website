@@ -71,3 +71,20 @@ WHERE NOT EXISTS
 :::tip
 When using `raw` callbacks, `escapedPrefix` automatically refers to the alias of the current table in the main query, ensuring your sub-query correctly joins back to the parent record.
 :::
+
+---
+
+### Understanding `raw()`
+
+The `raw()` function from `uql-orm` injects SQL fragments into queries. It has two forms:
+
+| Form | Syntax | Use Case |
+| :--- | :--- | :--- |
+| **String** | `raw('SQL fragment')` | Simple expressions (e.g., `raw('SUM(price) > 100')`). |
+| **Callback** | `raw(({ ctx, dialect, escapedPrefix }) => { ... })` | Complex sub-queries that need dialect-aware SQL generation. |
+
+The callback receives:
+
+- **`ctx`** — the `QueryContext` for building parameterized SQL via `ctx.append(sql)` and `ctx.value(val)`.
+- **`dialect`** — the current SQL dialect instance for generating nested queries (e.g., `dialect.find(...)`).
+- **`escapedPrefix`** — the escaped alias of the parent table, used to reference parent columns in correlated sub-queries.

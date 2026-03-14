@@ -84,7 +84,7 @@ try {
 | Method                                      | Description                                    |
 | :------------------------------------------ | :--------------------------------------------- |
 | `findMany(Entity, query)`                   | Find multiple records matching the query.      |
-| `findManyStream(Entity, query)`             | Stream records as an `AsyncIterable` for memory-efficient row-by-row iteration. |
+| `findManyStream(Entity, query)`             | [Stream records](/querying/streaming) as an `AsyncIterable` for memory-efficient row-by-row iteration. |
 | `findManyAndCount(Entity, query)`           | Find records and return `[rows, totalCount]`.  |
 | `findOne(Entity, query)`                    | Find a single record matching the query.       |
 | `findOneById(Entity, id, query?)`           | Find a record by its primary key.              |
@@ -112,6 +112,21 @@ Read methods (`findOne`, `findMany`, `findManyAndCount`, `count`, `deleteMany`) 
 :::
 
 ---
+
+### Pool API
+
+The pool manages the connection lifecycle. These are the main `pool` methods:
+
+| Method                          | Description                                                                 |
+| :------------------------------ | :-------------------------------------------------------------------------- |
+| `pool.withQuerier(callback)`    | Acquire a querier, run `callback`, and auto-release — even on errors.       |
+| `pool.transaction(callback)`    | Like `withQuerier`, but wraps the callback in a transaction.                |
+| `pool.getQuerier()`             | Manually acquire a querier. **You must call `querier.release()`** yourself. |
+| `pool.end()`                    | Gracefully shut down the pool (close all connections).                      |
+
+:::tip
+Always prefer `pool.withQuerier()` or `pool.transaction()` — they guarantee the connection is released. Use `pool.getQuerier()` only when you need manual lifecycle control (e.g., long-lived operations).
+:::
 
 ### Upsert Operations
 

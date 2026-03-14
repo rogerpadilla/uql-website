@@ -12,7 +12,7 @@ The following are the steps to define a basic `entity`:
 
 | Decorator     | Purpose                                                                      |
 | :------------ | :--------------------------------------------------------------------------- |
-| `@Entity()`   | Marks a class as a database table/collection.                                |
+| `@Entity()`   | Marks a class as a database table/collection. Accepts options: `name` (custom table name), `softDelete` (enable [soft-delete](/entities/soft-delete)). |
 | `@Id()`       | Defines the Primary Key with support for `onInsert` generators (UUIDs, etc). |
 | `@Field()`    | Standard column. Use `{ references: ... }` for Foreign Keys.                 |
 | `@Index()`    | Defines a composite or customized index on one or more columns.              |
@@ -109,8 +109,13 @@ The `@Field` and `@Id` decorators accept several options for both query validati
 | `comment`      | `string`            | Adds a comment to the column in the database.                                                                                                                       |
 | `dimensions`   | `number`            | Number of dimensions for vector fields. E.g., `@Field({ type: 'vector', dimensions: 1536 })`.                                                                      |
 | `distance`     | `VectorDistance`    | Default distance metric for vector similarity queries: `'cosine'`, `'l2'`, `'inner'`, `'l1'`, `'hamming'`.                                                          |
-| `onInsert`     | `function`          | Generator function for new records (e.g., for UUIDs).                                                                                                               |
-| `references`  | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                         |
+| `onInsert`     | `function`          | Generator function for new records (e.g., `() => uuidv7()`).                                                                                                       |
+| `onUpdate`     | `function`          | Callback invoked on every update (e.g., `() => new Date()` for `updatedAt`).                                                                                        |
+| `onDelete`     | `function`          | Callback for [soft-delete](/entities/soft-delete) values (e.g., `() => new Date()`).                                                                                |
+| `updatable`    | `boolean`           | Set to `false` to prevent updates on this field (e.g., `createdAt`). Defaults to `true`.                                                                            |
+| `eager`        | `boolean`           | Whether this relation is eagerly loaded. Defaults to `true`.                                                                                                        |
+| `virtual`      | `RawExpression`     | Defines a computed/[virtual field](/entities/virtual-fields) via raw SQL.                                                                                            |
+| `references`   | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                          |
 | `foreignKey`   | `string \| false`   | Custom foreign key constraint name, or `false` to disable physical constraints while maintaining logical references.                                                |
 
 ### Primary Key Options
