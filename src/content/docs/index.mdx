@@ -11,21 +11,19 @@ hero:
       link: /getting-started
       icon: right-arrow
       variant: primary
-    - text: View on GitHub
-      link: https://github.com/rogerpadilla/uql
-      icon: external
-      variant: secondary
-    - text: ORM Comparison
+    - text: ORM Comparison (2026)
       link: /comparison
-      icon: right-arrow
-      variant: minimal
-    - text: NPM Package
-      link: https://www.npmjs.com/package/uql-orm
-      icon: external
+      icon: magnifying-glass
       variant: secondary
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<LinkCard
+  title="Detailed ORM Technical Comparison"
+  description="See how UQL stacks up against Prisma, Drizzle, and MikroORM with code-to-code benchmarks and native vector support."
+  href="/comparison"
+/>
 
 ## Elegant, Fast, and Type-Safe
 
