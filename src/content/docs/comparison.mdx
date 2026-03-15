@@ -520,7 +520,54 @@ const http = new HttpQuerier('/api');
 const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
-**Developer Insight:** Writing CRUD boilerplate is often the least enjoyable part of a project. Drizzle and TypeORM are excellent internal tools but require you to build the "bridge" to your frontend manually—writing individual handlers for every model. Prisma, MikroORM, and UQL provide serializable structures that make bridging that gap easier. UQL specifically automates this bridge, letting you focus on your core features rather than writing your 50th `app.get()` route.
+**Developer Insight:** Writing CRUD boilerplate is often the least enjoyable part of a project. Drizzle and TypeORM are excellent internal tools but require you to build the "bridge" to your frontend manually—writing individual handlers for every model. While Drizzle can *run* in a browser (with a local DB like PGlite), it lacks a first-party bridge for remote connectivity. Prisma, MikroORM, and UQL provide serializable structures that make bridging that gap easier. UQL specifically automates this bridge with the `HttpQuerier`, letting you focus on your core features rather than writing your 50th boilerplate API route.
+
+---
+
+## Migrations & Synchronization
+
+Keeping your database schema in sync with your code is one of the most stressful parts of development. The goal is "Zero Drift"—ensuring what's in your TypeScript classes is exactly what's in your production database, without manual SQL headaches.
+
+```ts title="Drizzle"
+// 1. You edit your TS schema
+// 2. You run a CLI command to generate a JSON "snapshot"
+// 3. You run another command to generate a SQL migration from that snapshot
+// 4. Finally, you apply the SQL to your database
+npx drizzle-kit generate:pg
+npx drizzle-kit push:pg
+```
+
+```ts title="MikroORM"
+// 1. You edit your entities
+// 2. MikroORM diffs your metadata against the live DB (or a schema dump)
+// 3. It generates a TS/JS migration file
+await orm.getMigrator().createMigration();
+await orm.getMigrator().up();
+```
+
+```ts title="Prisma"
+// 1. You edit the proprietary .prisma file
+// 2. You run a 'dev' command which requires a "Shadow Database" to diff
+// 3. Prisma generates a SQL file and applies it
+npx prisma migrate dev --name add_nickname
+```
+
+```ts title="TypeORM"
+// 1. You edit your entities
+// 2. TypeORM can auto-sync in dev (dangerous for production)
+// 3. Or you manually generate a migration by diffing against a live DB
+npx typeorm migration:generate -n AddNickname
+```
+
+```ts title="UQL"
+// 1. You edit your entity class
+// 2. UQL diffs YOUR CODE directly against the live database
+// 3. It auto-generates a clean, timestamped DDL migration
+npx uql-migrate generate:entities add_nickname
+npx uql-migrate up
+```
+
+**Developer Insight:** Most migration tools rely on a "middleman"—a proprietary DSL (Prisma), a JSON snapshot (Drizzle), or a shadow database. This adds complexity and potential "drift" where your code and database fall out of sync. MikroORM and UQL uses an **Entity-First** approach: your TypeScript classes *are* the source of truth (by default). UQL's migrator talks directly to the database and your code, generating the delta automatically. Plus, its `autoSync` mode is uniquely "Safe-by-Default," allowing you to iterate instantly in development without the fear of accidentally dropping production columns.
 
 ---
 
@@ -578,8 +625,8 @@ UQL is developed with specific architectural priorities:
 - **Type-Safe Semantic Search**: Implementation of vector similarity as a native ORM operator rather than raw SQL.
 - **Data Serialization**: All query objects are designed as plain JSON to facilitate cross-network transmission.
 - **Universal Driver Support**: Consistent API behavior across PostgreSQL, MySQL, MariaDB, SQLite, and MongoDB.
-- **Performance Optimization**: Zero-allocation SQL generation focused on high-throughput environments.
-- **Fullstack Integration**: Optional client-side packages for direct browser-to-database communication.
+- **Zero-Allocation SQL Generation**: High-throughput engine optimized for sub-millisecond overhead.
+- **First-Party Fullstack Bridge**: Integrated client-side packages for direct, type-safe browser-to-database communication.
 
 <LinkCard title="Get Started →" href="/getting-started" description="Install UQL and write your first query in under a minute." />
 
@@ -606,8 +653,8 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 <small>
 
-¹ Prisma streaming is planned for v8.
-² Prisma 7 dropped MongoDB support; requires v6.19.
+¹ Prisma streaming is natively limited; requires cursor pagination for large sets.
+² Prisma v6/v7 support for MongoDB is constrained compared to SQL dialects.
 
 </small>
 
@@ -658,9 +705,10 @@ This measures **SQL generation only**, not database execution. Real-world perfor
 | Tool | Best For |
 | :--- | :--- |
 | **Prisma** | Largest ecosystem, Prisma Studio GUI, managed edge caching (Accelerate), best for teams wanting a full product. |
-| **Drizzle** | Closest to raw SQL, most granular control, MSSQL support, excellent for SQL purists and edge/serverless. |
-| **TypeORM** | Most mature, widest DB support (MSSQL, Oracle), Active Record pattern — best for teams from Java/C#. |
-| **MikroORM** | Unit of Work, identity map, change tracking — best for complex domain-driven design. |
+| **Drizzle** | Closest to raw SQL, zero-overhead, MSSQL support — best for SQL purists and running natively in edge/browser runtimes. |
+| **TypeORM** | Extensive history, widest DB support (Oracle, SAP), Active Record pattern — best for teams from Java/C#. |
+| **MikroORM** | Unit of Work, identity map, dependency-free core (v7) — best for complex domain-driven design and architectural consistency. |
+| **UQL** | First-party fullstack bridge, native semantic search, zero-allocation power — best for modern AI/RAG apps and cross-network APIs. |
 | **Kysely** | Pure type-safe query builder, zero runtime overhead — best when you want full SQL control without an ORM. |
 
 <LinkCard title="Read the Full ORM Analysis →" href="/blog/in-search-of-the-perfect-orm" description="A detailed evaluation of the top TypeScript ORMs and their design trade-offs." />
