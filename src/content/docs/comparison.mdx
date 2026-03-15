@@ -219,7 +219,8 @@ class User {
 ```
 
 ```ts title="Prisma"
-// Natively, logic is computed in the application tier
+// Prisma doesn't support computed fields in the schema,
+// so you usually map the results manually in your code:
 const users = await prisma.user.findMany();
 const results = users.map(u => ({
   ...u,
@@ -228,17 +229,18 @@ const results = users.map(u => ({
 ```
 
 ```ts title="TypeORM"
+import { Entity, Column, VirtualColumn, AfterLoad } from 'typeorm';
+
 @Entity()
 class User {
   @Column() firstName: string;
   @Column() lastName: string;
 
+  // SQL-based virtual field (Added in v0.3.x)
+  @VirtualColumn({ 
+    query: (alias) => `SELECT CONCAT(${alias}.firstName, ' ', ${alias}.lastName)` 
+  })
   fullName: string;
-
-  @AfterLoad()
-  setFullName() {
-    this.fullName = `${this.firstName} ${this.lastName}`;
-  }
 }
 ```
 
