@@ -97,6 +97,11 @@ const config: AstroUserConfig = {
           link: 'https://variability.ai',
           badge: { text: '❤️', variant: 'success' },
         },
+        {
+          label: 'UQL vs Others',
+          link: '/comparison',
+          badge: { text: 'New', variant: 'success' },
+        },
       ],
       customCss: ['./src/styles/custom.css'],
       expressiveCode: {

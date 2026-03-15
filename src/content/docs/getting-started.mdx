@@ -106,6 +106,7 @@ console.log(users);
 | Database | Driver Package | Status |
 | :--- | :--- | :--- |
 | PostgreSQL | `pg` | ✅ Full |
+| CockroachDB | `pg` | ✅ Full |
 | MySQL | `mysql2` | ✅ Full |
 | MariaDB | `mariadb` or `mysql2` | ✅ Full |
 | SQLite | `better-sqlite3` | ✅ Full |
@@ -124,6 +125,7 @@ UQL uses subpath exports to keep your bundles lean:
 | :--- | :--- |
 | `uql-orm` | Core decorators, types, and query utilities |
 | `uql-orm/postgres` | PostgreSQL driver pool |
+| `uql-orm/cockroach` | CockroachDB driver pool |
 | `uql-orm/mysql` | MySQL driver pool (also works with MariaDB) |
 | `uql-orm/maria` | MariaDB driver pool (dedicated `mariadb` driver) |
 | `uql-orm/sqlite` | SQLite driver pool |
