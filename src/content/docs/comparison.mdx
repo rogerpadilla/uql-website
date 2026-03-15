@@ -81,7 +81,7 @@ export class User {
 }
 ```
 
-**Senior Insight:** Choosing a schema style is often a trade-off between control and convenience. Prisma provides a clean, dedicated language but requires a build step. Drizzle gives you total SQL-like control, though it requires specific imports for each database (Postgres vs MySQL). MikroORM, TypeORM, and UQL lean into the "standard TypeScript" philosophy—using the classes you already know to define your data, keeping your mental model unified.
+**Senior Insight:** Schema modeling is a trade-off: Prisma offers a clean DSL with a build step; Drizzle gives total SQL control via dialect-specific imports. MikroORM, TypeORM, and UQL use standard TypeScript classes, keeping your mental model unified in pure TS.
 
 ---
 
@@ -130,7 +130,18 @@ const results = await querier.findMany(Item, {
 });
 ```
 
-**Developer Insight:** Most ORMs treat vector search as an "edge case" that falls back to raw SQL. This creates a friction point: you lose type safety and have to write database-specific syntax (like Postgres's `<->` or `::vector` cast) just to rank results. UQL treats vector similarity as a native sorting operator, letting you build AI features with the same type-safe, database-agnostic code as a standard date search.
+**Developer Insight:** Most ORMs treat vector similarity as an "edge case" requiring raw SQL and database-specific syntax (like `<->`). UQL handles it as a native, type-safe operator, allowing you to build AI features with the same database-agnostic code used for standard sorting.
+
+| Ability | **Drizzle** | **MikroORM** | **Prisma** | **UQL** |
+| :--- | :---: | :---: | :---: | :---: |
+| Native Vector Operator | ❌ | ❌ | ❌ | ✅ |
+| Multi-Dialect Support | 🔌 | ❌ | 🔌 | ✅ |
+| Index Migration | ❌ | ❌ | ✅ | ✅ |
+| JSON Path Vectors | ❌ | ❌ | ❌ | ✅ |
+
+:::note
+**Zero-Config Vectors**: UQL's migrator handles the heavy lifting, automatically creating database extensions (like `pgvector`) and managing complex index parameters such as HNSW's `m` and `ef_construction` without manual SQL.
+:::
 
 ---
 
@@ -184,7 +195,7 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Drizzle feels like writing SQL in a type-safe IDE—great for those who want to see the underlying query. Prisma, TypeORM, and UQL favor a declarative object style, which reduces "boilerplate fatigue." A key ergonomic difference is how these queries are handled: UQL and Prisma queries are plain data (JSON), which simplifies things when you need to pass query logic between different parts of your system or over a network.
+**Developer Insight:** Drizzle is for those who want to see the underlying SQL. Prisma, TypeORM, and UQL favor a declarative object style to reduce boilerplate. Notably, UQL and Prisma queries are plain JSON, making them easy to share across services or the network.
 
 ---
 
@@ -238,7 +249,7 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Deeply nested queries can quickly become unreadable. While all these tools handle basic relations, filtering or sorting *within* those relations varies. Prisma, MikroORM, and UQL allow you to nest your logic (like filtering only for companies in the 'US') directly in the fetch. Drizzle's Queries API and TypeORM typically require more manual configuration or the QueryBuilder for advanced relation filtering.
+**Developer Insight:** Relation filtering varies significantly. Prisma, MikroORM, and UQL allow you to nest logic (like `$where: { country: 'US' }`) directly inside the fetch. Drizzle and TypeORM often require the QueryBuilder for advanced relation filtering.
 
 ---
 
@@ -307,7 +318,7 @@ class User {
 }
 ```
 
-**Developer Insight:** Repeating the same `concat` or `case` statement in multiple queries is brittle and repetitive. MikroORM and UQL allow you to define that logic once in your entity; these fields then behave exactly like real columns for selection, sorting, or filtering. Drizzle, Prisma, and TypeORM require you to handle this logic manually at the query or application level.
+**Developer Insight:** Manually mapping computed fields is brittle. MikroORM and UQL allow you to define virtual fields directly in the entity, where they behave like real columns for sorting and filtering. Drizzle and Prisma require manual mapping at the app level.
 
 ---
 
@@ -367,7 +378,7 @@ await querier.updateMany(User, { $where: { status: 'inactive' } }, { status: 'ar
 await querier.deleteOneById(User, id);
 ```
 
-**Developer Insight:** For most CRUD work, any of these tools will get the job done quickly. The main difference is mental model: Drizzle and MikroORM ask you to think a bit more about the database return or the "flush" cycle, while Prisma, TypeORM, and UQL provide more direct, "fire-and-forget" methods for standard operations.
+**Developer Insight:** Most CRUD work is similar across these tools. The main difference is the mental model: Drizzle and MikroORM require more focus on the database return or flush cycle, while Prisma, TypeORM, and UQL prioritize fire-and-forget methods.
 
 ---
 
@@ -417,7 +428,7 @@ export class User {
 await querier.deleteOneById(User, id);
 ```
 
-**Developer Insight:** Forgetting a `.where({ deletedAt: null })` in a complex query is a classic source of bugs. While Drizzle and Prisma require you to be disciplined with every query you write, TypeORM, MikroORM, and UQL take that burden off your shoulders by handling the filtering at the engine level. It’s one less thing to worry about during a late-night coding session.
+**Developer Insight:** Hand-filtering `deletedAt: null` in every query is a bug magnet. TypeORM, MikroORM, and UQL handle this at the engine level, ensuring deleted records are hidden automatically without manual discipline.
 
 ---
 
@@ -476,7 +487,7 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Drizzle and TypeORM use a function-based approach, which is great for type safety but can feel verbose. Prisma, MikroORM, and UQL lean toward object-based operators. From a "human" workflow perspective, object-based queries (especially JSON-compatible ones like those in Prisma and UQL) are often easier to manage because they don't require importing dozens of individual operator functions, and they can be sent directly from a frontend or shared across services.
+**Developer Insight:** Object-based filtering (Prisma, MikroORM, UQL) is often more ergonomic than function-based filtering (Drizzle, TypeORM), as it avoids importing dozens of individual operators and is natively serializable as JSON.
 
 ---
 
@@ -520,7 +531,7 @@ const http = new HttpQuerier('/api');
 const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
-**Developer Insight:** Writing CRUD boilerplate is often the least enjoyable part of a project. Drizzle and TypeORM are excellent internal tools but require you to build the "bridge" to your frontend manually—writing individual handlers for every model. While Drizzle can *run* in a browser (with a local DB like PGlite), it lacks a first-party bridge for remote connectivity. Prisma, MikroORM, and UQL provide serializable structures that make bridging that gap easier. UQL specifically automates this bridge with the `HttpQuerier`, letting you focus on your core features rather than writing your 50th boilerplate API route.
+**Developer Insight:** Building API boilerplate for every model is pure toil. While Drizzle and TypeORM require you to build an manual bridge, UQL provides the first-party `HttpQuerier` to automate the bridge between browser and database.
 
 ---
 
@@ -567,7 +578,7 @@ npx uql-migrate generate:entities add_nickname
 npx uql-migrate up
 ```
 
-**Developer Insight:** Most migration tools rely on a "middleman"—a proprietary DSL (Prisma), a JSON snapshot (Drizzle), or a shadow database. This adds complexity and potential "drift" where your code and database fall out of sync. MikroORM and UQL uses an **Entity-First** approach: your TypeScript classes *are* the source of truth (by default). UQL's migrator talks directly to the database and your code, generating the delta automatically. Plus, its `autoSync` mode is uniquely "Safe-by-Default," allowing you to iterate instantly in development without the fear of accidentally dropping production columns.
+**Developer Insight:** UQL and MikroORM use an **Entity-First** approach where your code is the source of truth, diffing directly against the live database. This eliminates the "middleman" of proprietary DSLs (Prisma) or JSON snapshots (Drizzle).
 
 ---
 
@@ -614,21 +625,10 @@ for await (const user of results) {
 }
 ```
 
-**Developer Insight:** Streaming data in Node.js has historically been a headache with event emitters and manual backpressure. The modern `AsyncIterable` pattern (the `for await` loop) makes it much more intuitive. MikroORM and UQL provide this native consistency across all drivers—including MongoDB—which lets you process millions of rows with a stable memory footprint and clean, readable code.
+**Developer Insight:** Processing millions of rows requires native cursors to keep memory stable. MikroORM and UQL provide consistent `AsyncIterable` support across all drivers—including MongoDB—replacing complex event-emitters with clean `for await` loops.
 
 ---
 
-## UQL Design Focus
-
-UQL is developed with specific architectural priorities:
-
-- **Type-Safe Semantic Search**: Implementation of vector similarity as a native ORM operator rather than raw SQL.
-- **Data Serialization**: All query objects are designed as plain JSON to facilitate cross-network transmission.
-- **Universal Driver Support**: Consistent API behavior across PostgreSQL, MySQL, MariaDB, SQLite, and MongoDB.
-- **Zero-Allocation SQL Generation**: High-throughput engine optimized for sub-millisecond overhead.
-- **First-Party Fullstack Bridge**: Integrated client-side packages for direct, type-safe browser-to-database communication.
-
-<LinkCard title="Get Started →" href="/getting-started" description="Install UQL and write your first query in under a minute." />
 
 ---
 
@@ -677,11 +677,18 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 ---
 
+
+---
+
 ## Performance
 
-In our [open-source benchmark](https://github.com/rogerpadilla/ts-orm-benchmark) measuring **pure SQL generation speed** (no database I/O), UQL finished **1st in every category** across full ORMs and query builders alike:
+In our [open-source benchmark](https://github.com/rogerpadilla/ts-orm-benchmark) measuring **pure SQL generation speed** (no database I/O), UQL finished **1st in every category** across full ORMs and query builders alike.
 
-| Operation | Next Fastest | UQL | Advantage |
+:::tip
+**Query Builder vs. ORM**: We include Knex and Kysely (pure query builders) to show that UQL's zero-allocation engine is faster even than tools that don't have the overhead of entities and relations.
+:::
+
+| Operation | Next Fastest | **UQL** | **Advantage** |
 | :--- | :--- | ---: | ---: |
 | SELECT (complex) | Kysely (218K) | 644K ops/s | **3.0x** |
 | SELECT (1 field) | Sequelize (3,143K) | 3,994K ops/s | **1.3x** |
@@ -693,14 +700,14 @@ In our [open-source benchmark](https://github.com/rogerpadilla/ts-orm-benchmark)
 | AGGREGATE | Sequelize (407K) | 1,489K ops/s | **3.7x** |
 
 :::note
-This measures **SQL generation only**, not database execution. Real-world performance depends on many factors. The benchmark is [fully open-source](https://github.com/rogerpadilla/ts-orm-benchmark) and reproducible.
+This measures **SQL generation overhead**—the pure CPU time spent by the ORM before hitting the database. UQL achieves this via **zero-allocation architecture** and pre-computed schema lookups at startup. The benchmark is [fully open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
 :::
 
 <LinkCard title="Full Benchmark Analysis →" href="/blog/in-search-of-the-fastest-typescript-orm" description="Methodology, interactive charts, and reproduction instructions." />
 
 ---
 
-## Each Tool's Strengths
+## Summary: Choosing the Right Tool
 
 | Tool | Best For |
 | :--- | :--- |
@@ -709,6 +716,6 @@ This measures **SQL generation only**, not database execution. Real-world perfor
 | **TypeORM** | Extensive history, widest DB support (Oracle, SAP), Active Record pattern — best for teams from Java/C#. |
 | **MikroORM** | Unit of Work, identity map, dependency-free core (v7) — best for complex domain-driven design and architectural consistency with 40% faster TypeScript inference. |
 | **UQL** | First-party fullstack bridge, native semantic search, zero-allocation power — best for modern AI/RAG apps and cross-network APIs. |
-| **Kysely** | Pure type-safe query builder, zero runtime overhead — best when you want full SQL control without an ORM. |
+| **Kysely (Query Builder)** | Pure type-safe query builder, zero runtime overhead — best when you want full SQL control without the abstractions of an ORM. |
 
 <LinkCard title="Read the Full ORM Analysis →" href="/blog/in-search-of-the-perfect-orm" description="A detailed evaluation of the top TypeScript ORMs and their design trade-offs." />
