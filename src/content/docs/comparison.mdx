@@ -81,13 +81,62 @@ export class User {
 }
 ```
 
-**Developer Insight:** Choosing a schema style is often a trade-off between control and convenience. Prisma provides a clean, dedicated language but requires a build step and learning a new DSL. Drizzle gives you total SQL-like control, though it requires specific imports for each database (Postgres vs MySQL). MikroORM, TypeORM, and UQL lean into the "standard TypeScript" philosophy—using the classes you already know to define your data, keeping your mental model unified.
+**Senior Insight:** Choosing a schema style is often a trade-off between control and convenience. Prisma provides a clean, dedicated language but requires a build step. Drizzle gives you total SQL-like control, though it requires specific imports for each database (Postgres vs MySQL). MikroORM, TypeORM, and UQL lean into the "standard TypeScript" philosophy—using the classes you already know to define your data, keeping your mental model unified.
 
 ---
 
-## Querying — Find Records
+## Semantic Search
 
-The most frequent operation in any app. The goal is to move from "intent" to "data" with as little friction as possible.
+AI and RAG (Retrieval-Augmented Generation) have made vector similarity search a mainstream requirement. The goal is ranking results by meaning, not just keywords, without losing the type-safe experience we love in ORMs.
+
+```ts title="Drizzle"
+import { sql } from 'drizzle-orm';
+
+const results = await db.select()
+  .from(items)
+  .orderBy(sql`embedding <-> ${queryVector}::vector`)
+  .limit(10);
+```
+
+```ts title="MikroORM"
+const results = await em.createQueryBuilder(Item)
+  .select('*')
+  .orderBy({ ['embedding <-> ?']: [queryVector] })
+  .limit(10)
+  .getResult();
+```
+
+```ts title="Prisma"
+const results = await prisma.$queryRaw`
+  SELECT * FROM "Item"
+  ORDER BY embedding <-> ${queryVector}::vector
+  LIMIT 10
+`;
+```
+
+```ts title="TypeORM"
+const results = await repo.createQueryBuilder('item')
+  .orderBy('item.embedding <-> :vector')
+  .setParameter('vector', queryVector)
+  .limit(10)
+  .getMany();
+```
+
+```ts title="UQL"
+const results = await querier.findMany(Item, {
+  $select: { id: true, title: true },
+  $sort: { $vector: { embedding: queryVector } },
+  $limit: 10,
+});
+```
+
+**Developer Insight:** Most ORMs treat vector search as an "edge case" that falls back to raw SQL. This creates a friction point: you lose type safety and have to write database-specific syntax (like Postgres's `<->` or `::vector` cast) just to rank results. UQL treats vector similarity as a native sorting operator, letting you build AI features with the same type-safe, database-agnostic code as a standard date search.
+
+---
+
+## Find — Selection & Filtering
+
+Traditional querying still forms the backbone of any application. The goal is making complex filters readable and easily serializable for the network.
 
 ```ts title="Drizzle"
 import { eq, desc } from 'drizzle-orm';
@@ -472,55 +521,6 @@ const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
 **Developer Insight:** Writing CRUD boilerplate is often the least enjoyable part of a project. Drizzle and TypeORM are excellent internal tools but require you to build the "bridge" to your frontend manually—writing individual handlers for every model. Prisma, MikroORM, and UQL provide serializable structures that make bridging that gap easier. UQL specifically automates this bridge, letting you focus on your core features rather than writing your 50th `app.get()` route.
-
----
-
-## Semantic Search
-
-AI and RAG (Retrieval-Augmented Generation) have made vector similarity search a mainstream requirement. The goal is ranking results by meaning, not just keywords, without losing the type-safe experience we love in ORMs.
-
-```ts title="Drizzle"
-import { sql } from 'drizzle-orm';
-
-const results = await db.select()
-  .from(items)
-  .orderBy(sql`embedding <-> ${queryVector}::vector`)
-  .limit(10);
-```
-
-```ts title="MikroORM"
-const results = await em.createQueryBuilder(Item)
-  .select('*')
-  .orderBy({ ['embedding <-> ?']: [queryVector] })
-  .limit(10)
-  .getResult();
-```
-
-```ts title="Prisma"
-const results = await prisma.$queryRaw`
-  SELECT * FROM "Item"
-  ORDER BY embedding <-> ${queryVector}::vector
-  LIMIT 10
-`;
-```
-
-```ts title="TypeORM"
-const results = await repo.createQueryBuilder('item')
-  .orderBy('item.embedding <-> :vector')
-  .setParameter('vector', queryVector)
-  .limit(10)
-  .getMany();
-```
-
-```ts title="UQL"
-const results = await querier.findMany(Item, {
-  $select: { id: true, title: true },
-  $sort: { $vector: { embedding: queryVector } },
-  $limit: 10,
-});
-```
-
-**Developer Insight:** Most ORMs treat vector search as an "edge case" that falls back to raw SQL. This creates a friction point: you lose type safety and have to write database-specific syntax (like Postgres's `<->` or `::vector` cast) just to rank results. UQL treats vector similarity as a native sorting operator, letting you build AI features with the same type-safe, database-agnostic code as a standard date search.
 
 ---
 
