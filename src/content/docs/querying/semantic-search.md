@@ -8,7 +8,7 @@ sidebar:
 description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas.
 ---
 
-UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Works across **PostgreSQL** (pgvector), **MariaDB**, **SQLite** (sqlite-vec), and **MongoDB Atlas** (`$vectorSearch`).
+UQL provides first-class vector similarity search, enabling AI-powered semantic queries out of the box. Zero-allocation performance works across **PostgreSQL** (pgvector), **MariaDB**, **SQLite** (sqlite-vec), and **MongoDB Atlas** (`$vectorSearch`).
 
 ## Entity Setup
 
@@ -29,8 +29,8 @@ export class Article {
 }
 ```
 
-:::tip[Automatic Extension]
-For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns. No manual setup needed.
+:::tip[Zero-Config Vectors]
+For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector` when your schema includes vector columns. It also manages **Automatic Index Migration** for complex HNSW and IVFFlat parameters, ensuring your database performance stays in sync with your entity definitions without manual SQL.
 :::
 
 ---

@@ -115,8 +115,23 @@ export class User {
   email?: string;
 
   @Field({ onDelete: () => new Date() })
-  deletedAt?: Date;
+    deletedAt?: Date;
 }
+```
+
+### High-Performance Vectors
+
+UQL manages more than just basic B-Tree indexes. It provides industry-leading **Automatic Index Migration** for vector search, handling the complex mathematical parameters required by `pgvector` and MongoDB Atlas.
+
+When you define a vector index (e.g., `HNSW`), UQL's [Drift Detection Engine](/migrations) monitors parameters like `m` and `efConstruction`. If you tune these for performance in your code, UQL automatically generates the `DROP`/`CREATE` cycle to keep your database optimized.
+
+```ts
+@Index(['embedding'], { 
+  type: 'hnsw', 
+  distance: 'cosine', 
+  m: 16, 
+  efConstruction: 64 
+})
 ```
 
 ### Synchronization

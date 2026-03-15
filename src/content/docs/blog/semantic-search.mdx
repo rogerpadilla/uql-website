@@ -1,5 +1,5 @@
 ---
-title: "Semantic Search: First-Class Vector Similarity in a Multi-Dialect ORM"
+title: "Semantic Search: Native Vector Similarity in a Multi-Dialect ORM"
 date: 2026-03-12
 authors:
   - rogerpadilla
@@ -7,12 +7,12 @@ tags:
   - release
   - semantic-search
   - vector
-excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas — one API, automatic index creation, and zero raw SQL."
+excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas — featuring zero-allocation overhead and automatic index migration."
 ---
 
 AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you're forced to use raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
 
-**UQL 0.3 changes that.** Semantic search can now be used as a first-class citizen, all within a unified API.
+**UQL 0.3 changes that.** Native semantic search is now a first-class citizen, featuring **automatic index migration** for HNSW/IVFFlat and zero-allocation performance.
 
 ## What It Looks Like
 

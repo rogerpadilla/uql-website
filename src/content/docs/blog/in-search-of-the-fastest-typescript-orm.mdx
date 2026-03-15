@@ -142,7 +142,7 @@ Drizzle — marketed as lightweight — is slower than Sequelize (a full ORM fro
 
 **2. Standalone query builders can't beat a well-designed ORM.**
 
-Knex and Kysely have zero entity/relation overhead. They're just SQL string builders. Yet UQL — a full ORM with entities, relations, and migrations — is faster than both in all 8 categories. The conventional wisdom that "ORMs are slow, query builders are fast" doesn't hold when the ORM is designed for performance from day one.
+Knex and Kysely have zero entity/relation overhead. They're just SQL string builders. Yet UQL — a full ORM with entities, relations, and migrations — is faster than both in all 8 categories. This **4x-40x overhead advantage** demonstrates that the conventional wisdom ("ORMs are slow") doesn't hold when the ORM is designed for performance with a **Zero-Allocation** architecture from day one.
 
 **3. MikroORM pays double.**
 
@@ -176,7 +176,7 @@ That's 20x more CPU burned on generating SQL strings — pure waste before a sin
 
 Full disclosure: I'm the author of UQL. That's exactly why I built the benchmark as an independent repo anyone can audit and reproduce.
 
-The full benchmark is open source — clone it, run it, prove me wrong. No database needed, finishes in seconds:
+The full benchmark is open source — clone it, audit it, run it, share results. No database needed, finishes in seconds. See how UQL maintains its [4x-40x performance lead](/comparison#performance) across every modern TypeScript environment.
 
 **[github.com/rogerpadilla/ts-orm-benchmark](https://github.com/rogerpadilla/ts-orm-benchmark)**
 
