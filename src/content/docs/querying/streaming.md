@@ -1,81 +1,48 @@
 ---
-title: Streaming
-sidebar:
-  order: 108
-description: Memory-efficient cursor-based streaming for large result sets using findManyStream.
+title: Cursor Streaming
+description: Process millions of rows with a stable memory footprint using native driver-level cursors.
 ---
 
-## Cursor Streaming
+For large result sets that exceed available memory, UQL provides `findManyStream()`. Instead of loading the entire result set into a TypeScript array, it returns an `AsyncIterable` that allows you to process rows one-by-one as they arrive from the database.
 
-`findManyStream()` returns an `AsyncIterable` that yields records **one at a time** using native database cursors. Unlike `findMany()`, it never loads the entire result set into memory — ideal for exports, ETL pipelines, or any query that could return thousands of rows.
+## Basic Usage
 
-### Basic Example
-
-```ts title="You write"
-import { pool } from './uql.config.js';
-import { Order } from './shared/models/index.js';
-
-await pool.withQuerier(async (querier) => {
-  for await (const order of querier.findManyStream(Order, {
-    $select: { id: true, total: true, status: true },
-    $where: { status: 'completed' },
-    $sort: { createdAt: 'desc' },
-  })) {
-    // Each `order` is yielded individually — constant memory usage
-    await writeToCSV(order);
-  }
-});
-```
-
-```sql title="Generated SQL (PostgreSQL)"
-SELECT "id", "total", "status" FROM "Order"
-WHERE "status" = $1
-ORDER BY "createdAt" DESC
-```
-
-```sql title="Generated SQL (MySQL/MariaDB)"
-SELECT `id`, `total`, `status` FROM `Order`
-WHERE `status` = ?
-ORDER BY `createdAt` DESC
-```
-
-### How It Works Per Driver
-
-Every supported driver uses its **native cursor/streaming API** — no polyfills, no buffering:
-
-| Driver       | Mechanism                                   |
-| :----------- | :------------------------------------------ |
-| PostgreSQL   | [`pg-query-stream`](https://www.npmjs.com/package/pg-query-stream) (server-side cursor) |
-| MariaDB      | `connection.queryStream()` (native stream)  |
-| MySQL        | `connection.query().stream()` (native stream) |
-| SQLite       | `statement.iterate()` (step-based iteration) |
-| MongoDB      | Native `FindCursor` async iteration          |
-
-
-### When to Use Streaming vs `findMany`
-
-| Scenario                                 | Use                 |
-| :--------------------------------------- | :------------------ |
-| Display a paginated list (10-100 rows)   | `findMany`          |
-| Export 100K+ rows to CSV/JSON            | `findManyStream`    |
-| ETL pipeline (transform + write)         | `findManyStream`    |
-| Aggregate in-app (sum, group)            | `aggregate`         |
-| Real-time feed with backpressure         | `findManyStream`    |
-
-:::note
-`findManyStream` yields **flat rows only** — it skips relation-filling and lifecycle hooks for maximum streaming performance. If you need joins, use `findMany` with `$select` on relations instead.
-:::
-
-### RPC-Friendly Syntax
-
-Like all query methods, `findManyStream` supports the `$entity` call pattern for easy serialization:
+The `findManyStream` method accepts the same query object as `findMany`.
 
 ```ts
-for await (const user of querier.findManyStream({
-  $entity: User,
+const results = querier.findManyStream(User, {
   $select: { id: true, email: true },
   $where: { status: 'active' },
-})) {
-  process(user);
+});
+
+for await (const user of results) {
+  // Process each user row-by-row
+  console.log(`Processing: ${user.email}`);
 }
 ```
+
+## Why uses Streaming?
+
+1.  **Memory Efficiency**: You can process 1,000,000 rows with the same memory footprint as processing 10 rows.
+2.  **Early Processing**: Start handling the first row before the database has even finished finding the last one.
+3.  **Backpressure**: UQL respects the database cursor's speed, ensuring your application isn't overwhelmed by data.
+
+## Native Driver Implementation
+
+UQL uses the optimal streaming mechanism for each individual driver:
+
+| Driver | Implementation |
+| :--- | :--- |
+| **PostgreSQL** (`pg`) | Native cursor via `pg-query-stream`. |
+| **MySQL** (`mysql2`) | Result set streaming via `.stream()`. |
+| **SQLite** (`better-sqlite3`) | Iteration via `.iterate()`. |
+| **MongoDB** (`mongodb`) | Native MongoDB `Cursor`. |
+| **LibSQL** / **D1** | Emulated streaming (async row fetching). |
+
+## RPC & Remote Bridges
+
+Like all UQL queries, the stream query is fully serializable. If you are using the **Fullstack Bridge**, the streaming protocol is handled automatically over the network, allowing you to stream data from your database directly to a browser or mobile app.
+
+---
+
+**Senior Insight:** Streaming is powerful but holds a database connection open for the duration of the loop. Always ensure your processing logic inside the `for await` loop is fast, or use a technical queue if you need to perform heavy work on each row.
