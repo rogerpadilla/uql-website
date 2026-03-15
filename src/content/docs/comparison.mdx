@@ -155,13 +155,13 @@ import { eq, desc } from 'drizzle-orm';
 const results = await db
   .select({ id: users.id, name: users.name, email: users.email })
   .from(users)
-  .where(eq(users.name, 'roger'))
+  .where(eq(users.name, 'Lorem'))
   .orderBy(desc(users.createdAt))
   .limit(10);
 ```
 
 ```ts title="MikroORM"
-const results = await em.find(User, { name: 'roger' }, {
+const results = await em.find(User, { name: 'Lorem' }, {
   fields: ['id', 'name', 'email'],
   orderBy: { createdAt: 'DESC' },
   limit: 10,
@@ -171,7 +171,7 @@ const results = await em.find(User, { name: 'roger' }, {
 ```ts title="Prisma"
 const results = await prisma.user.findMany({
   select: { id: true, name: true, email: true },
-  where: { name: 'roger' },
+  where: { name: 'Lorem' },
   orderBy: { createdAt: 'desc' },
   take: 10,
 });
@@ -180,7 +180,7 @@ const results = await prisma.user.findMany({
 ```ts title="TypeORM"
 const results = await repo.find({
   select: { id: true, name: true, email: true },
-  where: { name: 'roger' },
+  where: { name: 'Lorem' },
   order: { createdAt: 'DESC' },
   take: 10,
 });
@@ -189,7 +189,7 @@ const results = await repo.find({
 ```ts title="UQL"
 const results = await querier.findMany(User, {
   $select: { id: true, name: true, email: true },
-  $where: { name: 'roger' },
+  $where: { name: 'Lorem' },
   $sort: { createdAt: 'desc' },
   $limit: 10,
 });
@@ -327,9 +327,9 @@ class User {
 The bread and butter of your API. The goal here is clarity: "Did it work, and what's the ID?"
 
 ```ts title="Drizzle"
-const [user] = await db.insert(users).values({ name: 'Roger' }).returning();
+const [user] = await db.insert(users).values({ name: 'Lorem' }).returning();
 
-await db.update(users).set({ name: 'Roger P.' }).where(eq(users.id, user.id));
+await db.update(users).set({ name: 'Lorem I.' }).where(eq(users.id, user.id));
 
 await db.update(users).set({ status: 'archived' }).where(eq(users.status, 'inactive'));
 
@@ -337,10 +337,10 @@ await db.delete(users).where(eq(users.id, user.id));
 ```
 
 ```ts title="MikroORM"
-const user = em.create(User, { name: 'Roger' });
+const user = em.create(User, { name: 'Lorem' });
 await em.flush();
 
-await em.nativeUpdate(User, { id: user.id }, { name: 'Roger P.' });
+await em.nativeUpdate(User, { id: user.id }, { name: 'Lorem I.' });
 
 await em.nativeUpdate(User, { status: 'inactive' }, { status: 'archived' });
 
@@ -348,9 +348,9 @@ await em.nativeDelete(User, { id: user.id });
 ```
 
 ```ts title="Prisma"
-const user = await prisma.user.create({ data: { name: 'Roger' } });
+const user = await prisma.user.create({ data: { name: 'Lorem' } });
 
-await prisma.user.update({ where: { id: user.id }, data: { name: 'Roger P.' } });
+await prisma.user.update({ where: { id: user.id }, data: { name: 'Lorem I.' } });
 
 await prisma.user.updateMany({ where: { status: 'inactive' }, data: { status: 'archived' } });
 
@@ -358,10 +358,10 @@ await prisma.user.delete({ where: { id: user.id } });
 ```
 
 ```ts title="TypeORM"
-const user = repo.create({ name: 'Roger' });
+const user = repo.create({ name: 'Lorem' });
 await repo.save(user);
 
-await repo.update(user.id, { name: 'Roger P.' });
+await repo.update(user.id, { name: 'Lorem I.' });
 
 await repo.update({ status: 'inactive' }, { status: 'archived' });
 
@@ -369,9 +369,9 @@ await repo.delete(user.id);
 ```
 
 ```ts title="UQL"
-const id = await querier.insertOne(User, { name: 'Roger' });
+const id = await querier.insertOne(User, { name: 'Lorem' });
 
-await querier.updateOneById(User, id, { name: 'Roger P.' });
+await querier.updateOneById(User, id, { name: 'Lorem I.' });
 
 await querier.updateMany(User, { $where: { status: 'inactive' } }, { status: 'archived' });
 
