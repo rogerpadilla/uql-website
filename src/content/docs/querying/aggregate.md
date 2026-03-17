@@ -36,6 +36,24 @@ ORDER BY SUM("amount") DESC
 LIMIT 10
 ```
 
+```sql title="Generated SQL (MySQL/MariaDB)"
+SELECT `status`, SUM(`amount`) `total`, COUNT(*) `count`
+FROM `Order`
+GROUP BY `status`
+HAVING COUNT(*) > ?
+ORDER BY SUM(`amount`) DESC
+LIMIT 10
+```
+
+```sql title="Generated SQL (SQLite)"
+SELECT `status`, SUM(`amount`) `total`, COUNT(*) `count`
+FROM `Order`
+GROUP BY `status`
+HAVING COUNT(*) > ?
+ORDER BY SUM(`amount`) DESC
+LIMIT 10
+```
+
 ```json title="Generated MongoDB Pipeline"
 [
   { "$group": { "_id": { "status": "$status" }, "total": { "$sum": "$amount" }, "count": { "$sum": 1 } } },
@@ -64,8 +82,12 @@ const [{ revenue }] = await querier.aggregate(Order, {
 });
 ```
 
-```sql title="Generated SQL"
+```sql title="Generated SQL (PostgreSQL)"
 SELECT SUM("amount") "revenue" FROM "Order"
+```
+
+```sql title="Generated SQL (MySQL/MariaDB/SQLite)"
+SELECT SUM(`amount`) `revenue` FROM `Order`
 ```
 
 ### `$where` vs `$having`
@@ -84,12 +106,20 @@ const results = await querier.aggregate(Order, {
 });
 ```
 
-```sql title="Generated SQL"
+```sql title="Generated SQL (PostgreSQL)"
 SELECT "status", COUNT(*) "count"
 FROM "Order"
 WHERE "createdAt" >= $1
 GROUP BY "status"
 HAVING COUNT(*) > $2
+```
+
+```sql title="Generated SQL (MySQL/MariaDB/SQLite)"
+SELECT `status`, COUNT(*) `count`
+FROM `Order`
+WHERE `createdAt` >= ?
+GROUP BY `status`
+HAVING COUNT(*) > ?
 ```
 
 ### `$having` Operators
@@ -134,8 +164,12 @@ const names = await querier.findMany(User, {
 });
 ```
 
-```sql title="Generated SQL"
+```sql title="Generated SQL (PostgreSQL)"
 SELECT DISTINCT "name" FROM "User"
+```
+
+```sql title="Generated SQL (MySQL/MariaDB/SQLite)"
+SELECT DISTINCT `name` FROM `User`
 ```
 
 :::tip

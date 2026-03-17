@@ -65,13 +65,34 @@ const config: AstroUserConfig = {
       },
       sidebar: [
         {
-          label: 'Quick Start',
-          link: '/getting-started',
-          badge: { text: 'Start here', variant: 'success' },
+          label: 'Overview',
+          items: [
+            { label: 'Welcome', link: '/' },
+            {
+              label: 'Quick Start',
+              link: '/getting-started',
+            },
+            {
+              label: 'AI & Semantic Search',
+              link: '/ai-semantic-search',
+            },
+            {
+              label: 'Comparison',
+              link: '/comparison',
+              badge: { text: 'New', variant: 'success' },
+            },
+          ],
         },
         {
-          label: 'Entities',
-          autogenerate: { directory: 'entities' },
+          label: 'Core',
+          items: [
+            { label: 'Entities', link: '/entities/basic' },
+            { label: 'Relations', link: '/entities/relations' },
+            { label: 'Soft Delete', link: '/entities/soft-delete' },
+            { label: 'Lifecycle Hooks', link: '/entities/lifecycle-hooks' },
+            { label: 'Inheritance', link: '/entities/inheritance' },
+            { label: 'Indexes', link: '/entities/indexes' },
+          ],
         },
         {
           label: 'Querying',
@@ -80,27 +101,28 @@ const config: AstroUserConfig = {
         {
           label: 'Advanced',
           items: [
-            { label: 'Migrations', link: '/migrations', badge: { text: 'New', variant: 'success' } },
+            { label: 'Migrations', link: '/migrations' },
             { label: 'Logging & Monitoring', link: '/logging' },
             { label: 'Naming Strategy', link: '/naming-strategy' },
           ],
         },
         {
-          label: 'Extensions',
+          label: 'Ecosystem',
           items: [
+            { label: 'Next.js', link: '/nextjs' },
+            { label: 'Cloudflare Workers & D1', link: '/cloudflare-d1' },
             { label: 'Express', link: '/extensions-express' },
             { label: 'Browser', link: '/extensions-browser' },
           ],
         },
         {
+          label: 'Blog',
+          link: '/blog',
+        },
+        {
           label: 'Sponsors',
           link: 'https://variability.ai',
           badge: { text: '❤️', variant: 'success' },
-        },
-        {
-          label: 'UQL vs Others',
-          link: '/comparison',
-          badge: { text: 'New', variant: 'success' },
         },
       ],
       customCss: ['./src/styles/custom.css'],

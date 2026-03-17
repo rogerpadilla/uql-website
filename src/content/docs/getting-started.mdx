@@ -12,6 +12,19 @@ description: Go from zero to a working UQL query in under three minutes.
 - **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
 - **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
 
+:::note[New to UQL? Start here]
+
+For your first week with UQL, follow this path:
+
+1. **[Quick Start](/getting-started)** (this page) — install, configure, and run your first query.  
+2. **[Entities](/entities/basic)** — define your models and types.  
+3. **[Relations](/entities/relations)** — map associations between entities.  
+4. **[Querying](/querying/querier)** — learn `$select`, `$where`, `$sort`, and friends.  
+5. **[Transactions](/querying/transactions)** — wrap operations safely.  
+6. **[Migrations](/migrations)** — keep your database in sync with your code.
+
+:::
+
 ---
 
 ## 1. Install
@@ -148,3 +161,13 @@ UQL uses subpath exports to keep your bundles lean:
 	<LinkCard title="Transactions" href="/querying/transactions" description="Automatic and manual transaction patterns." />
 	<LinkCard title="Migrations" href="/migrations" description="Schema evolution with the CLI and Drift Detection." />
 </CardGrid>
+
+---
+
+## Common pitfalls
+
+::::tip
+- **Decorators not working**: Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in `tsconfig.json`, and that your bundler supports decorators.  
+- **ESM import issues**: UQL is Pure ESM — set your `module` to `NodeNext`, `ESNext`, or `Bundler`, and avoid mixing `require()` with `import`.  
+- **Connection errors**: Double‑check database credentials and that your driver package (for example `pg`, `mysql2`, or `better-sqlite3`) is installed and compatible with your runtime.  
+::::

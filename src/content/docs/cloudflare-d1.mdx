@@ -1,0 +1,80 @@
+---
+title: Cloudflare Workers & D1
+sidebar:
+  order: 65
+description: Run UQL on Cloudflare Workers using the D1 database.
+---
+
+## Overview
+
+UQL supports **Cloudflare D1** so you can run a fully type-safe ORM on **Cloudflare Workers** with SQLite under the hood.
+
+This guide covers:
+
+- Wiring UQL to a D1 database.
+- Querying from a Worker handler.
+
+---
+
+## 1. Bind a D1 database
+
+In your Cloudflare configuration (for example `wrangler.toml`):
+
+```toml
+[env.production]
+[[d1_databases]]
+binding = "DB"
+database_name = "uql-app"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+
+Your Worker will receive a `DB` binding at runtime.
+
+---
+
+## 2. Define entities
+
+```ts
+import { Entity, Id, Field } from 'uql-orm';
+
+@Entity()
+export class Todo {
+  @Id()
+  id?: number;
+
+  @Field()
+  title?: string;
+
+  @Field({ type: 'boolean', default: false })
+  completed?: boolean;
+}
+```
+
+---
+
+## 3. Create a D1 querier in the Worker
+
+```ts
+import { D1Querier } from 'uql-orm/d1';
+import { Todo } from './entities';
+
+export default {
+  async fetch(request: Request, env: { DB: D1Database }) {
+    const querier = new D1Querier(env.DB, { entities: [Todo] });
+
+    const todos = await querier.findMany(Todo, {
+      $select: { id: true, title: true, completed: true },
+      $limit: 50,
+    });
+
+    return new Response(JSON.stringify(todos), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  },
+};
+```
+
+This pattern works with any D1-backed data model and composes naturally with UQL's streaming and semantic search APIs.
+
+For more details on query capabilities, see the [Querying](/querying/querier) docs and [AI & Semantic Search](/ai-semantic-search).
+

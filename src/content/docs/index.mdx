@@ -3,7 +3,7 @@ title: Welcome to UQL
 description: The best ORM for TypeScript and modern JavaScript designed to be fast, safe, and easy to integrate into any application.
 template: splash
 hero:
-  tagline: The best ORM for TypeScript and modern JavaScript designed to be fast, safe, and easy to integrate into any application.
+  tagline: The best ORM for TypeScript and modern JavaScript designed to be fast, safe, and easy to integrate into any application — especially AI and data‑heavy workloads.
   image:
     file: ../../assets/logo-hero.svg
   actions:
@@ -11,6 +11,9 @@ hero:
       link: /getting-started
       icon: right-arrow
       variant: primary
+    - text: AI & Semantic Search
+      link: /ai-semantic-search
+      variant: secondary
     - text: ORM Comparison (2026)
       link: /comparison
       variant: minimal
@@ -66,21 +69,35 @@ UQL is designed to be **unobtrusive**. You don't need to change your architectur
 
 ---
 
+## Who is UQL for?
+
+UQL shines when you need **modern TypeScript ergonomics** with **hard performance guarantees**:
+
+- **AI & RAG applications**: Native vector search, distance projection, and JSON‑native queries make it easy to build semantic search and retrieval‑augmented generation pipelines.
+- **Multi-tenant SaaS & platforms**: Unified schema and query model across PostgreSQL, MySQL/MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB with entity‑first migrations.
+- **High-concurrency APIs**: Zero‑allocation query engine, sticky connections, and first‑class streaming support keep latency and resource usage predictable.
+
+If you want **Prisma‑level ergonomics** with **query‑builder performance**, UQL is designed for you.
+
+---
+
 ## Explore the Documentation
 
 <CardGrid>
-	<LinkCard title="Entities" href="/entities/basic" description="Decorators, type abstractions, relations, soft-delete, lifecycle hooks, and inheritance." />
-	<LinkCard title="Querying" href="/querying/querier" description="Deep selection, filtering, sorting, aggregation, JSON operators, and sub-queries." />
-	<LinkCard title="Advanced" href="/migrations" description="Migrations, logging, and naming strategies." />
-	<LinkCard title="Extensions" href="/extensions-express" description="Auto-generated REST APIs with Express and type-safe browser queries." />
+	<LinkCard title="Quick Start" href="/getting-started" description="Go from zero to your first UQL query in a few minutes." />
+	<LinkCard title="Core Concepts" href="/entities/basic" description="Entities, relations, type abstractions, and lifecycle hooks." />
+	<LinkCard title="Querying & Transactions" href="/querying/querier" description="Deep selection, filtering, sorting, aggregation, JSON operators, and transactions." />
+	<LinkCard title="AI & Semantic Search" href="/ai-semantic-search" description="Add vector similarity search and RAG‑style workflows to your app." />
+	<LinkCard title="Migrations & Ops" href="/migrations" description="Entity-first migrations, logging, and naming strategies." />
+	<LinkCard title="Extensions & Fullstack" href="/extensions-express" description="Auto-generated REST APIs with Express and type-safe browser queries from the browser." />
 </CardGrid>
 
 ---
 
-## Built with ❤️ and supported by
+## Built with ❤️ and used in production
 
-UQL is an open-source project driven by the community and proudly sponsored by **[Variability.ai](https://variability.ai)**.  
+UQL is an open-source project driven by the community and proudly used in production at:
 
-> "Squeeze your meeting and videos with Variability AI"
+- **[Variability.ai](https://variability.ai)** — AI meeting and video intelligence platform.
 
 Their support helps us maintain and evolve the best ORM for developers everywhere. Thank you for being part of our journey!

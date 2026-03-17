@@ -1,0 +1,137 @@
+---
+title: Next.js + UQL
+sidebar:
+  order: 60
+description: Use UQL with Next.js App Router to build a type-safe, AI-ready backend.
+---
+
+## Overview
+
+This guide shows how to use **UQL** with **Next.js App Router** to build a type-safe API and server actions.
+
+You will:
+
+- Configure UQL in a shared module.
+- Use it from **route handlers**.
+- Optionally, call it from **server actions**.
+
+---
+
+## 1. Install dependencies
+
+```sh
+npm install uql-orm pg
+```
+
+---
+
+## 2. Define entities and UQL pool
+
+Create an `entities.ts` file in your app (for example in `src/db/entities.ts`):
+
+```ts
+import { Entity, Id, Field } from 'uql-orm';
+
+@Entity()
+export class User {
+  @Id({ type: 'uuid' })
+  id?: string;
+
+  @Field({ unique: true })
+  email?: string;
+
+  @Field()
+  name?: string;
+}
+```
+
+Then create a UQL pool in `src/db/uql.ts`:
+
+```ts
+import { PgQuerierPool } from 'uql-orm/postgres';
+import { User } from './entities';
+
+export const uqlPool = new PgQuerierPool(
+  {
+    host: process.env.POSTGRES_HOST,
+    database: process.env.POSTGRES_DB,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+  },
+  {
+    entities: [User],
+  },
+);
+```
+
+In Next.js, this module will be treated as a server-only file when imported from server components or route handlers.
+
+---
+
+## 3. Use UQL in route handlers
+
+Create an API route such as `app/api/users/route.ts`:
+
+```ts
+import { NextResponse } from 'next/server';
+import { uqlPool } from '@/db/uql';
+import { User } from '@/db/entities';
+
+export async function GET() {
+  const users = await uqlPool.transaction(async (querier) => {
+    return await querier.findMany(User, {
+      $select: { id: true, name: true, email: true },
+      $limit: 20,
+    });
+  });
+
+  return NextResponse.json(users);
+}
+```
+
+This keeps your query fully type-safe and works across all supported databases.
+
+---
+
+## 4. Use UQL from server actions
+
+You can also use UQL directly inside **server actions** for form submissions or mutations:
+
+```ts
+'use server';
+
+import { uqlPool } from '@/db/uql';
+import { User } from '@/db/entities';
+
+export async function createUser(formData: FormData) {
+  const email = formData.get('email') as string;
+  const name = formData.get('name') as string;
+
+  await uqlPool.transaction(async (querier) => {
+    await querier.insertOne(User, { email, name });
+  });
+}
+```
+
+---
+
+## 5. Add AI & semantic search
+
+Once you have entities in place, you can plug in **semantic search** for AI features:
+
+```ts
+import { Article } from '@/db/entities';
+
+export async function searchArticles(queryEmbedding: number[]) {
+  return await uqlPool.transaction(async (querier) => {
+    return await querier.findMany(Article, {
+      $select: { id: true, title: true },
+      $sort: { embedding: { $vector: queryEmbedding, $distance: 'cosine' } },
+      $limit: 10,
+    });
+  });
+}
+```
+
+See the [AI & Semantic Search](/ai-semantic-search) page for end-to-end patterns.
+

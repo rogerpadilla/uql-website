@@ -8,7 +8,7 @@ sidebar:
 description: Side-by-side API comparison of UQL vs Prisma, Drizzle, TypeORM, and MikroORM — with actual code for every common operation.
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## Technical Profile: ORM Comparison
 
@@ -719,3 +719,22 @@ This measures **SQL generation overhead**—the pure CPU time spent by the ORM b
 | **Kysely (Query Builder)** | Pure type-safe query builder, zero runtime overhead — best when you want full SQL control without the abstractions of an ORM. |
 
 <LinkCard title="Read the Full ORM Analysis →" href="/blog/in-search-of-the-perfect-orm" description="A detailed evaluation of the top TypeScript ORMs and their design trade-offs." />
+
+---
+
+## Next steps with UQL
+
+If this comparison resonated with your use case, try UQL next:
+
+<CardGrid>
+  <LinkCard
+    title="Quick Start"
+    href="/getting-started"
+    description="Install, configure, and run your first UQL query in a few minutes."
+  />
+  <LinkCard
+    title="AI & Semantic Search"
+    href="/ai-semantic-search"
+    description="Use native vector search and JSON queries to build AI and RAG features."
+  />
+</CardGrid>

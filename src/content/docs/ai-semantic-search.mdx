@@ -1,0 +1,153 @@
+---
+title: AI & Semantic Search
+sidebar:
+  order: 40
+description: Build AI and RAG features with UQL's native semantic search, JSON-native queries, and multi-database support.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Ship AI features without leaving your ORM
+
+UQL treats **semantic search** and **AI-powered ranking** as first-class capabilities, not add-ons bolted on with raw SQL.
+
+- **Native vector search**: `$vector`, `$distance`, and `$project` built directly into the query API.
+- **Multi-dialect**: PostgreSQL (pgvector), MariaDB, SQLite (sqlite-vec), and MongoDB Atlas with `$vectorSearch`.
+- **JSON-native queries**: The same query object works over HTTP/WebSockets using the browser querier.
+
+If you're building **RAG systems**, **AI search**, or **semantic filtering** on top of your data, UQL gives you a single, type-safe API end-to-end.
+
+---
+
+## Typical AI architecture with UQL
+
+1. **Ingest & embed**  
+   Use your preferred embedding model (OpenAI, Anthropic, local models, etc.) to turn documents or rows into vectors.
+
+2. **Store in UQL entities**  
+   Model your content as normal UQL entities with a typed `vector`/`halfvec`/`sparsevec` field and optional ANN indexes for fast similarity search.
+
+3. **Query by meaning**  
+   Use `$vector` and `$distance` in `$sort` to find the most relevant rows for a user query, optionally projecting the distance into the result.
+
+4. **Orchestrate RAG**  
+   Feed the top‑K results into your LLM for summarisation, Q&A, or hybrid scoring — all while keeping the data layer fully type-safe.
+
+---
+
+## Minimal end‑to‑end example
+
+### 1. Define an entity with a vector field
+
+```ts
+import { Entity, Id, Field, Index } from 'uql-orm';
+
+@Entity()
+@Index(['embedding'], { type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })
+export class Article {
+  @Id() id?: number;
+  @Field() title?: string;
+  @Field() category?: string;
+
+  @Field({ type: 'vector', dimensions: 1536 })
+  embedding?: number[];
+}
+```
+
+For Postgres, UQL automatically ensures the `vector` extension exists and manages complex index parameters for you.
+
+### 2. Ingest content with embeddings
+
+```ts
+import { pool } from './uql.config.js';
+import { Article } from './entities.js';
+
+const embedding = await embed('What is UQL?'); // any embedding model
+
+await pool.transaction(async (querier) => {
+  await querier.insertOne(Article, {
+    title: 'What is UQL?',
+    category: 'docs',
+    embedding,
+  });
+});
+```
+
+### 3. Query by meaning
+
+```ts
+import type { WithDistance } from 'uql-orm';
+
+const queryEmbedding = await embed('TypeScript ORM with vector search');
+
+const results = await pool.transaction(async (querier) => {
+  return await querier.findMany(Article, {
+    $where: { category: 'docs' },
+    $sort: {
+      embedding: {
+        $vector: queryEmbedding,
+        $distance: 'cosine',
+        $project: 'similarity',
+      },
+    },
+    $limit: 10,
+  });
+}) as WithDistance<Article, 'similarity'>[];
+
+for (const article of results) {
+  console.log(article.title, article.similarity);
+}
+```
+
+This pattern works the same way across **PostgreSQL**, **MariaDB**, **SQLite**, and **MongoDB Atlas** — UQL handles the dialect‑specific details.
+
+---
+
+## Fullstack semantic search
+
+Because UQL queries are **pure JSON**, you can share the same query definition between backend and frontend.
+
+```ts
+// api.ts (Express)
+import { querierMiddleware } from 'uql-orm/express';
+import { Article } from './entities.js';
+
+app.use('/api', querierMiddleware({ include: [Article] }));
+
+// client.ts (Browser)
+import { HttpQuerier } from 'uql-orm/browser';
+import { Article } from './entities.js';
+
+const http = new HttpQuerier('/api');
+
+const results = await http.findMany(Article, {
+  $where: { category: 'science' },
+  $sort: { embedding: { $vector: queryEmbedding } },
+  $limit: 5,
+});
+```
+
+This makes it straightforward to build **AI‑powered UIs** (search bars, recommendation panels, “related content” widgets) that talk directly to your database through a type-safe, JSON-native protocol.
+
+---
+
+## Learn more
+
+<CardGrid>
+  <LinkCard
+    title="Semantic Search Reference"
+    href="/querying/semantic-search"
+    description="All operators and options for vector fields, distance metrics, and indexes."
+  />
+  <LinkCard
+    title="Benchmark: Fastest TypeScript ORM"
+    href="/blog/in-search-of-the-fastest-typescript-orm"
+    description="See how UQL's zero‑allocation engine compares for query generation speed."
+  />
+  <LinkCard
+    title="Querying"
+    href="/querying/querier"
+    description="Deep selection, filtering, relation operators, and streaming."
+  />
+</CardGrid>
+
