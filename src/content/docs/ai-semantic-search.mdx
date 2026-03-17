@@ -2,40 +2,40 @@
 title: AI & Semantic Search
 sidebar:
   order: 40
-description: Build AI and RAG features with UQL's native semantic search, JSON-native queries, and multi-database support.
+description: Build semantic search and RAG features in UQL with one type-safe query API.
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## Ship AI features without leaving your ORM
+## Build semantic search without extra complexity
 
-UQL treats **semantic search** and **AI-powered ranking** as first-class capabilities, not add-ons bolted on with raw SQL.
+With UQL, semantic search is part of your normal ORM workflow. You can store embeddings and query by meaning without adding a separate search stack.
 
-- **Native vector search**: `$vector`, `$distance`, and `$project` built directly into the query API.
-- **Multi-dialect**: PostgreSQL (pgvector), MariaDB, SQLite (sqlite-vec), and MongoDB Atlas with `$vectorSearch`.
-- **JSON-native queries**: The same query object works over HTTP/WebSockets using the browser querier.
+- **Native vector operators**: Use `$vector`, `$distance`, and `$project` directly in queries.
+- **Multi-database support**: PostgreSQL (pgvector), MariaDB, SQLite (sqlite-vec), and MongoDB Atlas.
+- **One query shape end-to-end**: Use the same JSON query structure on backend and frontend.
 
-If you're building **RAG systems**, **AI search**, or **semantic filtering** on top of your data, UQL gives you a single, type-safe API end-to-end.
+If you are building RAG, search, or recommendation features, this gives you one type-safe API from database to UI.
 
 ---
 
-## Typical AI architecture with UQL
+## Typical flow
 
-1. **Ingest & embed**  
-   Use your preferred embedding model (OpenAI, Anthropic, local models, etc.) to turn documents or rows into vectors.
+1. **Create embeddings**  
+   Convert text into vectors using your preferred model.
 
-2. **Store in UQL entities**  
-   Model your content as normal UQL entities with a typed `vector`/`halfvec`/`sparsevec` field and optional ANN indexes for fast similarity search.
+2. **Store vectors in your entities**  
+   Add a typed `vector` field and index it for fast similarity search.
 
 3. **Query by meaning**  
-   Use `$vector` and `$distance` in `$sort` to find the most relevant rows for a user query, optionally projecting the distance into the result.
+   Sort by vector distance to get the closest matches for a user query.
 
-4. **Orchestrate RAG**  
-   Feed the top‑K results into your LLM for summarisation, Q&A, or hybrid scoring — all while keeping the data layer fully type-safe.
+4. **Use the best matches in your LLM step**  
+   Pass the most relevant results into Q&A, summarization, or recommendation prompts.
 
 ---
 
-## Minimal end‑to‑end example
+## End-to-end example
 
 ### 1. Define an entity with a vector field
 
@@ -54,9 +54,11 @@ export class Article {
 }
 ```
 
-For Postgres, UQL automatically ensures the `vector` extension exists and manages complex index parameters for you.
+If you use Postgres, UQL can handle pgvector setup and index options for you.
 
 ### 2. Ingest content with embeddings
+
+For single-operation scopes, prefer [`pool.withQuerier()`](/querying/querier).
 
 ```ts
 import { pool } from './uql.config.js';
@@ -64,8 +66,6 @@ import { Article } from './entities.js';
 
 const embedding = await embed('What is UQL?'); // any embedding model
 
-// Use withQuerier for single-operation scopes:
-// https://uql.dev/querying/querier
 await pool.withQuerier((querier) =>
   querier.insertOne(Article, {
     title: 'What is UQL?',
@@ -101,15 +101,15 @@ for (const article of results) {
 }
 ```
 
-`$project` lets you expose the computed vector score on each row (for example as `similarity`), so you can rank, threshold, or debug relevance in application code.
+`$project` adds the computed score to each row (here: `similarity`), so your app can filter, rank, or inspect relevance.
 
-This pattern works the same way across **PostgreSQL**, **MariaDB**, **SQLite**, and **MongoDB Atlas** — UQL handles the dialect‑specific details.
+The query shape stays the same across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas.
 
 ---
 
 ## Fullstack semantic search
 
-Because UQL queries are **pure JSON**, you can share the same query definition between backend and frontend.
+UQL queries are plain JSON, so backend and frontend may share the same query format (optional).
 
 ```ts
 // api.ts (Express)
@@ -132,7 +132,64 @@ const results = await http.findMany(Article, {
 });
 ```
 
-This makes it straightforward to build **AI‑powered UIs** (search bars, recommendation panels, “related content” widgets) that talk directly to your database through a type-safe, JSON-native protocol.
+This makes it easy to build search bars, recommendation panels, and related-content widgets without rewriting query logic for each layer.
+
+---
+
+## Production tips
+
+### Hybrid retrieval (metadata + vectors)
+
+In production, combine normal filters with vector ranking so results stay relevant to user context.
+
+```ts
+import type { WithDistance } from 'uql-orm';
+
+const queryEmbedding = await embed(userQuery);
+
+const candidates = await pool.withQuerier((querier) =>
+  querier.findMany(Article, {
+    $where: {
+      category: 'docs',
+    },
+    $sort: {
+      embedding: {
+        $vector: queryEmbedding,
+        $distance: 'cosine',
+        $project: 'score',
+      },
+    },
+    $limit: 30,
+  })
+) as WithDistance<Article, 'score'>[];
+```
+
+### Score thresholding
+
+Keep low-signal results out of your RAG context window:
+
+```ts
+const filtered = candidates.filter((row) => row.score <= 0.35);
+```
+
+With cosine distance, lower values are better matches. Tune this threshold from real logs and user feedback.
+
+### Re-rank before generation
+
+Use two passes when you need higher precision or tighter token budgets (optional for simpler setups):
+- First pass: retrieve a broader shortlist from the database with vector search.
+- Optional second pass: use a reranker model (or LLM) to reorder that shortlist for the exact query.
+- Final step: keep only the best few chunks as generation context.
+
+### Chunking and metadata
+
+- Split content into chunks instead of embedding full documents at once.
+- Use a fixed chunk size (how much text per chunk) and fixed overlap (how much text repeats between chunks) so results are consistent and easier to tune.
+- Save metadata (`documentId`, section, URL, `updatedAt`) so you can cite sources and prefer fresher content.
+
+### Evaluate with a golden set
+
+Keep a small set of real user-style queries and define what "good" looks like for each one. Re-run this set whenever you change models, chunking, or indexes to confirm quality is improving instead of regressing.
 
 ---
 
