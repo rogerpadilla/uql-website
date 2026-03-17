@@ -64,6 +64,8 @@ import { Article } from './entities.js';
 
 const embedding = await embed('What is UQL?'); // any embedding model
 
+// Use withQuerier for single-operation scopes:
+// https://uql.dev/querying/querier
 await pool.withQuerier((querier) =>
   querier.insertOne(Article, {
     title: 'What is UQL?',
@@ -99,6 +101,8 @@ for (const article of results) {
 }
 ```
 
+`$project` lets you expose the computed vector score on each row (for example as `similarity`), so you can rank, threshold, or debug relevance in application code.
+
 This pattern works the same way across **PostgreSQL**, **MariaDB**, **SQLite**, and **MongoDB Atlas** — UQL handles the dialect‑specific details.
 
 ---
@@ -118,6 +122,7 @@ app.use('/api', querierMiddleware({ include: [Article] }));
 import { HttpQuerier } from 'uql-orm/browser';
 import { Article } from './entities.js';
 
+const queryEmbedding = await embed('semantic query from user input');
 const http = new HttpQuerier('/api');
 
 const results = await http.findMany(Article, {
