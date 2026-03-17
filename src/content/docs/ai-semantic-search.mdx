@@ -64,13 +64,13 @@ import { Article } from './entities.js';
 
 const embedding = await embed('What is UQL?'); // any embedding model
 
-await pool.transaction(async (querier) => {
-  await querier.insertOne(Article, {
+await pool.withQuerier((querier) =>
+  querier.insertOne(Article, {
     title: 'What is UQL?',
     category: 'docs',
     embedding,
-  });
-});
+  })
+);
 ```
 
 ### 3. Query by meaning
@@ -80,8 +80,8 @@ import type { WithDistance } from 'uql-orm';
 
 const queryEmbedding = await embed('TypeScript ORM with vector search');
 
-const results = await pool.transaction(async (querier) => {
-  return await querier.findMany(Article, {
+const results = await pool.withQuerier((querier) =>
+  querier.findMany(Article, {
     $where: { category: 'docs' },
     $sort: {
       embedding: {
@@ -91,8 +91,8 @@ const results = await pool.transaction(async (querier) => {
       },
     },
     $limit: 10,
-  });
-}) as WithDistance<Article, 'similarity'>[];
+  })
+) as WithDistance<Article, 'similarity'>[];
 
 for (const article of results) {
   console.log(article.title, article.similarity);
