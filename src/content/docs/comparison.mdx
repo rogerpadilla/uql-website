@@ -531,7 +531,7 @@ const http = new HttpQuerier('/api');
 const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
-**Developer Insight:** Building API boilerplate for every model is pure toil. While Drizzle and TypeORM require you to build an manual bridge, UQL provides the first-party `HttpQuerier` to automate the bridge between browser and database.
+**Developer Insight:** Building API boilerplate for every model is pure toil. While Drizzle and TypeORM require you to build a manual bridge, UQL provides the first-party `HttpQuerier` to automate the bridge between browser and database.
 
 ---
 
@@ -629,9 +629,6 @@ for await (const user of results) {
 
 ---
 
-
----
-
 ## Feature Matrix
 
 Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
@@ -639,7 +636,7 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 | Capability | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | Native semantic search | 🔌 | ❌ | 🔌 | ❌ | ✅ |
-| Virtual fields (computed) | 🔌 | ✅ | ❌ | ❌ | ✅ |
+| Virtual fields (computed) | 🔌 | ✅ | ❌ | ✅ | ✅ |
 | No custom DSL needed | ✅ | ✅ | ❌ | ✅ | ✅ |
 | No codegen needed | ✅ | ✅ | ❌ | ✅ | ✅ |
 | Serializable queries (JSON) | ❌ | ❌ | ✅ | ❌ | ✅ |
@@ -677,9 +674,6 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 ---
 
-
----
-
 ## Performance
 
 In our [open-source benchmark](https://github.com/rogerpadilla/ts-orm-benchmark) measuring **pure SQL generation speed** (no database I/O), UQL finished **1st in every category** across full ORMs and query builders alike.
@@ -709,14 +703,103 @@ This measures **SQL generation overhead**—the pure CPU time spent by the ORM b
 
 ## Summary: Choosing the Right Tool
 
-| Tool | Best For |
-| :--- | :--- |
-| **Prisma** | Largest ecosystem, Prisma Studio GUI, managed edge caching (Accelerate), best for teams wanting a full product. |
-| **Drizzle** | Closest to raw SQL, zero-overhead, MSSQL support — best for SQL purists and running natively in local edge/browser runtimes (PGlite). |
-| **TypeORM** | Extensive history, widest DB support (Oracle, SAP), Active Record pattern — best for teams from Java/C#. |
-| **MikroORM** | Unit of Work, identity map, dependency-free core (v7) — best for complex domain-driven design and architectural consistency with 40% faster TypeScript inference. |
-| **UQL** | First-party fullstack bridge, native semantic search, zero-allocation power — best for modern AI/RAG apps and cross-network APIs. |
-| **Kysely (Query Builder)** | Pure type-safe query builder, zero runtime overhead — best when you want full SQL control without the abstractions of an ORM. |
+There is no universal winner here. Pick based on your team's workflow, not just features.
+
+### Drizzle
+
+**When to use Drizzle**
+
+- You like staying close to SQL and keeping abstraction layers thin.
+- You care about explicit query composition and tight control over generated SQL.
+- You want a lightweight runtime with strong TypeScript ergonomics.
+- You are targeting modern SQL deployments, including edge-oriented setups.
+
+**When not to use Drizzle**
+
+- Day-to-day SQL-heavy development feels like overhead for your team.
+- You need richer ORM patterns such as unit-of-work and identity-map behavior.
+- You expect built-in soft delete behavior instead of manual filtering discipline.
+- You want first-party browser/server query transport primitives.
+
+### Kysely (Query Builder)
+
+**When to use Kysely**
+
+- You want pure, type-safe SQL composition.
+- You prefer explicit query control over ORM entity abstractions.
+- You want strong type safety while staying close to SQL concepts.
+- You do not need identity-map behavior, relation APIs, or ORM lifecycle hooks.
+
+**When not to use Kysely**
+
+- You need classic ORM features like entities, relations, and lifecycle hooks.
+- Your domain model depends on unit-of-work and identity-map patterns.
+- You expect metadata-driven ORM automation.
+- You want first-party fullstack query transport primitives out of the box.
+
+### MikroORM
+
+**When to use MikroORM**
+
+- Your domain layer benefits from unit-of-work and identity-map patterns.
+- You want entity-first modeling with strong relation handling.
+- You prefer a consistent TypeScript-first architecture.
+- You need one ORM across SQL and MongoDB with similar mental models.
+
+**When not to use MikroORM**
+
+- You do not need unit-of-work/identity-map complexity.
+- Ecosystem size and hiring familiarity are top priorities.
+- You prefer a direct SQL/query-builder style over richer ORM abstractions.
+- You need first-party auto-REST or browser-querier primitives.
+
+### Prisma
+
+**When to use Prisma**
+
+- You want a full product experience: mature ecosystem, Prisma Studio, and managed add-ons.
+- You prefer a predictable migration workflow centered on Prisma Migrate.
+- Your team values a polished DX with strong docs and conventions.
+- You need broad SQL support with a stable day-to-day workflow.
+
+**When not to use Prisma**
+
+- You do not want to learn or maintain a separate `.prisma` DSL.
+- You want to avoid generated client code and generation steps in CI/build.
+- You need native `AsyncIterable` streaming instead of manual cursor pagination.
+- You rely heavily on driver-specific SQL and want first-class SQL composition.
+
+### TypeORM
+
+**When to use TypeORM**
+
+- You want a long-established ORM with wide database support.
+- Your team is comfortable with decorators, entities, and repository patterns.
+- You need lifecycle hooks and traditional enterprise ORM capabilities.
+- You come from Java/C# ORM mental models and want familiar patterns.
+
+**When not to use TypeORM**
+
+- You want a modern JSON-serializable query object style by default.
+- You need stronger first-party support for semantic/vector workflows.
+- You prefer a smaller, stricter API surface with fewer legacy patterns.
+- You want built-in browser-to-server querying bridges.
+
+### UQL
+
+**When to use UQL**
+
+- A JSON-query model that works across backend and browser boundaries is important to you.
+- You want a lean runtime with fewer moving parts in day-to-day data access.
+- You want entity-first migrations and high SQL generation performance.
+- You are building AI/RAG-heavy apps with fullstack data transport needs.
+
+**When not to use UQL**
+
+- You need MSSQL support today.
+- You prioritize ecosystem maturity and third-party integrations over newer architecture.
+- You require tooling like Prisma Studio as a core workflow.
+- You need maximum community mindshare for immediate hiring and onboarding.
 
 <LinkCard title="Read the Full ORM Analysis →" href="/blog/in-search-of-the-perfect-orm" description="A detailed evaluation of the top TypeScript ORMs and their design trade-offs." />
 
