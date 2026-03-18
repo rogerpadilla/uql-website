@@ -24,9 +24,9 @@ Every tool has its own technical philosophy and strengths. We aim for a balanced
 
 ---
 
-## Community Updates (Mar 18, 2026) + quick changelog
+## Community Updates (Mar 18, 2026) - feedback from [here](https://www.reddit.com/r/javascript/comments/1rwm8sa/orm_comparison_2026/)
 
-- Added Joist as a full participant across all comparison sections (not just matrix entries).
+- Added Joist as a full participant across all comparison sections.
 - Updated MikroORM to v7-recommended `defineEntity` style in schema examples.
 - Updated database matrix: MikroORM Cloudflare D1 (experimental/plugin path), MikroORM Neon support, and Oracle coverage.
 - Added runtime-model comparison row: managed entities that require active ORM context (Unit of Work / Identity Map).
@@ -325,7 +325,7 @@ Defining calculated fields that aren't stored in the database. These are a lifes
 ```ts title="Drizzle"
 const results = await db.select({
   id: users.id,
-  fullName: sql<string>`concat(${users.firstName}, ' ', ${users.lastName})`
+  fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`
 }).from(users);
 ```
 
@@ -337,7 +337,7 @@ class User {
 
   @Property({ 
     persist: false, 
-    formula: alias => `concat(${alias}.firstName, ' ', ${alias}.lastName)` 
+    formula: alias => `CONCAT(${alias}.firstName, ' ', ${alias}.lastName)` 
   })
   fullName?: string;
 }
@@ -377,7 +377,7 @@ class User {
 
   @Field({
     virtual: raw(({ escapedPrefix }) => 
-      `concat(${escapedPrefix}.firstName, ' ', ${escapedPrefix}.lastName)`)
+      `CONCAT(${escapedPrefix}.firstName, ' ', ${escapedPrefix}.lastName)`)
   })
   fullName?: string;
 }
