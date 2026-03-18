@@ -81,6 +81,10 @@ const config: AstroUserConfig = {
               link: '/comparison',
               badge: { text: 'New', variant: 'success' },
             },
+            {
+              label: 'Benchmark',
+              link: '/comparison#performance',
+            },
           ],
         },
         {
