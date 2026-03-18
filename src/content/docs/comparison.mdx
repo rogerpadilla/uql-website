@@ -63,10 +63,6 @@ export class User extends UserSchema.class {}
 UserSchema.setClass(User);
 ```
 
-:::note
-MikroORM v7's recommended approach is [`defineEntity`](https://mikro-orm.io/docs/define-entity) — decorators are still supported but no longer the default. See also the [Kysely integration](https://mikro-orm.io/docs/kysely) and the [v7 release notes](https://mikro-orm.io/blog/mikro-orm-7-released).
-:::
-
 ```prisma title="Prisma"
 model User {
   id        Int     @id @default(autoincrement())
