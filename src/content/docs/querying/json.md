@@ -245,10 +245,14 @@ This page targets modern, actively maintained database lines. Baselines below re
 
 | Dialect | Practical baseline | Notes |
 | ------- | ------------------ | ----- |
-| PostgreSQL | 9.6+ | Uses `jsonb` operators/functions (`->>`, `||`, `-`, `jsonb_set`, `jsonb_array_elements`) |
+| PostgreSQL | 16+ | Uses `jsonb` operators/functions (`->>`, `||`, `-`, `jsonb_set`, `jsonb_array_elements`) |
 | MySQL | 8.4+ | Uses `->>`, `JSON_SET`, `JSON_REMOVE`, `JSON_ARRAY_APPEND`, `JSON_TABLE` |
 | MariaDB | 12.2+ | Uses `JSON_VALUE` for dot-notation path extraction (not `->>`), plus `JSON_SET`, `JSON_REMOVE`, `JSON_ARRAY_APPEND`, `JSON_TABLE` |
 | SQLite | 3.45+ | Uses `json_extract`, `json_set`, `json_remove`, and `json_insert(..., '$[#]', ...)` for append |
+
+::::note[About older versions]
+UQL may work on earlier versions for many JSON features, but this guide intentionally optimizes for the cleanest SQL and behavior on modern maintained releases.
+::::
 
 
 :::tip[PostgreSQL: Use `jsonb` over `json`]
