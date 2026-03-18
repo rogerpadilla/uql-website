@@ -835,16 +835,30 @@ You can explore the charts here: [TypeScript ORM Benchmark Charts](https://roger
 **Query Builder vs. ORM**: We include Knex and Kysely (pure query builders) to show that UQL's zero-allocation engine is faster even than tools that don't have the overhead of entities and relations.
 :::
 
-| Operation | Next Fastest | **UQL** | **Advantage** |
+Across these benchmark operations (pure SQL generation, no database I/O), UQL is on average **~2.4x** faster than the next fastest tool.
+
+| Operation group | Avg advantage (vs. next fastest) |
+| :--- | ---: |
+| Reads (`SELECT*`, sort/limit, `AGGREGATE`) | **~2.6x** |
+| Writes (`INSERT/UPDATE/UPSERT/DELETE`) | **~2.1x** |
+
+### Reads (SELECT-heavy)
+
+| Operation | Next fastest | UQL | Advantage |
 | :--- | :--- | ---: | ---: |
 | SELECT (complex) | Kysely (218K) | 644K ops/s | **3.0x** |
 | SELECT (1 field) | Sequelize (3,143K) | 3,994K ops/s | **1.3x** |
+| SELECT + SORT + LIMIT | Knex (480K) | 1,200K ops/s | **2.5x** |
+| AGGREGATE | Sequelize (407K) | 1,489K ops/s | **3.7x** |
+
+### Writes (mutations)
+
+| Operation | Next fastest | UQL | Advantage |
+| :--- | :--- | ---: | ---: |
 | INSERT (10 rows) | Knex (407K) | 606K ops/s | **1.5x** |
 | UPDATE | Kysely (819K) | 1,817K ops/s | **2.2x** |
 | UPSERT | Knex (349K) | 693K ops/s | **2.0x** |
 | DELETE | Sequelize (1,349K) | 3,642K ops/s | **2.7x** |
-| SELECT + SORT + LIMIT | Knex (480K) | 1,200K ops/s | **2.5x** |
-| AGGREGATE | Sequelize (407K) | 1,489K ops/s | **3.7x** |
 
 :::note
 UQL achieves this via **zero-allocation architecture** and pre-computed schema lookups at startup. The benchmark is fully [open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
