@@ -324,17 +324,21 @@ const results = await db.select({
 ```
 
 ```ts title="MikroORM"
-@Entity()
-class User {
-  @Property() firstName: string;
-  @Property() lastName: string;
+import { defineEntity, p, quote } from '@mikro-orm/core';
 
-  @Property({ 
-    persist: false, 
-    formula: alias => `CONCAT(${alias}.firstName, ' ', ${alias}.lastName)` 
-  })
-  fullName?: string;
-}
+const UserSchema = defineEntity({
+  name: 'User',
+  properties: {
+    firstName: p.string(),
+    lastName: p.string(),
+    fullName: p.formula<string>(cols =>
+      quote`CONCAT(${cols.firstName}, ' ', ${cols.lastName})`
+    ),
+  },
+});
+
+export class User extends UserSchema.class {}
+UserSchema.setClass(User);
 ```
 
 ```ts title="Prisma"
@@ -483,13 +487,23 @@ const results = await db.select().from(users).where(isNull(users.deletedAt));
 ```
 
 ```ts title="MikroORM"
-@Entity()
-@Filter({ name: 'softDelete', cond: { deletedAt: null }, default: true })
-export class User {
-  @PrimaryKey() id!: number;
-  @Property({ nullable: true }) deletedAt?: Date;
-}
-// Automatically filters out records where deletedAt is set
+import { defineEntity, p } from '@mikro-orm/core';
+
+const UserSchema = defineEntity({
+  name: 'User',
+  properties: {
+    id: p.integer().primary(),
+    deletedAt: p.datetime().nullable(),
+  },
+  filters: {
+    softDelete: { cond: { deletedAt: null }, default: true },
+  },
+});
+
+export class User extends UserSchema.class {}
+UserSchema.setClass(User);
+// Queries auto-filter soft-deleted rows; use an onFlush subscriber
+// to convert em.remove() calls into deletedAt updates.
 ```
 
 ```ts title="Prisma"
