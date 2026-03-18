@@ -833,7 +833,7 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 ## Performance
 
-In our [open-source benchmark](https://github.com/rogerpadilla/ts-orm-benchmark) measuring **pure SQL generation speed** (no database I/O), UQL finished **1st in every category** across full ORMs and query builders alike.
+In our [open-source benchmark](/blog/in-search-of-the-fastest-typescript-orm) measuring **pure SQL generation speed** (no database I/O).
 
 You can explore the charts here: [TypeScript ORM Benchmark Charts](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html).
 
@@ -853,7 +853,7 @@ You can explore the charts here: [TypeScript ORM Benchmark Charts](https://roger
 | AGGREGATE | Sequelize (407K) | 1,489K ops/s | **3.7x** |
 
 :::note
-This measures **SQL generation overhead**—the pure CPU time spent by the ORM before hitting the database. UQL achieves this via **zero-allocation architecture** and pre-computed schema lookups at startup. The benchmark is [fully open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
+UQL achieves this via **zero-allocation architecture** and pre-computed schema lookups at startup. The benchmark is fully [open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
 :::
 
 <LinkCard title="Full Benchmark Analysis →" href="/blog/in-search-of-the-fastest-typescript-orm" description="Methodology, interactive charts, and reproduction instructions." />
