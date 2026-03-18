@@ -5,10 +5,10 @@ sidebar:
   badge:
     text: New
     variant: success
-description: Work with JSON/JSONB fields — type-safe filtering, atomic updates, and sorting across PostgreSQL, MySQL, and SQLite.
+description: Work with JSON/JSONB fields — type-safe filtering, atomic updates, and sorting across PostgreSQL, MySQL, MariaDB, and SQLite.
 ---
 
-UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **MySQL**, and **SQLite**. Query, update, and sort by nested JSON properties using a consistent, type-safe API — UQL generates dialect-specific SQL automatically.
+UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite**. Query, update, and sort by nested JSON properties using a consistent, type-safe API — UQL generates dialect-specific SQL automatically.
 
 ## Entity Setup
 
@@ -60,8 +60,8 @@ WHERE ("settings"->>'isArchived') IS DISTINCT FROM $1
 
 ```sql title="Generated SQL (MySQL)"
 SELECT * FROM `Company`
-WHERE JSON_EXTRACT(`settings`, '$.isArchived') <> ?
-  AND JSON_EXTRACT(`settings`, '$.theme') = ?
+WHERE (`settings`->>'isArchived') <> ?
+  AND (`settings`->>'theme') = ?
 ```
 
 ```sql title="Generated SQL (SQLite)"
@@ -162,7 +162,7 @@ SELECT * FROM "Company" ORDER BY "kind"->>'public' DESC
 ```
 
 ```sql title="Generated SQL (MySQL)"
-SELECT * FROM `Company` ORDER BY JSON_EXTRACT(`kind`, '$.public') DESC
+SELECT * FROM `Company` ORDER BY (`kind`->>'public') DESC
 ```
 
 ```sql title="Generated SQL (SQLite)"
@@ -173,17 +173,17 @@ SELECT * FROM `Company` ORDER BY json_extract(`kind`, '$.public') DESC
 
 ## Supported Dialects
 
-All JSON features work across three SQL dialects:
+All JSON features work across four SQL dialects:
 
-| Feature                | PostgreSQL             | MySQL                | SQLite               |
-| ---------------------- | ---------------------- | -------------------- | -------------------- |
-| Dot-notation filtering | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()`     |
-| `$merge`               | `\|\| ::jsonb`         | `JSON_MERGE_PATCH()` | `json_patch()`       |
-| `$unset`               | `- 'key'`              | `JSON_REMOVE()`      | `json_remove()`      |
-| Dot-notation sorting   | `->>'key'`     | `JSON_EXTRACT()`     | `json_extract()`     |
-| `$size`                | `jsonb_array_length()` | `JSON_LENGTH()`      | `json_array_length()`|
-| `$all`                 | `@> ::jsonb`           | `JSON_CONTAINS()`    | `json_each()`        |
-| `$elemMatch`           | `jsonb_array_elements` | `JSON_TABLE()`       | `json_each()`        |
+| Feature                | PostgreSQL             | MySQL                | MariaDB              | SQLite               |
+| ---------------------- | ---------------------- | -------------------- | -------------------- | -------------------- |
+| Dot-notation filtering | `->>'key'`     | `->>'key'`           | `->>'key'`           | `json_extract()`     |
+| `$merge`               | `\|\| ::jsonb`         | `JSON_MERGE_PATCH()` | `JSON_MERGE_PATCH()` | `json_patch()`       |
+| `$unset`               | `- 'key'`              | `JSON_REMOVE()`      | `JSON_REMOVE()`      | `json_remove()`      |
+| Dot-notation sorting   | `->>'key'`     | `->>'key'`           | `->>'key'`           | `json_extract()`     |
+| `$size`                | `jsonb_array_length()` | `JSON_LENGTH()`      | `JSON_LENGTH()`      | `json_array_length()`|
+| `$all`                 | `@> ::jsonb`           | `JSON_CONTAINS()`    | `JSON_CONTAINS()`    | `json_each()`        |
+| `$elemMatch`           | `jsonb_array_elements` | `JSON_TABLE()`       | `JSON_TABLE()`       | `json_each()`        |
 
 :::tip[PostgreSQL: Use `jsonb` over `json`]
 For PostgreSQL, always prefer `type: 'jsonb'` over `type: 'json'`. JSONB is binary-stored, indexable, and faster for queries. Array operators (`$size`, `$all`, `$elemMatch`) use JSONB-specific functions (`jsonb_array_length`, `@>`, `jsonb_array_elements`) which require JSONB columns.
