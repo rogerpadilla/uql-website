@@ -608,6 +608,38 @@ await em.find(User, { as: u }, {
 
 ---
 
+## JSON / JSONB Operators (Practical Coverage)
+
+For teams building search-heavy or settings-heavy apps, JSON operator depth matters as much as plain scalar filtering.
+
+UQL currently provides the broadest **cross-dialect** JSON operator surface in this comparison. The focus is practical parity across PostgreSQL, MySQL, MariaDB, and SQLite using each database's native JSON functions/operators on modern maintained releases.
+
+| JSON capability | **Drizzle** | **Joist** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Dot-notation JSON filtering | ❌¹ | ❌ | 🔌² | ✅³ | 🔌² | ✅ |
+| Atomic JSON key merge/update | ❌¹ | ❌ | 🔌² | 🔌² | 🔌² | ✅ |
+| Atomic JSON key removal (`unset`) | ❌¹ | ❌ | 🔌² | ❌ | ❌ | ✅ |
+| Atomic JSON array append (`push`) | ❌¹ | ❌ | 🔌² | ❌ | ❌ | ✅ |
+| JSON array query operators (`size`, `all`, `elemMatch`) | ❌¹ | ❌ | 🔌² | 🔌² | 🔌² | ✅ |
+| Same JSON API across 4 SQL dialects | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+<small>
+
+¹ Requires raw SQL.
+² Achievable with dialect-specific SQL expressions or query-builder escape hatches, not a unified high-level JSON operator API.
+³ Prisma advanced JSON filtering is available on selected connectors and has connector-specific limitations.
+
+Snapshot references:
+- Drizzle JSON operator gap: [issue #1690](https://github.com/drizzle-team/drizzle-orm/issues/1690)
+- TypeORM JSON containment scope: [issue #11800](https://github.com/typeorm/typeorm/issues/11800)
+- Prisma JSON filtering docs: [Working with Json fields](https://www.prisma.io/docs/orm/prisma-client/special-fields-and-types/working-with-json-fields)
+
+</small>
+
+See [JSON / JSONB](/querying/json) for generated SQL examples and practical baseline dialect versions.
+
+---
+
 ## Network Boundaries & APIs
 
 In a world of microservices and fullstack apps, your data shouldn't be trapped on the server. The "mental context switch" of mapping database results to JSON API responses is a significant source of developer toil.

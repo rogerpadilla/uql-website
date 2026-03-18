@@ -12,7 +12,7 @@ UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **
 
 ## Entity Setup
 
-Wrap JSONB field types with `Json<T>` to enable full type safety — IDE autocompletion for dot-notation paths, `$merge` keys, and `$unset` keys.
+Wrap JSONB field types with `Json<T>` to enable full type safety — IDE autocompletion for dot-notation paths, `$merge` keys, `$unset` keys, and `$push` targets.
 
 ```ts
 import { Entity, Id, Field, Json } from 'uql-orm';
@@ -26,7 +26,7 @@ export class Company {
   name?: string;
 
   @Field({ type: 'jsonb' })
-  kind?: Json<{ public?: number; private?: number }>;
+  kind?: Json<{ public?: number; private?: number; tags?: string[] }>;
 
   @Field({ type: 'jsonb' })
   settings?: Json<{ isArchived?: boolean; theme?: string; locale?: string }>;
@@ -66,8 +66,8 @@ WHERE (`settings`->>'isArchived') <> ?
 
 ```sql title="Generated SQL (MariaDB)"
 SELECT * FROM `Company`
-WHERE (`settings`->>'isArchived') <> ?
-  AND (`settings`->>'theme') = ?
+WHERE JSON_VALUE(`settings`, '$.isArchived') <> ?
+  AND JSON_VALUE(`settings`, '$.theme') = ?
 ```
 
 ```sql title="Generated SQL (SQLite)"
@@ -77,12 +77,16 @@ WHERE json_extract(`settings`, '$.isArchived') IS NOT ?
 ```
 
 :::note[Null-Safe `$ne`]
-JSONB `$ne` uses null-safe operators (`IS DISTINCT FROM` on PostgreSQL, `IS NOT` on SQLite) so absent keys (SQL `NULL`) are correctly included in results.
+For PostgreSQL and SQLite, JSON-path `$ne` uses null-safe operators (`IS DISTINCT FROM` and `IS NOT`) so absent keys (SQL `NULL`) are correctly included in results.
+:::
+
+:::note[MariaDB JSON Path Access]
+MariaDB does not support MySQL's `->` / `->>` JSON shorthand operators. UQL uses `JSON_VALUE()` for MariaDB dot-notation filtering and sorting to keep SQL fully native and compatible.
 :::
 
 ---
 
-## Updating (`$merge` / `$unset`)
+## Updating (`$merge` / `$unset` / `$push`)
 
 Atomically merge or remove keys in JSON fields directly from update payloads. No need to overwrite the entire JSON value.
 
@@ -102,18 +106,18 @@ UPDATE "Company" SET "kind" = COALESCE("kind", '{}') || $1::jsonb WHERE "id" = $
 ```
 
 ```sql title="Generated SQL (MySQL)"
-UPDATE `Company` SET `kind` = JSON_MERGE_PATCH(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
--- values: ['{"public":1}', id]
+UPDATE `Company` SET `kind` = JSON_SET(COALESCE(`kind`, '{}'), '$.public', CAST(? AS JSON)) WHERE `id` = ?
+-- values: ['1', id]
 ```
 
 ```sql title="Generated SQL (MariaDB)"
-UPDATE `Company` SET `kind` = JSON_MERGE_PATCH(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
--- values: ['{"public":1}', id]
+UPDATE `Company` SET `kind` = JSON_SET(COALESCE(`kind`, '{}'), '$.public', CAST(? AS JSON)) WHERE `id` = ?
+-- values: ['1', id]
 ```
 
 ```sql title="Generated SQL (SQLite)"
-UPDATE `Company` SET `kind` = json_patch(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
--- values: ['{"public":1}', id]
+UPDATE `Company` SET `kind` = json_set(COALESCE(`kind`, '{}'), '$.public', json(?)) WHERE `id` = ?
+-- values: ['1', id]
 ```
 
 ### `$unset` — Remove Keys
@@ -142,22 +146,52 @@ UPDATE `Company` SET `kind` = JSON_REMOVE(`kind`, '$.private') WHERE `id` = ?
 UPDATE `Company` SET `kind` = json_remove(`kind`, '$.private') WHERE `id` = ?
 ```
 
-### Combined `$merge` + `$unset`
+### `$push` — Append to Array
 
-Both operations can be combined in a single update.
+Append a value to the end of a JSON array using native array-append functions. Only keys whose type is an array are valid `$push` targets (type-checked at compile time).
 
 ```ts title="You write"
 await querier.updateOneById(Company, id, {
-  kind: { $merge: { public: 1 }, $unset: ['private'] },
+  kind: { $push: { tags: 'new-tag' } },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+UPDATE "Company" SET "kind" = jsonb_set("kind", '{tags}', COALESCE("kind"->'tags', '[]'::jsonb) || jsonb_build_array($1::jsonb)) WHERE "id" = $2
+-- values: ['"new-tag"', id]
+```
+
+```sql title="Generated SQL (MySQL)"
+UPDATE `Company` SET `kind` = JSON_ARRAY_APPEND(`kind`, '$.tags', CAST(? AS JSON)) WHERE `id` = ?
+-- values: ['"new-tag"', id]
+```
+
+```sql title="Generated SQL (MariaDB)"
+UPDATE `Company` SET `kind` = JSON_ARRAY_APPEND(`kind`, '$.tags', CAST(? AS JSON)) WHERE `id` = ?
+-- values: ['"new-tag"', id]
+```
+
+```sql title="Generated SQL (SQLite)"
+UPDATE `Company` SET `kind` = json_insert(`kind`, '$.tags[#]', json(?)) WHERE `id` = ?
+-- values: ['"new-tag"', id]
+```
+
+### Combining Operators
+
+`$merge`, `$unset`, and `$push` can be freely combined in a single update.
+
+```ts title="You write"
+await querier.updateOneById(Company, id, {
+  kind: { $merge: { public: 1 }, $push: { tags: 'new-tag' }, $unset: ['private'] },
 });
 ```
 
 :::caution[Array Merging]
-`$merge` uses RFC 7396 (`JSON_MERGE_PATCH`) under the hood in MySQL and SQLite. This means **arrays are replaced entirely**, not appended to. If `kind` contains an array like `tags: ['a']`, merging `{ tags: ['x'] }` results in `tags: ['x']`, not `tags: ['a', 'x']`.
+`$merge` uses **shallow, top-level key overwrite** semantics — arrays are replaced entirely, not appended to. To append elements to a JSON array, use `$push` instead.
 :::
 
 :::tip[Type Safety]
-Both `$merge` keys and `$unset` keys are validated against the JSON field's inner type `T` (from `Json<T>`). The IDE will autocomplete valid keys and reject invalid ones at compile time.
+`$merge` keys, `$unset` keys, and `$push` targets are all validated against the JSON field's inner type `T` (from `Json<T>`). The IDE will autocomplete valid keys and reject invalid ones at compile time. `$push` additionally restricts targets to array-typed keys and expects the array's element type as the value.
 :::
 
 ---
@@ -181,7 +215,7 @@ SELECT * FROM `Company` ORDER BY (`kind`->>'public') DESC
 ```
 
 ```sql title="Generated SQL (MariaDB)"
-SELECT * FROM `Company` ORDER BY (`kind`->>'public') DESC
+SELECT * FROM `Company` ORDER BY JSON_VALUE(`kind`, '$.public') DESC
 ```
 
 ```sql title="Generated SQL (SQLite)"
@@ -194,15 +228,28 @@ SELECT * FROM `Company` ORDER BY json_extract(`kind`, '$.public') DESC
 
 All JSON features work across four SQL dialects:
 
-| Feature                | PostgreSQL             | MySQL                | MariaDB              | SQLite               |
-| ---------------------- | ---------------------- | -------------------- | -------------------- | -------------------- |
-| Dot-notation filtering | `->>'key'`     | `->>'key'`           | `->>'key'`           | `json_extract()`     |
-| `$merge`               | `\|\| ::jsonb`         | `JSON_MERGE_PATCH()` | `JSON_MERGE_PATCH()` | `json_patch()`       |
-| `$unset`               | `- 'key'`              | `JSON_REMOVE()`      | `JSON_REMOVE()`      | `json_remove()`      |
-| Dot-notation sorting   | `->>'key'`     | `->>'key'`           | `->>'key'`           | `json_extract()`     |
-| `$size`                | `jsonb_array_length()` | `JSON_LENGTH()`      | `JSON_LENGTH()`      | `json_array_length()`|
-| `$all`                 | `@> ::jsonb`           | `JSON_CONTAINS()`    | `JSON_CONTAINS()`    | `json_each()`        |
-| `$elemMatch`           | `jsonb_array_elements` | `JSON_TABLE()`       | `JSON_TABLE()`       | `json_each()`        |
+| Feature                | PostgreSQL             | MySQL                    | MariaDB                  | SQLite               |
+| ---------------------- | ---------------------- | ------------------------ | ------------------------ | -------------------- |
+| Dot-notation filtering | `->>'key'`             | `->>'key'`               | `JSON_VALUE()`           | `json_extract()`     |
+| `$merge`               | `\|\| ::jsonb`         | `JSON_SET()`             | `JSON_SET()`             | `json_set()`         |
+| `$unset`               | `- 'key'`              | `JSON_REMOVE()`          | `JSON_REMOVE()`          | `json_remove()`      |
+| `$push`                | `jsonb_set()` + `\|\|` | `JSON_ARRAY_APPEND()`    | `JSON_ARRAY_APPEND()`    | `json_insert()`      |
+| Dot-notation sorting   | `->>'key'`             | `->>'key'`               | `JSON_VALUE()`           | `json_extract()`     |
+| `$size`                | `jsonb_array_length()` | `JSON_LENGTH()`          | `JSON_LENGTH()`          | `json_array_length()`|
+| `$all`                 | `@> ::jsonb`           | `JSON_CONTAINS()`        | `JSON_CONTAINS()`        | `json_each()`        |
+| `$elemMatch`           | `jsonb_array_elements` | `JSON_TABLE()`           | `JSON_TABLE()`           | `json_each()`        |
+
+## Dialect Compatibility
+
+This page targets modern, actively maintained database lines. Baselines below reflect the current compatibility target for generated SQL:
+
+| Dialect | Practical baseline | Notes |
+| ------- | ------------------ | ----- |
+| PostgreSQL | 9.6+ | Uses `jsonb` operators/functions (`->>`, `||`, `-`, `jsonb_set`, `jsonb_array_elements`) |
+| MySQL | 8.4+ | Uses `->>`, `JSON_SET`, `JSON_REMOVE`, `JSON_ARRAY_APPEND`, `JSON_TABLE` |
+| MariaDB | 12.2+ | Uses `JSON_VALUE` for dot-notation path extraction (not `->>`), plus `JSON_SET`, `JSON_REMOVE`, `JSON_ARRAY_APPEND`, `JSON_TABLE` |
+| SQLite | 3.45+ | Uses `json_extract`, `json_set`, `json_remove`, and `json_insert(..., '$[#]', ...)` for append |
+
 
 :::tip[PostgreSQL: Use `jsonb` over `json`]
 For PostgreSQL, always prefer `type: 'jsonb'` over `type: 'json'`. JSONB is binary-stored, indexable, and faster for queries. Array operators (`$size`, `$all`, `$elemMatch`) use JSONB-specific functions (`jsonb_array_length`, `@>`, `jsonb_array_elements`) which require JSONB columns.
