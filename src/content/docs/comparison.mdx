@@ -5,7 +5,7 @@ sidebar:
   badge:
     text: New
     variant: success
-description: Side-by-side API comparison of UQL vs Prisma, Drizzle, TypeORM, and MikroORM — with actual code for every common operation.
+description: Side-by-side API comparison of UQL vs Prisma, Drizzle, TypeORM, MikroORM, and Joist — with actual code for every common operation.
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
@@ -17,6 +17,19 @@ This page provides an **operation-by-operation code comparison** between the lea
 :::note
 Every tool has its own technical philosophy and strengths. We aim for a balanced, code-first perspective. If you spot a 2026 technical inaccuracy, please [open an issue](https://github.com/rogerpadilla/uql/issues).
 :::
+
+:::note
+**Disclosure:** This comparison is maintained by the UQL team. We include source links and integrate community corrections to keep claims verifiable.
+:::
+
+---
+
+## Community Updates (Mar 18, 2026) + quick changelog
+
+- Added Joist as a full participant across all comparison sections (not just matrix entries).
+- Updated MikroORM to v7-recommended `defineEntity` style in schema examples.
+- Updated database matrix: MikroORM Cloudflare D1 (experimental/plugin path), MikroORM Neon support, and Oracle coverage.
+- Added runtime-model comparison row: managed entities that require active ORM context (Unit of Work / Identity Map).
 
 ---
 
@@ -36,16 +49,25 @@ export const users = pgTable('users', {
 ```
 
 ```ts title="MikroORM"
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 
-@Entity()
-export class User {
-  @PrimaryKey() id!: number;
-  @Property({ unique: true }) email!: string;
-  @Property() name!: string;
-  @ManyToOne(() => Company) company!: Company;
-}
+const UserSchema = defineEntity({
+  name: 'User',
+  properties: {
+    id: p.integer().primary(),
+    email: p.string().unique(),
+    name: p.string(),
+    company: () => p.manyToOne(Company),
+  },
+});
+
+export class User extends UserSchema.class {}
+UserSchema.setClass(User);
 ```
+
+:::note
+MikroORM v7's recommended approach is [`defineEntity`](https://mikro-orm.io/docs/define-entity) — decorators are still supported but no longer the default. See also the [Kysely integration](https://mikro-orm.io/docs/kysely) and the [v7 release notes](https://mikro-orm.io/blog/mikro-orm-7-released).
+:::
 
 ```prisma title="Prisma"
 model User {
@@ -81,7 +103,25 @@ export class User {
 }
 ```
 
-**Senior Insight:** Schema modeling is a trade-off: Prisma offers a clean DSL with a build step; Drizzle gives total SQL control via dialect-specific imports. MikroORM, TypeORM, and UQL use standard TypeScript classes, keeping your mental model unified in pure TS.
+```ts title="Joist"
+// 1. Database-first: define schema in a migration (e.g. node-pg-migrate)
+// 2. Run joist-codegen — entities are auto-generated from the live DB
+
+// Generated (auto-managed): src/entities/UserCodegen.ts
+export abstract class UserCodegen {
+  readonly company: ManyToOneReference<User, Company, never>;
+  get id(): string { /* ... */ }
+  get email(): string { /* ... */ }
+  set email(value: string) { /* ... */ }
+  get name(): string { /* ... */ }
+  set name(value: string) { /* ... */ }
+}
+
+// Your file: src/entities/User.ts
+export class User extends UserCodegen {}
+```
+
+**Senior Insight:** Schema modeling is a trade-off: Prisma offers a clean DSL with a build step; Drizzle gives total SQL control via dialect-specific imports. MikroORM v7 defaults to `defineEntity` (a programmatic, decorator-free style), TypeORM and UQL use decorator-based TypeScript classes, all keeping the model in pure TS. Joist takes a database-first approach: you write migrations, then codegen produces the entity classes automatically.
 
 ---
 
@@ -130,14 +170,23 @@ const results = await querier.findMany(Item, {
 });
 ```
 
+```ts title="Joist"
+// No native vector operator — requires raw SQL via Knex:
+const results = await knex
+  .select('*')
+  .from('items')
+  .orderByRaw('embedding <-> ?::vector', [queryVector])
+  .limit(10);
+```
+
 **Developer Insight:** Most ORMs treat vector similarity as an "edge case" requiring raw SQL and database-specific syntax (like `<->`). UQL handles it as a native, type-safe operator, allowing you to build AI features with the same database-agnostic code used for standard sorting.
 
-| Ability | **Drizzle** | **MikroORM** | **Prisma** | **UQL** |
-| :--- | :---: | :---: | :---: | :---: |
-| Native Vector Operator | ❌ | ❌ | ❌ | ✅ |
-| Multi-Dialect Support | 🔌 | ❌ | 🔌 | ✅ |
-| Index Migration | ❌ | ❌ | ✅ | ✅ |
-| JSON Path Vectors | ❌ | ❌ | ❌ | ✅ |
+| Ability | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **Joist** | **UQL** |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Native Vector Operator | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Multi-Dialect Support | 🔌 | ❌ | 🔌 | 🔌 | ❌ | ✅ |
+| Index Migration | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| JSON Path Vectors | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 :::note
 **Zero-Config Vectors**: UQL's migrator handles the heavy lifting, automatically creating database extensions (like `pgvector`) and managing complex index parameters such as HNSW's `m` and `ef_construction` without manual SQL.
@@ -195,7 +244,14 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Drizzle is for those who want to see the underlying SQL. Prisma, TypeORM, and UQL favor a declarative object style to reduce boilerplate. Notably, UQL and Prisma queries are plain JSON, making them easy to share across services or the network.
+```ts title="Joist"
+const results = await em.find(User, { name: 'Lorem' }, {
+  orderBy: { createdAt: 'DESC' },
+});
+// Joist loads full entities (identity-map) — no field-level select
+```
+
+**Developer Insight:** Drizzle is for those who want to see the underlying SQL. Prisma, TypeORM, and UQL favor a declarative object style to reduce boilerplate. Notably, UQL and Prisma queries are plain JSON, making them easy to share across services or the network. Joist uses a similar object-literal style but always loads full entities due to its identity-map architecture.
 
 ---
 
@@ -249,7 +305,16 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Relation filtering varies significantly. Prisma, MikroORM, and UQL allow you to nest logic (like `$where: { country: 'US' }`) directly inside the fetch. Drizzle and TypeORM often require the QueryBuilder for advanced relation filtering.
+```ts title="Joist"
+const results = await em.find(User, {
+  company: { country: 'US' },
+});
+// Relations loaded via populate hints, N+1 safe by default
+const loaded = await results[0].populate({ company: {} });
+console.log(loaded.company.get.name);
+```
+
+**Developer Insight:** Relation filtering varies significantly. Prisma, MikroORM, UQL, and Joist allow you to nest logic (like `$where: { country: 'US' }`) directly inside the fetch. Drizzle and TypeORM often require the QueryBuilder for advanced relation filtering. Joist's "join literal" approach is unique: it builds JOINs from nested object shapes and is N+1 safe by default thanks to its dataloader foundation.
 
 ---
 
@@ -318,7 +383,25 @@ class User {
 }
 ```
 
-**Developer Insight:** Manually mapping computed fields is brittle. MikroORM and UQL allow you to define virtual fields directly in the entity, where they behave like real columns for sorting and filtering. Drizzle and Prisma require manual mapping at the app level.
+```ts title="Joist"
+class User extends UserCodegen {
+  // Sync getter — not stored in DB, calculated on access
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+
+// Or as a ReactiveField — stored in DB and auto-updated on change:
+class User extends UserCodegen {
+  readonly fullName: ReactiveField<User, string> = hasReactiveField(
+    "fullName",
+    ["firstName", "lastName"],
+    (u) => `${u.firstName} ${u.lastName}`,
+  );
+}
+```
+
+**Developer Insight:** Manually mapping computed fields is brittle. MikroORM and UQL allow you to define virtual fields directly in the entity, where they behave like real columns for sorting and filtering. Drizzle and Prisma require manual mapping at the app level. Joist goes further with ReactiveFields: derived values that are persisted to the database and automatically recalculated when their dependencies change—essentially instantly-updated materialized views.
 
 ---
 
@@ -378,7 +461,20 @@ await querier.updateMany(User, { $where: { status: 'inactive' } }, { status: 'ar
 await querier.deleteOneById(User, id);
 ```
 
-**Developer Insight:** Most CRUD work is similar across these tools. The main difference is the mental model: Drizzle and MikroORM require more focus on the database return or flush cycle, while Prisma, TypeORM, and UQL prioritize fire-and-forget methods.
+```ts title="Joist"
+const user = em.create(User, { name: 'Lorem' });
+await em.flush();
+
+user.name = 'Lorem I.';
+await em.flush();
+
+// Bulk conditional updates require Knex or manual find + loop + flush
+
+em.delete(user);
+await em.flush();
+```
+
+**Developer Insight:** Most CRUD work is similar across these tools. The main difference is the mental model: Drizzle and MikroORM require more focus on the database return or flush cycle, while Prisma, TypeORM, and UQL prioritize fire-and-forget methods. Joist follows the Unit of Work pattern like MikroORM: mutations are staged in the EntityManager and flushed atomically, with automatic batch INSERTs/UPDATEs.
 
 ---
 
@@ -428,7 +524,17 @@ export class User {
 await querier.deleteOneById(User, id);
 ```
 
-**Developer Insight:** Hand-filtering `deletedAt: null` in every query is a bug magnet. TypeORM, MikroORM, and UQL handle this at the engine level, ensuring deleted records are hidden automatically without manual discipline.
+```ts title="Joist"
+// Add a deleted_at column to your migration — Joist handles the rest.
+// em.find automatically filters out soft-deleted rows.
+em.delete(user);
+await em.flush();
+
+// To explicitly include soft-deleted rows:
+const all = await em.find(User, {}, { softDeletes: 'include' });
+```
+
+**Developer Insight:** Hand-filtering `deletedAt: null` in every query is a bug magnet. TypeORM, MikroORM, UQL, and Joist handle this at the engine level, ensuring deleted records are hidden automatically without manual discipline.
 
 ---
 
@@ -487,7 +593,24 @@ const results = await querier.findMany(User, {
 });
 ```
 
-**Developer Insight:** Object-based filtering (Prisma, MikroORM, UQL) is often more ergonomic than function-based filtering (Drizzle, TypeORM), as it avoids importing dozens of individual operators and is natively serializable as JSON.
+```ts title="Joist"
+const results = await em.find(User, {
+  age: { gte: 18, lte: 65 },
+  name: { like: 'A%' },
+  status: { ne: 'banned' },
+});
+
+// For complex OR conditions, use aliases:
+const [u] = aliases(User);
+await em.find(User, { as: u }, {
+  conditions: { or: [u.age.gte(18), u.status.eq('active')] },
+});
+
+// Note: Joist does not support filtering on JSONB columns in em.find;
+// for those you need raw SQL/Knex via em.loadFromQuery.
+```
+
+**Developer Insight:** Object-based filtering (Prisma, MikroORM, UQL, Joist) is often more ergonomic than function-based filtering (Drizzle, TypeORM), as it avoids importing dozens of individual operators and is natively serializable as JSON. Joist adds a twist: for cross-column OR conditions, you use typed `aliases` instead of raw objects. Note that Joist does not yet support JSONB column filtering in `em.find` — you need to drop to raw SQL for that.
 
 ---
 
@@ -531,7 +654,16 @@ const http = new HttpQuerier('/api');
 const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
-**Developer Insight:** Building API boilerplate for every model is pure toil. While Drizzle and TypeORM require you to build a manual bridge, UQL provides the first-party `HttpQuerier` to automate the bridge between browser and database.
+```ts title="Joist"
+// No built-in REST API or browser querier — standard manual routing:
+app.get('/api/users', async (req, res) => {
+  const em = newEntityManager();
+  const results = await em.find(User, { status: 'active' });
+  res.json(results);
+});
+```
+
+**Developer Insight:** Building API boilerplate for every model is pure toil. In this comparison, every ORM except UQL requires you to build your own API bridge, while UQL provides first-party `HttpQuerier` transport between browser and database.
 
 ---
 
@@ -578,7 +710,14 @@ npx uql-migrate generate:entities add_nickname
 npx uql-migrate up
 ```
 
-**Developer Insight:** UQL and MikroORM use an **Entity-First** approach where your code is the source of truth, diffing directly against the live database. This eliminates the "middleman" of proprietary DSLs (Prisma) or JSON snapshots (Drizzle).
+```ts title="Joist"
+// 1. Database-first: you write migrations (e.g. node-pg-migrate)
+// 2. Run joist-codegen to regenerate entity classes from the live DB schema
+npm run joist-migrate
+npm run joist-codegen
+```
+
+**Developer Insight:** UQL and MikroORM use an **Entity-First** approach where your code is the source of truth, diffing directly against the live database. This eliminates the "middleman" of proprietary DSLs (Prisma) or JSON snapshots (Drizzle). Joist takes the opposite **Database-First** approach: your migration files are the source of truth, and codegen produces entities to match.
 
 ---
 
@@ -625,7 +764,13 @@ for await (const user of results) {
 }
 ```
 
-**Developer Insight:** Processing millions of rows requires native cursors to keep memory stable. MikroORM and UQL provide consistent `AsyncIterable` support across all drivers—including MongoDB—replacing complex event-emitters with clean `for await` loops.
+```ts title="Joist"
+// No built-in streaming — defers to Knex for large result sets:
+const stream = knex.select('*').from('users').where('status', 'active').stream();
+stream.on('data', (user) => writeToCsv(user));
+```
+
+**Developer Insight:** Processing millions of rows requires native cursors to keep memory stable. MikroORM and UQL provide consistent `AsyncIterable` support across all drivers—including MongoDB—replacing complex event-emitters with clean `for await` loops. Joist defers to its underlying Knex connection for streaming.
 
 ---
 
@@ -633,44 +778,56 @@ for await (const user of results) {
 
 Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
-| Capability | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| Native semantic search | 🔌 | ❌ | 🔌 | ❌ | ✅ |
-| Virtual fields (computed) | 🔌 | ✅ | ❌ | ✅ | ✅ |
-| No custom DSL needed | ✅ | ✅ | ❌ | ✅ | ✅ |
-| No codegen needed | ✅ | ✅ | ❌ | ✅ | ✅ |
-| Serializable queries (JSON) | ❌ | ❌ | ✅ | ❌ | ✅ |
-| Deep relation operators | ❌ | ✅ | ✅ | ❌ | ✅ |
-| Cursor streaming (AsyncIterable) | ✅ | ✅ | ❌¹ | 🔌 | ✅ |
-| Soft delete (built-in) | ❌ | 🔌 | 🔌 | ✅ | ✅ |
-| Lifecycle hooks | ❌ | ✅ | 🔌 | ✅ | ✅ |
-| Auto REST API | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Browser querier | ❌ | ❌ | ❌ | ❌ | ✅ |
-| MongoDB support | ❌ | ✅ | ❌² | ✅ | ✅ |
+| Capability | **Drizzle** | **Joist** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Native semantic search | 🔌 | ❌ | ❌ | 🔌 | ❌ | ✅ |
+| Virtual fields (computed) | 🔌 | ✅ | ✅ | ❌ | ✅ | ✅ |
+| No custom DSL needed | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| No codegen needed | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| Serializable queries (JSON) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
+| Deep relation operators | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Cursor streaming (AsyncIterable) | ✅ | ❌ | ✅ | ❌ | 🔌 | ✅ |
+| Soft delete (built-in) | ❌ | ✅ | 🔌 | 🔌 | ✅ | ✅ |
+| Lifecycle hooks | ❌ | ✅ | ✅ | 🔌 | ✅ | ✅ |
+| Managed entities require active ORM context (Unit of Work / Identity Map) | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| N+1 prevention (automatic) | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Reactive fields (auto-updated) | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Test factories (built-in) | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Tagged ids | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Auto REST API | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Browser querier | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| MongoDB support | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Unified query mental model across SQL + MongoDB | ❌ | ❌ | ✅ | 🔌⁴ | ❌⁵ | ✅ |
 
 <small>
 
-¹ Prisma streaming is natively limited; requires cursor pagination for large sets.
-² Prisma v6/v7 support for MongoDB is constrained compared to SQL dialects.
-
+⁴ Prisma Client is broadly consistent across SQL/Mongo, but connector-specific capabilities and raw-query APIs diverge.
+⁵ TypeORM's Mongo path diverges from SQL behavior (for example, QueryBuilder support differs).
 </small>
 
 ---
 
 ## Database Support
 
-| Database | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| Cloudflare D1 | ✅ | ❌ | ✅ | ❌ | ✅ |
-| CockroachDB | ✅ | ✅ | ✅ | ✅ | ✅ |
-| LibSQL / Turso | ✅ | ✅ | ✅ | ❌ | ✅ |
-| MariaDB | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MongoDB | ❌ | ✅ | ❌² | ✅ | ✅ |
-| MSSQL | ✅ | ✅ | ✅ | ✅ | ❌ |
-| MySQL | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Neon Serverless | ✅ | ❌ | ✅ | ❌ | ✅ |
-| PostgreSQL | ✅ | ✅ | ✅ | ✅ | ✅ |
-| SQLite | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Database | **Drizzle** | **Joist** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Cloudflare D1 | ✅ | ❌ | 🔌³ | ✅ | ❌ | ✅ |
+| CockroachDB | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| LibSQL / Turso | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
+| MariaDB | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| MongoDB | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| MSSQL | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| MySQL | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Neon Serverless | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Oracle | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ |
+| PostgreSQL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| SQLite | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+
+<small>
+
+³ MikroORM Cloudflare D1 support is currently documented as an experimental path through its SQL/Kysely integration.
+
+</small>
 
 ---
 
@@ -737,6 +894,22 @@ There is no universal winner here. Pick based on your team's workflow, not just 
 - You expect metadata-driven ORM automation.
 - You want first-party fullstack query transport primitives out of the box.
 
+### Joist
+
+**When to use Joist**
+
+- You want bullet-proof automatic N+1 prevention without manual optimization.
+- ReactiveFields (auto-updated derived columns) are a core part of your domain model.
+- You prefer database-first schema management with generated, type-safe entities.
+- Built-in test factories, tagged IDs, and reactive validation rules match your workflow.
+
+**When not to use Joist**
+
+- You need a database other than PostgreSQL.
+- You want to avoid a codegen step in your build pipeline.
+- You need native streaming, vector search, or browser-to-server query transport.
+- You prefer entity-first schema modeling with detached/plain results, not ORM-managed hydrated entities.
+
 ### MikroORM
 
 **When to use MikroORM**
@@ -748,7 +921,7 @@ There is no universal winner here. Pick based on your team's workflow, not just 
 
 **When not to use MikroORM**
 
-- You do not need unit-of-work/identity-map complexity.
+- You do not need Unit of Work/Identity Map complexity and prefer detached/plain results.
 - Ecosystem size and hiring familiarity are top priorities.
 - You prefer a direct SQL/query-builder style over richer ORM abstractions.
 - You need first-party auto-REST or browser-querier primitives.
