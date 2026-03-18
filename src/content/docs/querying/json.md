@@ -64,6 +64,12 @@ WHERE (`settings`->>'isArchived') <> ?
   AND (`settings`->>'theme') = ?
 ```
 
+```sql title="Generated SQL (MariaDB)"
+SELECT * FROM `Company`
+WHERE (`settings`->>'isArchived') <> ?
+  AND (`settings`->>'theme') = ?
+```
+
 ```sql title="Generated SQL (SQLite)"
 SELECT * FROM `Company`
 WHERE json_extract(`settings`, '$.isArchived') IS NOT ?
@@ -100,6 +106,11 @@ UPDATE `Company` SET `kind` = JSON_MERGE_PATCH(COALESCE(`kind`, '{}'), ?) WHERE 
 -- values: ['{"public":1}', id]
 ```
 
+```sql title="Generated SQL (MariaDB)"
+UPDATE `Company` SET `kind` = JSON_MERGE_PATCH(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
+-- values: ['{"public":1}', id]
+```
+
 ```sql title="Generated SQL (SQLite)"
 UPDATE `Company` SET `kind` = json_patch(COALESCE(`kind`, '{}'), ?) WHERE `id` = ?
 -- values: ['{"public":1}', id]
@@ -120,6 +131,10 @@ UPDATE "Company" SET "kind" = ("kind") - 'private' WHERE "id" = $1
 ```
 
 ```sql title="Generated SQL (MySQL)"
+UPDATE `Company` SET `kind` = JSON_REMOVE(`kind`, '$.private') WHERE `id` = ?
+```
+
+```sql title="Generated SQL (MariaDB)"
 UPDATE `Company` SET `kind` = JSON_REMOVE(`kind`, '$.private') WHERE `id` = ?
 ```
 
@@ -162,6 +177,10 @@ SELECT * FROM "Company" ORDER BY "kind"->>'public' DESC
 ```
 
 ```sql title="Generated SQL (MySQL)"
+SELECT * FROM `Company` ORDER BY (`kind`->>'public') DESC
+```
+
+```sql title="Generated SQL (MariaDB)"
 SELECT * FROM `Company` ORDER BY (`kind`->>'public') DESC
 ```
 
