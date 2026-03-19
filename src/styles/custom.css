@@ -1,4 +1,9 @@
-/* Standard Starlight theme overrides */
+/* ==========================================================================
+   UQL Global Theme & Overrides
+   Premium, modern, and minimal aesthetic
+   ========================================================================== */
+
+/* ── 1. Color Palette & Typography ── */
 :root {
     --sl-color-accent-low: #0f3854;
     --sl-color-accent: #3282b8;
@@ -18,19 +23,56 @@
     --sl-color-bg-nav: #1e293b;
 }
 
+/* ── 2. Scrollbars (Modern & Cross-Browser) ── */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sl-color-gray-5) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px; /* Applies to internal horizontal scrollbars like tables/code too */
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--sl-color-gray-5);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sl-color-accent);
+}
+
+/* ── 3. Layout & Glassmorphism ── */
+
+.content-panel {
+    padding-bottom: 5rem;
+}
+
 /* Premium Sidebar */
 .sidebar-content {
-    background-color: var(--sl-color-bg-nav);
+    /* Using color-mix to avoid invalid rgba(hex, opacity) errors */
+    background-color: color-mix(in srgb, var(--sl-color-bg-nav, var(--sl-color-bg)) 90%, transparent) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Glassmorphism for Header */
+/* Header Glassmorphism */
 header {
-    border-bottom: 1px solid var(--sl-color-gray-5);
-    background-color: rgba(var(--sl-color-bg), 0.8) !important;
+    border-bottom: 1px solid var(--sl-color-gray-5) !important;
+    /* Fixed invalid rgba(hex, alpha) usage with modern color-mix API */
+    background-color: color-mix(in srgb, var(--sl-color-bg) 85%, transparent) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+}
+
+
+/* ── 4. Interactive Elements & Components ── */
+
+a,
+button {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* Improve Code Blocks */
@@ -38,72 +80,6 @@ header {
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 0.75rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Smooth transitions for interactive elements */
-a,
-button {
-    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Content spacing */
-.content-panel {
-    padding-bottom: 5rem;
-}
-
-/* Custom scrollbar for a premium look */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--sl-color-gray-5);
-    border-radius: 5px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--sl-color-accent);
-}
-
-/* ── Custom View Transitions ── */
-
-/* Only the main content participates in the transition */
-.main-frame {
-    view-transition-name: main-content;
-}
-
-/* Disable the default root animation so sidebar/header stay untouched */
-::view-transition-old(root),
-::view-transition-new(root) {
-    animation: none;
-}
-
-/* Animate only the content area */
-::view-transition-old(main-content) {
-    animation: vt-fade-out 120ms ease-out both;
-}
-
-::view-transition-new(main-content) {
-    animation: vt-slide-fade-in 220ms ease-out both;
-}
-
-@keyframes vt-fade-out {
-    to {
-        opacity: 0;
-    }
-}
-
-@keyframes vt-slide-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
 }
 
 /* Blog preview cards — clear visual separation + fully clickable */
@@ -114,12 +90,13 @@ button {
     border-radius: 0.75rem;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .preview:hover {
     border-color: var(--sl-color-accent);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .preview h2 a::after {
@@ -133,9 +110,9 @@ button {
 #starlight__sidebar [href="/blog/semantic-search/"]::after {
     content: 'New';
     display: inline-block;
-    background-color: var(--sl-color-green-low);
-    color: var(--sl-color-white);
-    border: 1px solid var(--sl-color-green);
+    background-color: color-mix(in srgb, var(--sl-color-green) 15%, transparent);
+    color: var(--sl-color-green-high, var(--sl-color-green));
+    border: 1px solid color-mix(in srgb, var(--sl-color-green) 40%, transparent);
     font-size: 0.625rem;
     font-weight: 600;
     padding: 0.125rem 0.375rem;
@@ -143,4 +120,72 @@ button {
     margin-inline-start: 0.5rem;
     vertical-align: middle;
     line-height: 1;
+}
+
+/* ── 5. Custom View Transitions ── */
+
+.main-frame {
+    view-transition-name: main-content;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+::view-transition-old(main-content) {
+    animation: vt-fade-out 150ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(main-content) {
+    animation: vt-slide-fade-in 250ms cubic-bezier(0, 0, 0.2, 1) both;
+}
+
+@keyframes vt-fade-out {
+    to { opacity: 0; }
+}
+
+@keyframes vt-slide-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* ── 6. Advanced Markdown Tables (Sticky Headers) ── */
+
+/* Base Sticky Styles */
+.sl-markdown-content th {
+    position: sticky;
+    z-index: 10;
+    /* Uses theme's background to ensure content rolling underneath is invisible */
+    background-color: var(--sl-color-bg);
+    /* In border-collapse tables, an inset box-shadow perfectly simulates the border */
+    box-shadow: inset 0 -1px 0 var(--sl-color-gray-5);
+}
+
+/* Desktop: Allow table to flow normally so it sticks to the page nav */
+@media (min-width: 50rem) {
+    .sl-markdown-content table:not(:where(.not-content *)) {
+        display: table;
+        overflow: visible;
+        width: 100%;
+    }
+    
+    .sl-markdown-content th {
+        top: calc(var(--sl-nav-height, 3.5rem) - 1px);
+    }
+}
+
+/* Mobile: Retain horizontal overflow, but add vertical scroll max-height bounds */
+@media (max-width: 49.99rem) {
+    .sl-markdown-content table:not(:where(.not-content *)) {
+        max-height: 75vh;
+        /* Hardware acceleration and momentum scrolling for smooth experience */
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .sl-markdown-content th {
+        top: 0;
+    }
 }

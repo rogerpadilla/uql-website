@@ -8,30 +8,65 @@
  */
 ---
 
-<section class="giscus-container">
-  <script
-    src="https://giscus.app/client.js"
-    data-repo="rogerpadilla/uql"
-    data-repo-id="MDEwOlJlcG9zaXRvcnkyOTYzOTIwOTE="
-    data-category="Blog Comments"
-    data-category-id="DIC_kwDOEaqVm84C4HwJ"
-    data-mapping="pathname"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="top"
-    data-theme="preferred_color_scheme"
-    data-lang="en"
-    data-loading="lazy"
-    crossorigin="anonymous"
-    async
-  ></script>
+<section class="giscus-container" id="giscus-wrapper">
+  <!-- Content injected via client-side script to support View Transitions -->
 </section>
+
+<script is:inline data-astro-rerun>
+  (function setupGiscus() {
+    const container = document.getElementById('giscus-wrapper');
+    if (!container) return;
+    
+    // Clear previous elements if restoring from view transition cache
+    container.innerHTML = '';
+
+    const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    const theme = getTheme();
+
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'rogerpadilla/uql');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnkyOTYzOTIwOTE=');
+    script.setAttribute('data-category', 'Blog Comments');
+    script.setAttribute('data-category-id', 'DIC_kwDOEaqVm84C4HwJ');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', 'en');
+    script.setAttribute('data-loading', 'lazy');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+
+    container.appendChild(script);
+
+    // Watch for Starlight theme toggles without recreating the entire iframe
+    if (!window.__giscusThemeObserver) {
+      window.__giscusThemeObserver = new MutationObserver(() => {
+        const newTheme = getTheme();
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            { giscus: { setConfig: { theme: newTheme } } },
+            'https://giscus.app'
+          );
+        }
+      });
+      window.__giscusThemeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
+    }
+  })();
+</script>
 
 <style>
   .giscus-container {
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--sl-color-gray-5);
+    min-height: 400px; /* Reduces layout shift on load */
   }
 </style>
