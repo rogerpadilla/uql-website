@@ -630,18 +630,19 @@ UQL currently provides the broadest **cross-dialect** JSON operator surface in t
 
 | JSON capability | **Drizzle** | **Joist** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Dot-notation JSON filtering | ❌¹ | ❌ | 🔌² | ✅³ | 🔌² | ✅ |
-| Atomic JSON key merge/update | ❌¹ | ❌ | 🔌² | 🔌² | 🔌² | ✅ |
-| Atomic JSON key removal (`unset`) | ❌¹ | ❌ | 🔌² | ❌ | ❌ | ✅ |
-| Atomic JSON array append (`push`) | ❌¹ | ❌ | 🔌² | ❌ | ❌ | ✅ |
-| JSON array query operators (`size`, `all`, `elemMatch`) | ❌¹ | ❌ | 🔌² | 🔌² | 🔌² | ✅ |
-| Same JSON API across 4 SQL dialects | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Nested / Dot-notation JSON filtering | ❌¹ | ❌ | ✅⁴ | ✅³ | 🔌² | ✅ |
+| Atomic JSON key merge/update | ❌¹ | ❌ | ❌⁴ | 🔌² | 🔌² | ✅ |
+| Atomic JSON key removal (`unset`) | ❌¹ | ❌ | ❌⁴ | ❌ | ❌ | ✅ |
+| Atomic JSON array append (`push`) | ❌¹ | ❌ | ❌⁴ | ❌ | ❌ | ✅ |
+| JSON array query operators (`size`, `all`, `elemMatch`) | ❌¹ | ❌ | ✅⁴ | 🔌² | 🔌² | ✅ |
+| Same JSON API across 4 SQL dialects | ❌ | ❌ | ✅⁴ | ❌ | ❌ | ✅ |
 
 <small>
 
 ¹ Requires raw SQL.
 ² Achievable with dialect-specific SQL expressions or query-builder escape hatches, not a unified high-level JSON operator API.
 ³ Prisma advanced JSON filtering is available on selected connectors and has connector-specific limitations.
+⁴ MikroORM provides a unified interface for querying JSON properties (via nested objects and `$elemMatch`) natively across SQL dialects, but relies on full object substitution rather than atomic diffing operators for JSON mutations.
 
 Snapshot references (verified Mar, 2026):
 - Drizzle JSON operator gap: [issue #1690](https://github.com/drizzle-team/drizzle-orm/issues/1690)
