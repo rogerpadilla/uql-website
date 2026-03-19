@@ -155,13 +155,13 @@ button {
 /* ── 6. Advanced Markdown Tables (Sticky Headers) ── */
 
 /* Base Sticky Styles */
-.sl-markdown-content th {
+.sl-markdown-content thead th {
     position: sticky;
     z-index: 10;
     /* Uses theme's background to ensure content rolling underneath is invisible */
-    background-color: var(--sl-color-bg);
+    background-color: var(--sl-color-bg) !important;
     /* In border-collapse tables, an inset box-shadow perfectly simulates the border */
-    box-shadow: inset 0 -1px 0 var(--sl-color-gray-5);
+    box-shadow: inset 0 -1px 0 var(--sl-color-hairline, var(--sl-color-gray-5)) !important;
 }
 
 /* Desktop: Allow table to flow normally so it sticks to the page nav */
@@ -172,7 +172,7 @@ button {
         width: 100%;
     }
     
-    .sl-markdown-content th {
+    .sl-markdown-content thead th {
         top: calc(var(--sl-nav-height, 3.5rem) - 1px);
     }
 }
@@ -185,7 +185,7 @@ button {
         -webkit-overflow-scrolling: touch;
     }
     
-    .sl-markdown-content th {
+    .sl-markdown-content thead th {
         top: 0;
     }
 }
