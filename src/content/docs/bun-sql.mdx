@@ -1,0 +1,84 @@
+---
+title: Bun Native SQL
+sidebar:
+  order: 60
+description: Use Bun's high-performance native SQL drivers with UQL.
+---
+
+## Overview
+
+UQL provides first-class support for **Bun's native SQL client** (`bun:sql`). 
+It allows you to use Bun's built-in, high-performance native drivers for **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite** with UQL's unified API.
+
+### Key Benefits
+
+1. **Blazing Fast**: Uses Bun's native implementations instead of pure JS drivers.
+2. **Zero Dependencies**: No need to install `pg`, `mysql2`, or `better-sqlite3`.
+3. **Unified Connection**: Use a single `BunSqlQuerierPool` for all SQL dialects.
+4. **Adapter Mapping**: UQL automatically configures Bun's internal drivers to match your specified dialect, preventing silent protocol mismatches.
+
+---
+
+## 1. Installation
+
+You only need `uql-orm`. Bun provides the SQL drivers built-in.
+
+```sh
+bun add uql-orm
+```
+
+---
+
+## 2. Using Bun SQL
+
+Import from `uql-orm/bunSql` and specify your dialect and connection string.
+
+```ts
+import { BunSqlQuerierPool } from 'uql-orm/bunSql';
+import { User, Post } from './entities.js';
+
+// Dialect can be 'postgres', 'mysql', 'mariadb', or 'sqlite'
+const pool = new BunSqlQuerierPool(
+  'postgres', 
+  // e.g., 'postgres://user:pass@localhost:5432/db'
+  process.env.DATABASE_URL,
+  { entities: [User, Post] }
+);
+
+const users = await pool.withQuerier(async (querier) =>
+  querier.findMany(User, { $limit: 10 })
+);
+```
+
+---
+
+## 3. SQLite with Bun
+
+For SQLite, you can use a file path or `:memory:`.
+
+```ts
+const pool = new BunSqlQuerierPool(
+  'sqlite', 
+  'uql.db', 
+  { entities: [User] }
+);
+```
+
+---
+
+## 4. Why Bun SQL in UQL?
+
+Bun's `sql` client has a "silent fallback" where it defaults to PostgreSQL if an adapter isn't explicitly provided or recognized. 
+`BunSqlQuerierPool` in UQL eliminates this risk by:
+
+- **Enforcing Adapter mapping**: Mapping `mariadb` -> `mysql` internally for Bun.
+- **Dialect Guardrails**: Ensuring your UQL code uses the correct SQL AST generator for the target database.
+- **Unified Result Mapping**: Correctly handles Bun's custom result objects, including `affectedRows` and `lastInsertRowid`, mapping them to UQL's standard `QueryUpdateResult`.
+
+---
+
+## Next Steps
+
+- Explore the [Querying](/querying/querier) API.
+- Learn about [Transactions](/querying/transactions) in Bun SQL.
+- Set up [AI & Vector Search](/ai-semantic-search) with Bun and PGVector.

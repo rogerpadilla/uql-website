@@ -163,6 +163,7 @@ await querier.beginTransaction({ isolationLevel: 'read committed' });
 | :--- | :--- |
 | **PostgreSQL** | Full support — uses `BEGIN TRANSACTION ISOLATION LEVEL ...`. |
 | **MySQL / MariaDB** | Full support — uses `SET TRANSACTION ISOLATION LEVEL` before `START TRANSACTION`. |
+| **Bun SQL** | Full support — passes through to underlying database (Postgres, MySQL, SQLite). |
 | **SQLite / LibSQL** | Silently ignored (SQLite uses serializable by default). |
 | **MongoDB** | Silently ignored. |
 
