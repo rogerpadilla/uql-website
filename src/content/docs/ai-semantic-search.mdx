@@ -11,8 +11,8 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 With UQL, semantic search is part of your normal ORM workflow. You can store embeddings and query by meaning without adding a separate search stack.
 
-- **Native vector operators**: Use `$vector`, `$distance`, and `$project` directly in queries.
-- **Multi-database support**: PostgreSQL (pgvector), MariaDB, SQLite (sqlite-vec), and MongoDB Atlas.
+- **Multi-runtime support**: Optimized for Node.js, **Bun Native**, Deno, and the Browser.
+- **Multi-database support**: PostgreSQL (pgvector), CockroachDB, MySQL (v8.0.39+ / v9.0.1+), MariaDB (v11.4+), SQLite (sqlite-vec), and MongoDB Atlas.
 - **One query shape end-to-end**: Use the same JSON query structure on backend and frontend.
 
 If you are building RAG, search, or recommendation features, this gives you one type-safe API from database to UI.
@@ -103,7 +103,7 @@ for (const article of results) {
 
 `$project` adds the computed score to each row (here: `similarity`), so your app can filter, rank, or inspect relevance.
 
-The query shape stays the same across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas.
+The query shape stays the same across all SQL dialects (PostgreSQL, CockroachDB, MySQL, MariaDB, SQLite) and MongoDB Atlas.
 
 ---
 

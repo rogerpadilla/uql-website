@@ -1,0 +1,102 @@
+---
+title: Bun Native SQL
+sidebar:
+  order: 60
+description: Use Bun's high-performance native SQL drivers with UQL.
+---
+
+## Overview
+
+UQL provides first-class support for **Bun's native SQL client** (`bun:sql`). 
+It allows you to use Bun's built-in, high-performance native drivers for **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite** with UQL's unified API.
+
+### Key Benefits
+
+1. **Blazing Fast**: Uses Bun's native implementations instead of pure JS drivers.
+2. **Zero Dependencies**: No need to install `pg`, `mysql2`, or `better-sqlite3`.
+3. **Unified Connection**: Use a single `BunSqlQuerierPool` for all SQL dialects.
+4. **Adapter Mapping**: UQL automatically configures Bun's internal drivers to match your specified dialect, preventing silent protocol mismatches.
+
+---
+
+## 1. Installation
+
+You only need `uql-orm`. Bun provides the SQL drivers built-in.
+
+```sh
+bun add uql-orm
+```
+
+---
+
+## 2. Using Bun SQL
+
+Import from `uql-orm/bunSql` and specify your dialect and connection string.
+
+```ts
+import { BunSqlQuerierPool } from 'uql-orm/bunSql';
+import { User, Post } from './entities.js';
+
+// Dialect can be 'postgres', 'mysql', 'mariadb', or 'sqlite'
+const pool = new BunSqlQuerierPool(
+  'postgres', 
+  // e.g., 'postgres://user:pass@localhost:5432/db'
+  process.env.DATABASE_URL,
+  { entities: [User, Post] }
+);
+
+const users = await pool.withQuerier(async (querier) =>
+  querier.findMany(User, { $limit: 10 })
+);
+```
+
+---
+
+## 3. SQLite with Bun
+
+For SQLite, simply point to a database file or the `:memory:` special string.
+
+```ts
+const pool = new BunSqlQuerierPool(
+  'sqlite', 
+  ':memory:', 
+  { entities: [User] }
+);
+```
+
+---
+
+## 4. Connection & Pooling Behaviors
+
+Bun's `bun:sql` treats different databases with distinct connection semantics. UQL's `BunSqlQuerierPool` abstracts these details so you don't have to worry about race conditions or driver-specific errors.
+
+### Automatic Reservation (Pooling)
+For **PostgreSQL** and **MySQL**, Bun exposes a `.reserve()` method to obtain a dedicated connection from the pool.
+- **UQL's Role**: UQL identifies these as "Reserved Connections." It automatically calls `.reserve()` and ensures `.release()` is called when the querier is released back to the pool.
+
+### Unpooled Persistence (SQLite)
+Bun's native **SQLite** driver does *not* support connection reservation and throws if you attempt to call `.reserve()`.
+- **UQL's Role**: `BunSqlQuerierPool` identifies the SQLite dialect and transparently returns a singleton handle. It skips the reservation phase, allowing you to use the standard `withQuerier` or `transaction` wrappers without modification.
+
+### Dialect Aliasing
+Bun has native support for **CockroachDB** through its PostgreSQL adapter.
+- **UQL's Role**: You can pass `'cockroachdb'` as the dialect to `BunSqlQuerierPool`. UQL will automatically tell Bun to use the `postgres` adapter while maintaining UQL's specialized SQL generation for CockroachDB (such as unique identity and JSON handling).
+
+---
+
+## 5. Why Bun SQL in UQL?
+
+Bun's `sql` client has a "silent fallback" where it defaults to PostgreSQL if an adapter isn't explicitly provided or recognized. 
+`BunSqlQuerierPool` in UQL eliminates this risk by:
+
+- **Enforcing Adapter mapping**: Mapping `mariadb` -> `mysql` internally for Bun.
+- **Dialect Guardrails**: Ensuring your UQL code uses the correct SQL AST generator for the target database.
+- **Unified Result Mapping**: Correctly handles Bun's custom result objects, including `affectedRows` and `lastInsertRowid`, mapping them to UQL's standard `QueryUpdateResult`.
+
+---
+
+## Next Steps
+
+- Explore the [Querying](/querying/querier) API.
+- Learn about [Transactions](/querying/transactions) in Bun SQL.
+- Set up [AI & Vector Search](/ai-semantic-search) with Bun and PGVector.

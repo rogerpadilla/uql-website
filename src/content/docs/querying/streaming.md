@@ -21,7 +21,7 @@ for await (const user of results) {
 }
 ```
 
-## Why uses Streaming?
+## Why use Streaming?
 
 1.  **Memory Efficiency**: You can process 1,000,000 rows with the same memory footprint as processing 10 rows.
 2.  **Early Processing**: Start handling the first row before the database has even finished finding the last one.
@@ -36,6 +36,7 @@ UQL uses the optimal streaming mechanism for each individual driver:
 | **PostgreSQL** (`pg`) | Native cursor via `pg-query-stream`. |
 | **MySQL** (`mysql2`) | Result set streaming via `.stream()`. |
 | **SQLite** (`better-sqlite3`) | Iteration via `.iterate()`. |
+| **Bun SQL** (`bun:sql`) | Native iteration via generator-wrapped `iterate()`. |
 | **MongoDB** (`mongodb`) | Native MongoDB `Cursor`. |
 | **LibSQL** / **D1** | Emulated streaming (async row fetching). |
 

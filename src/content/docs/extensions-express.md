@@ -83,6 +83,10 @@ For an entity named `User`, the following endpoints are automatically generated:
 | `PUT`    | `/user`     | Upsert a user (insert or update based on conflict paths). |
 | `DELETE` | `/user/:id` | Delete a user (supports soft-delete if configured).       |
 
+:::note[Dynamic ID Mapping]
+Starting with `0.7.0`, the middleware automatically detects the primary key defined via `@Id()` in your entity metadata. Route parameters like `:id` are no longer hardcoded to the property name `id`, but are mapped dynamically to whatever you've defined as your entity's identifier (e.g., `uuid`, `itemNo`, etc.).
+:::
+
 :::tip
 All `GET` endpoints support UQL's powerful [Serializable JSON Query Syntax](/querying/querier), allowing your frontend to perform complex joins and filters directly via URL parameters.
 :::

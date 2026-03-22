@@ -121,12 +121,24 @@ npx uql-migrate down
 npx uql-migrate up --config ./configs/uql.config.ts
 ```
 
-:::caution[Bun Users]
-If your `uql.config.ts` uses TypeScript path aliases (e.g., `~app/...`), run migrations with the `--bun` flag to ensure proper resolution:
-```bash
-bun run --bun uql-migrate status
+:::tip[Bun Users]
+If you are using Bun's native SQL drivers, use `BunSqlQuerierPool` in your configuration to avoid installing external driver packages like `pg` or `mysql2`:
+
+```ts
+// uql.config.ts
+import { BunSqlQuerierPool } from 'uql-orm/bunSql';
+
+export default {
+  pool: new BunSqlQuerierPool('postgres', process.env.DATABASE_URL),
+  // ...
+};
 ```
-Or add a script to your `package.json`: `"uql": "bun run --bun uql-migrate"`.
+
+When running migrations, use the `--bun` flag to ensure Bun's high-performance runtime handles TypeScript resolution and native driver loading:
+```bash
+bun run --bun uql-migrate up
+```
+Or add a script to your `package.json`: `"uql": "bun run --bun uql-migrate status"`.
 :::
 
 ### 3. Entity-First Synchronization (Development)
