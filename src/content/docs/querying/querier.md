@@ -100,7 +100,8 @@ try {
 | `upsertMany(Entity, conflictPaths, data[])` | Bulk insert or update based on conflict paths. |
 | `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
 | `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
-| `run(sql, values?)`                         | Execute raw SQL.                               |
+| [`run(sql, values?)`](/querying/raw-sql)    | Execute [raw SQL](/querying/raw-sql) (INSERT, UPDATE, DELETE). |
+| [`all<T>(sql, values?)`](/querying/raw-sql) | Execute [raw SQL SELECT](/querying/raw-sql) with generics. |
 | `transaction(callback, opts?)`              | Run a [transaction](/querying/transactions) within a callback. |
 | `beginTransaction(opts?)`                   | Start a [transaction](/querying/transactions) manually. |
 | `commitTransaction()`                       | Commit the active transaction.                 |
