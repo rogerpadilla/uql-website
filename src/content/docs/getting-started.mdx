@@ -41,7 +41,8 @@ Install the core and your preferred driver:
   </TabItem>
   <TabItem label="bun">
     ```sh
-    bun add uql-orm pg # or mysql2, better-sqlite3, mongodb, etc.
+    bun add uql-orm
+    # Bun has native SQL drivers built-in via `bun:sql`, no external drivers required!
     ```
   </TabItem>
   <TabItem label="pnpm">
@@ -118,6 +119,7 @@ console.log(users);
 
 | Database | Driver Package | Status |
 | :--- | :--- | :--- |
+| Bun SQL Native | `bun:sql` | ✅ Full |
 | PostgreSQL | `pg` | ✅ Full |
 | CockroachDB | `pg` | ✅ Full |
 | MySQL | `mysql2` | ✅ Full |
@@ -142,6 +144,7 @@ UQL uses subpath exports to keep your bundles lean:
 | `uql-orm/mysql` | MySQL driver pool (also works with MariaDB) |
 | `uql-orm/maria` | MariaDB driver pool (dedicated `mariadb` driver) |
 | `uql-orm/sqlite` | SQLite driver pool |
+| `uql-orm/bunSql` | **Bun Native SQL** driver pool (Postgres, MySQL, SQLite) |
 | `uql-orm/libsql` | LibSQL / Turso driver pool |
 | `uql-orm/neon` | Neon serverless driver pool |
 | `uql-orm/d1` | Cloudflare D1 driver pool |

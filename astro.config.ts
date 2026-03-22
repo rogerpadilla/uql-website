@@ -114,6 +114,7 @@ const config: AstroUserConfig = {
           label: 'Ecosystem',
           items: [
             { label: 'Next.js', link: '/nextjs' },
+            { label: 'Bun Native SQL', link: '/bun-sql' },
             { label: 'Cloudflare Workers & D1', link: '/cloudflare-d1' },
             { label: 'Express', link: '/extensions-express' },
             { label: 'Browser', link: '/extensions-browser' },
