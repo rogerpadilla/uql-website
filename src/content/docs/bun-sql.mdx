@@ -37,16 +37,14 @@ Import from `uql-orm/bunSql` and specify your dialect and connection string.
 import { BunSqlQuerierPool } from 'uql-orm/bunSql';
 import { User, Post } from './entities.js';
 
-// Dialect can be 'postgres', 'mysql', 'mariadb', or 'sqlite'
+// Pass Bun `SQL.Options`: URL, `adapter`, or SQLite `filename`. UQL infers the dialect.
 const pool = new BunSqlQuerierPool(
-  'postgres', 
-  // e.g., 'postgres://user:pass@localhost:5432/db'
-  process.env.DATABASE_URL,
-  { entities: [User, Post] }
+  process.env.DATABASE_URL!, // e.g. postgres://, mysql://, file path, or :memory:
+  { entities: [User, Post] },
 );
 
 const users = await pool.withQuerier(async (querier) =>
-  querier.findMany(User, { $limit: 10 })
+  querier.findMany(User, { $limit: 10 }),
 );
 ```
 
@@ -57,11 +55,7 @@ const users = await pool.withQuerier(async (querier) =>
 For SQLite, simply point to a database file or the `:memory:` special string.
 
 ```ts
-const pool = new BunSqlQuerierPool(
-  'sqlite', 
-  ':memory:', 
-  { entities: [User] }
-);
+const pool = new BunSqlQuerierPool(':memory:', { entities: [User] });
 ```
 
 ---

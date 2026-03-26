@@ -12,7 +12,7 @@ UQL provide a comprehensive set of operators for comparing field values. These o
 | Name           | Description                                                                        |
 | -------------- | ---------------------------------------------------------------------------------- |
 | `$eq`          | Equal to.                                                                          |
-| `$ne`          | Not equal to.                                                                      |
+| `$ne`          | Not equal to (null-safe: rows where the column is `NULL` still match when the value is not null). |
 | `$lt`          | Less than.                                                                         |
 | `$lte`         | Less than or equal to.                                                             |
 | `$gt`          | Greater than.                                                                      |
@@ -58,15 +58,22 @@ UQL transparently handles the differences between database vendors. For example,
 
 ```sql title="Generated SQL (PostgreSQL)"
 SELECT "id", "name" FROM "User"
-WHERE ("name" ILIKE $1 AND "name" <> $2) AND ("age" >= $3 AND "age" <= $4)
+WHERE ("name" ILIKE $1 AND "name" IS DISTINCT FROM $2) AND ("age" >= $3 AND "age" <= $4)
 ORDER BY "name"
 LIMIT 50
 ```
 
-```sql title="Generated SQL (MySQL/SQLite)"
+```sql title="Generated SQL (MySQL/MariaDB)"
 SELECT `id`, `name` FROM `User`
-WHERE (LOWER(`name`) LIKE ? AND `name` <> ?) AND (`age` >= ? AND `age` <= ?)
+WHERE (LOWER(`name`) LIKE ? AND NOT (`name` <=> ?)) AND (`age` >= ? AND `age` <= ?)
 ORDER BY `name`
+LIMIT 50
+```
+
+```sql title="Generated SQL (SQLite)"
+SELECT "id", "name" FROM "User"
+WHERE (LOWER("name") LIKE ? AND "name" IS NOT ?) AND ("age" >= ? AND "age" <= ?)
+ORDER BY "name"
 LIMIT 50
 ```
 
