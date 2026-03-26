@@ -72,9 +72,9 @@ For **PostgreSQL** and **MySQL**, Bun exposes a `.reserve()` method to obtain a 
 Bun's native **SQLite** driver does *not* support connection reservation and throws if you attempt to call `.reserve()`.
 - **UQL's Role**: `BunSqlQuerierPool` identifies the SQLite dialect and transparently returns a singleton handle. It skips the reservation phase, allowing you to use the standard `withQuerier` or `transaction` wrappers without modification.
 
-### Dialect Aliasing
-Bun has native support for **CockroachDB** through its PostgreSQL adapter.
-- **UQL's Role**: You can pass `'cockroachdb'` as the dialect to `BunSqlQuerierPool`. UQL will automatically tell Bun to use the `postgres` adapter while maintaining UQL's specialized SQL generation for CockroachDB (such as unique identity and JSON handling).
+### CockroachDB
+Bun talks to **CockroachDB** through its PostgreSQL wire adapter.
+- **UQL's Role**: Use a Cockroach connection URL (or `adapter: 'cockroachdb'` in `SQL.Options` when Bun exposes it). UQL keeps `SqlDialect` as `cockroachdb` for AST generation while `normalizeBunOpts` maps Bun's `adapter` to `postgres` under the hood.
 
 ---
 
@@ -83,7 +83,7 @@ Bun has native support for **CockroachDB** through its PostgreSQL adapter.
 Bun's `sql` client has a "silent fallback" where it defaults to PostgreSQL if an adapter isn't explicitly provided or recognized. 
 `BunSqlQuerierPool` in UQL eliminates this risk by:
 
-- **Enforcing Adapter mapping**: Mapping `mariadb` -> `mysql` internally for Bun.
+- **Enforcing adapter mapping**: Normalizing `SQL.Options` per dialect (e.g. CockroachDB uses Bun’s `postgres` adapter while UQL still emits Cockroach-specific SQL).
 - **Dialect Guardrails**: Ensuring your UQL code uses the correct SQL AST generator for the target database.
 - **Unified Result Mapping**: Correctly handles Bun's custom result objects, including `affectedRows` and `lastInsertRowid`, mapping them to UQL's standard `QueryUpdateResult`.
 
