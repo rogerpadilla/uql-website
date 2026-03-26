@@ -71,9 +71,9 @@ LIMIT 50
 ```
 
 ```sql title="Generated SQL (SQLite)"
-SELECT "id", "name" FROM "User"
-WHERE (LOWER("name") LIKE ? AND "name" IS NOT ?) AND ("age" >= ? AND "age" <= ?)
-ORDER BY "name"
+SELECT `id`, `name` FROM `User`
+WHERE (`name` LIKE ? AND `name` IS NOT ?) AND (`age` >= ? AND `age` <= ?)
+ORDER BY `name`
 LIMIT 50
 ```
 
