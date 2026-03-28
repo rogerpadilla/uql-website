@@ -189,3 +189,28 @@ button {
         top: 0;
     }
 }
+
+/* ── 7. Splash Hero Refinements ── */
+
+/*
+ * Starlight's hero uses `padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem)`.
+ * The `:where()` wrapper gives it zero specificity, so a bare `.hero` wins.
+ * We override both axes to eliminate the dead space.
+ */
+.hero {
+    padding-block: 2rem 1rem !important;
+}
+
+/* Scale hero logo on tablet — Starlight uses width-based sizing with `height: auto` */
+@media (max-width: 72rem) {
+    .hero > img {
+        width: min(100%, 14rem) !important;
+    }
+}
+
+/* Scale hero logo on mobile — keep headline + CTAs above fold */
+@media (max-width: 50rem) {
+    .hero > img {
+        width: min(60%, 10rem) !important;
+    }
+}

@@ -19,75 +19,24 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## Elegant, Fast, and Type-Safe
-
-<CardGrid stagger>
-	<Card title="Full Type Safety" icon="pencil">
-		Deeply nested auto-completion for your queries and entity definitions. Stop catching bugs in production.
-	</Card>
-	<Card title="Unified API" icon="add-document">
-		First-class support for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, Cloudflare D1, MongoDB, and **Bun Native SQL** with a consistent API.
-	</Card>
-	<Card title="Performant by Design" icon="setting">
-		Zero-overhead query generation, 64-bit primary keys, and smart connection pooling for high-concurrency environments.
-	</Card>
-	<Card title="Universal Compatibility" icon="open-book">
-		Engineered for the ESM era. Works out of the box with Node.js, Bun, Deno, and even the Browser.
-	</Card>
-</CardGrid>
-
----
-
-:::note[Tip]
-UQL is designed to be **unobtrusive**. You don't need to change your architecture to fit the ORM; UQL fits into yours.
-:::
+```sh
+npm install uql-orm
+```
 
 ---
 
 ## Why UQL?
 
-| Feature | **UQL** | Traditional ORMs |
+| Feature | **UQL** | Others |
 | :--- | :--- | :--- |
 | **API** | **Unified & Intuitive**: Same syntax for SQL & NoSQL. | Fragmented: SQL and Mongo feel like different worlds. |
 | **Intelligence** | **Deep Auto-Completion**: IDE-powered inference for relations & operators at any depth. | Surface-level: Often loses types in complex joins. |
 | **Syntax** | **Serializable JSON**: Pure data, perfect for APIs/Websockets. | Method-Chaining: Hard to transport over the wire. |
 | **Efficiency** | **Sticky Connections**: [Measured at 3.9M+ ops/s](/comparison#performance). | Heavy: Often generates "SQL Soup" that's hard to debug. |
-| **Comparison** | [View full 2026 technical breakdown →](/comparison) | *Based on latest profiles for Prisma, Drizzle, and MikroORM.* |
 
----
-
-## Benchmark & Performance
-
-<CardGrid>
-	<LinkCard
-		title="Benchmark Overview (Performance)"
-		href="/comparison#performance"
-		description="Pure SQL generation speed (no database I/O) across ORMs and query builders."
-	/>
-	<LinkCard
-		title="Benchmark Analysis"
-		href="/blog/in-search-of-the-fastest-typescript-orm"
-		description="Methodology, interactive charts, and reproduction instructions."
-	/>
-	<LinkCard
-		title="Benchmark Repo (GitHub)"
-		href="https://github.com/rogerpadilla/ts-orm-benchmark"
-		description="Fully open-source and audit-ready."
-	/>
-</CardGrid>
-
----
-
-## Key Features
-
-<CardGrid>
-	<LinkCard title="Entity-First Migrations" href="/migrations" description="Define your schema in TypeScript and let UQL generate migrations automatically. Safe by default — only adds, never drops." />
-	<LinkCard title="Semantic Type System" href="/entities/basic" description="Use abstract types like 'uuid', 'json', 'vector' that map correctly across all databases without dialect-specific code." />
-	<LinkCard title="Thread-Safe Transactions" href="/querying/transactions" description="Configurable isolation levels across all drivers. Portable across PostgreSQL, MySQL, SQLite, and MongoDB." />
-	<LinkCard title="Professional Logging" href="/logging" description="Built-in slow-query detection, colored output, and customizable log levels for production monitoring." />
-</CardGrid>
+> See also: [Full 2026 comparison →](/comparison) · [In Search of the Fastest TypeScript ORM →](/blog/in-search-of-the-fastest-typescript-orm) · [Benchmark Repo (GitHub) →](https://github.com/rogerpadilla/ts-orm-benchmark)
 
 ---
 
@@ -116,10 +65,4 @@ If you want **Prisma‑level ergonomics** with **query‑builder performance**, 
 
 ---
 
-## Built with ❤️ and used in production
-
-UQL is an open-source project driven by the community and proudly used in production at:
-
-- **[Variability.ai](https://variability.ai)** — AI meeting and video intelligence platform.
-
-Their support helps us maintain and evolve the best ORM for developers everywhere. Thank you for being part of our journey!
+**🤍 Open-source** · Production-trusted by [Variability.ai](https://variability.ai) — AI meeting and video intelligence platform.
