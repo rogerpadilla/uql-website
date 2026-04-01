@@ -31,17 +31,21 @@ bun add uql-orm
 
 ## 2. Using Bun SQL
 
-Import from `uql-orm/bunSql` and specify your dialect and connection string.
+Import from `uql-orm/bunSql` and pass a Bun **`SQL.Options`** object (connection URL, `adapter`, SQLite `filename`, etc.). UQL infers the dialect from that shape.
 
 ```ts
+import type { Config } from 'uql-orm';
 import { BunSqlQuerierPool } from 'uql-orm/bunSql';
 import { User, Post } from './entities.js';
 
-// Pass Bun `SQL.Options`: URL, `adapter`, or SQLite `filename`. UQL infers the dialect.
 const pool = new BunSqlQuerierPool(
-  process.env.DATABASE_URL!, // e.g. postgres://, mysql://, file path, or :memory:
-  { entities: [User, Post] },
+  { url: process.env.DATABASE_URL! }, // e.g. postgres://, mysql://, sqlite://, or file path
 );
+
+export default {
+  pool,
+  entities: [User, Post],
+} satisfies Config;
 
 const users = await pool.withQuerier(async (querier) =>
   querier.findMany(User, { $limit: 10 }),
@@ -52,10 +56,11 @@ const users = await pool.withQuerier(async (querier) =>
 
 ## 3. SQLite with Bun
 
-For SQLite, simply point to a database file or the `:memory:` special string.
+For SQLite, use a `sqlite:` / `file:` URL, `:memory:`, or a `filename` option—whatever your Bun version accepts in `SQL.Options`.
 
 ```ts
-const pool = new BunSqlQuerierPool(':memory:', { entities: [User] });
+const pool = new BunSqlQuerierPool({ url: 'sqlite://:memory:' });
+// or: new BunSqlQuerierPool({ filename: ':memory:' })
 ```
 
 ---
@@ -74,7 +79,11 @@ Bun's native **SQLite** driver does *not* support connection reservation and thr
 
 ### CockroachDB
 Bun talks to **CockroachDB** through its PostgreSQL wire adapter.
-- **UQL's Role**: Use a Cockroach connection URL (or `adapter: 'cockroachdb'` in `SQL.Options` when Bun exposes it). UQL keeps `SqlDialect` as `cockroachdb` for AST generation while `normalizeBunOpts` maps Bun's `adapter` to `postgres` under the hood.
+- **UQL's Role**: Use a Cockroach connection URL (or `adapter: 'cockroachdb'` in `SQL.Options` when Bun exposes it). UQL keeps the dialect id as `cockroachdb` for AST generation while `normalizeBunOpts` maps Bun's `adapter` to `postgres` under the hood.
+
+### PostgreSQL dialect
+
+For `postgres://` / `postgresql://` URLs, UQL uses **`BunSqlPostgresDialect`**, a Postgres AST tuned for Bun’s parameter binding (not the same as **`PgDialect`** for node `pg`). You do not configure this explicitly—the pool infers it from `SQL.Options`.
 
 ---
 

@@ -51,6 +51,8 @@ export default {
 } satisfies Config;
 ```
 
+There is **no** top-level `dialect` field in `Config`: migrations and `uql-migrate` infer the database kind from **`pool.dialect.dialectName`**. On `QuerierPool`, the dialect instance is exposed as **`dialect`** (older releases used `dialectInstance`). The CLI validates that the default export looks like a real pool (`getQuerier`, `transaction`, `withQuerier`, and a dialect) via **`assertCliConfig`** from `uql-orm/migrate`.
+
 By default, the CLI looks for `uql.config.ts` in the project root, but you can specify a custom path using the `--config` / `-c` flag.
 
 ### 2. Manage via CLI
@@ -126,13 +128,16 @@ If you are using Bun's native SQL drivers, use `BunSqlQuerierPool` in your confi
 
 ```ts
 // uql.config.ts
+import type { Config } from 'uql-orm';
 import { BunSqlQuerierPool } from 'uql-orm/bunSql';
 
 export default {
-  pool: new BunSqlQuerierPool('postgres', process.env.DATABASE_URL),
-  // ...
-};
+  pool: new BunSqlQuerierPool({ url: process.env.DATABASE_URL! }),
+  // entities, migrationsPath, ...
+} satisfies Config;
 ```
+
+The pool constructor takes Bun’s `SQL.Options` (e.g. `{ url }`, `{ adapter, hostname, ... }`, or SQLite `filename`). The migrator reads the dialect id from `pool.dialect.dialectName`.
 
 When running migrations, use the `--bun` flag to ensure Bun's high-performance runtime handles TypeScript resolution and native driver loading:
 ```bash

@@ -10,6 +10,15 @@ description: Work with JSON/JSONB fields — type-safe filtering, atomic updates
 
 UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite**. Query, update, and sort by nested JSON properties using a consistent, type-safe API — UQL generates dialect-specific SQL automatically.
 
+:::note[PostgreSQL examples default to Node.js + `pg`]
+Unless stated otherwise, **PostgreSQL** snippets on this page match what **`PgQuerierPool`** / **`PgDialect`** (the `node-postgres` driver) produce:
+
+- JSON payloads for `jsonb` are **stringified in the ORM** and bound as parameters, then cast with **`$N::jsonb`** in SQL (no `( $N::text )::jsonb` hop).
+- **Array** parameters for operators like `$in` / `$nin` (`= ANY` / `<> ALL`) are passed as **native JavaScript arrays**; `pg` encodes them on the wire.
+
+If you use **`BunSqlQuerierPool`** against Postgres, UQL switches to **`BunSqlPostgresDialect`**: JSON fragments often use **`( $N::text )::jsonb`**, and arrays are sent as **Postgres array literal strings** instead. See [Bun Native SQL](/bun-sql).
+:::
+
 ## Entity Setup
 
 Wrap JSONB field types with `Json<T>` to enable full type safety — IDE autocompletion for dot-notation paths, `$merge` keys, `$unset` keys, and `$push` targets.
@@ -52,7 +61,7 @@ const companies = await querier.findMany(Company, {
 });
 ```
 
-```sql title="Generated SQL (PostgreSQL)"
+```sql title="Generated SQL (PostgreSQL, node-pg)"
 SELECT * FROM "Company"
 WHERE ("settings"->>'isArchived') IS DISTINCT FROM $1
   AND "settings"->>'theme' = $2
@@ -100,8 +109,8 @@ await querier.updateOneById(Company, id, {
 });
 ```
 
-```sql title="Generated SQL (PostgreSQL)"
-UPDATE "Company" SET "kind" = COALESCE("kind", '{}') || $1::jsonb WHERE "id" = $2
+```sql title="Generated SQL (PostgreSQL, node-pg)"
+UPDATE "Company" SET "kind" = COALESCE("kind", '{}'::jsonb) || $1::jsonb WHERE "id" = $2
 -- values: ['{"public":1}', id]
 ```
 
@@ -130,7 +139,7 @@ await querier.updateOneById(Company, id, {
 });
 ```
 
-```sql title="Generated SQL (PostgreSQL)"
+```sql title="Generated SQL (PostgreSQL, node-pg)"
 UPDATE "Company" SET "kind" = ("kind") - 'private' WHERE "id" = $1
 ```
 
@@ -156,7 +165,7 @@ await querier.updateOneById(Company, id, {
 });
 ```
 
-```sql title="Generated SQL (PostgreSQL)"
+```sql title="Generated SQL (PostgreSQL, node-pg)"
 UPDATE "Company" SET "kind" = jsonb_set("kind", '{tags}', COALESCE("kind"->'tags', '[]'::jsonb) || jsonb_build_array($1::jsonb)) WHERE "id" = $2
 -- values: ['"new-tag"', id]
 ```
@@ -206,7 +215,7 @@ const companies = await querier.findMany(Company, {
 });
 ```
 
-```sql title="Generated SQL (PostgreSQL)"
+```sql title="Generated SQL (PostgreSQL, node-pg)"
 SELECT * FROM "Company" ORDER BY "kind"->>'public' DESC
 ```
 
@@ -257,6 +266,10 @@ UQL may work on earlier versions for many JSON features, but this guide intentio
 
 :::tip[PostgreSQL: Use `jsonb` over `json`]
 For PostgreSQL, always prefer `type: 'jsonb'` over `type: 'json'`. JSONB is binary-stored, indexable, and faster for queries. Array operators (`$size`, `$all`, `$elemMatch`) use JSONB-specific functions (`jsonb_array_length`, `@>`, `jsonb_array_elements`) which require JSONB columns.
+:::
+
+:::tip[Same AST, different Postgres pools]
+**`PostgresDialect`** (shared SQL shape) stringifies JSON for `jsonb` binds. **`PgDialect`** (default with **`PgQuerierPool`**) uses **`$N::jsonb`** and native JS arrays for `ANY`/`ALL`. **`BunSqlPostgresDialect`** (with **`BunSqlQuerierPool`**) uses **`( $N::text )::jsonb`** where Bun’s client needs it, and **array-literal** encoding for `ANY`/`ALL`. Neon and Cockroach pools use other `PostgresDialect` subclasses; JSON casts match the base **`$N::jsonb`** pattern unless you override capabilities.
 :::
 
 :::note

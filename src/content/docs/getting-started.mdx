@@ -90,13 +90,14 @@ export class User {
 }
 
 // uql.config.ts
+import type { Config } from 'uql-orm';
 import { PgQuerierPool } from 'uql-orm/postgres';
 import { User } from './entities.js';
 
-export const pool = new PgQuerierPool(
-  { host: 'localhost', database: 'uql_app' },
-  { entities: [User] }
-);
+const pool = new PgQuerierPool({ host: 'localhost', database: 'uql_app' });
+
+export default { pool, entities: [User] } satisfies Config;
+export { pool };
 
 // app.ts
 import { pool } from './uql.config.js';
