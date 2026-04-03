@@ -53,7 +53,7 @@ Install the core and your preferred driver:
 </Tabs>
 
 :::tip[TypeScript Setup]
-UQL uses decorators. Make sure your `tsconfig.json` has:
+If you use the **decorator-based approach**, make sure your `tsconfig.json` has:
 
 ```json
 {
@@ -63,6 +63,8 @@ UQL uses decorators. Make sure your `tsconfig.json` has:
   }
 }
 ```
+
+If you use the **imperative API** (`defineEntity`), these flags are **not required**.
 
 UQL is Modern Pure ESM — ensure your project's `module` supports ESM imports (e.g., `NodeNext`, `ESNext`, `Bundler`).
 :::
