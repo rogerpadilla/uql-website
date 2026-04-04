@@ -25,9 +25,10 @@ defineEntity(User, {
   fields: {
     id: { type: 'uuid', isId: true },
     name: { type: String },
-    email: { type: String, unique: true },
+    email: { type: String },
   },
   indexes: [
+    { columns: ['name'] },
     { columns: ['email'], unique: true },
   ],
   // You can also define hooks and relations here
