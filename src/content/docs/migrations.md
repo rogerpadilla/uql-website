@@ -29,6 +29,12 @@ That's it. No manual `ALTER TABLE`, no keeping entities and migrations in sync, 
 Want manual migrations for data backfills or custom SQL? You can do that too — full automation + full control when you need it.
 :::
 
+### Generated files and custom generators
+
+**`generate:entities`** writes a default-export migration where each SQL statement is its own `await querier.run("…")` line. The argument is always a normal JavaScript **string literal** (produced with `JSON.stringify`), so SQL that contains **backticks** (SQLite / LibSQL / MySQL-style identifiers), **double quotes**, or **newlines** does not break TypeScript parsing.
+
+If you provide a **custom `SchemaGenerator`**, the create-table helpers **`generateCreateTable`**, **`generateCreateTableFromNode`**, and **`generateCreateTableFromDefinition`** return **`string[]`** — one string per `querier.run`. Join with `'\n'` only when you need a single combined script. (See the **uql-orm** changelog for version **0.8.2**.)
+
 ### 1. Unified Configuration
 
 Reuse the same `uql.config.ts` for both your application bootstrap and the CLI. This ensures your app and migrations share the same settings (like [Naming Strategies](/naming-strategy)).
