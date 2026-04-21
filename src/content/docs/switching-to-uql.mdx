@@ -165,7 +165,7 @@ Once the legacy ORM is no longer being used for any queries, remove it from your
 :::warning[The "Migration Mindset" Shift]
 Coming from a different ORM creates "muscle memory" that can lead to bugs. Be mindful of these:
 
-- **The "Identity Map" Reflex**: If you are coming from MikroORM or Joist, remember: **UQL does not track state.** Changing `user.name = 'Bob'` does nothing to the database. You must explicitly call `updateOne`.
+- **The "Identity Map" Reflex**: If you are coming from MikroORM, remember: **UQL does not track state.** Changing `user.name = 'Bob'` does nothing to the database. You must explicitly call `updateOne`.
 - **The "DSL" Reflex**: If you are coming from Prisma, you might look for a schema file to check a relation. **Stop.** Look at the `@Entity` class. If it's not in the TS class, it's not in the DB.
 - **The "CommonJS" Trap**: UQL is **Pure ESM**. If your project is still using `require()`, you will need to migrate to `import` and set `"type": "module"` in your `package.json`.
 - **The "Generation" Habit**: You no longer need to run a "generate" command after changing a field. Just save the file and run your migration.
