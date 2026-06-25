@@ -9,6 +9,40 @@ description: Install UQL, define an entity, and run your first query.
 
 **[UQL](/)** is a JSON-native query protocol for TypeScript — fast, type-safe, and the same wherever your code runs.
 
+---
+
+## Installation
+
+Install the core package and your preferred database driver:
+
+<Tabs>
+  <TabItem label="npm">
+    ```sh
+    npm install uql-orm pg
+    # or install another driver as needed
+    npm install uql-orm mysql2
+    npm install uql-orm better-sqlite3
+    npm install uql-orm mongodb
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```sh
+    bun add uql-orm
+    # Bun has native SQL drivers built-in via `bun:sql`
+    # No external drivers required for PostgreSQL, MySQL, SQLite
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add uql-orm pg
+    # or install another driver as needed
+    pnpm add uql-orm mysql2
+    pnpm add uql-orm better-sqlite3
+    pnpm add uql-orm mongodb
+    ```
+  </TabItem>
+</Tabs>
+
 - **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
 - **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
 
@@ -64,6 +98,9 @@ If you use the **decorator-based approach**, make sure your `tsconfig.json` has:
 }
 ```
 
+**For `defineEntity` (imperative API), these flags are NOT required.**
+```
+
 If you use the **imperative API** (`defineEntity`), these flags are **not required**.
 
 UQL is Modern Pure ESM — ensure your project's `module` supports ESM imports (e.g., `NodeNext`, `ESNext`, `Bundler`).
@@ -96,7 +133,21 @@ import type { Config } from 'uql-orm';
 import { PgQuerierPool } from 'uql-orm/postgres';
 import { User } from './entities.js';
 
-const pool = new PgQuerierPool({ host: 'localhost', database: 'uql_app' });
+// For production, use environment variables:
+// const pool = new PgQuerierPool({ 
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME
+// });
+
+// For local development:
+const pool = new PgQuerierPool({ 
+  host: 'localhost',
+  user: 'postgres',
+  password: 'password',
+  database: 'uql_app'
+});
 
 export default { pool, entities: [User] } satisfies Config;
 export { pool };
@@ -120,18 +171,18 @@ console.log(users);
 
 ## Supported Databases
 
-| Database | Driver Package | Status |
-| :--- | :--- | :--- |
-| Bun SQL Native | `bun:sql` | ✅ Full |
-| PostgreSQL | `pg` | ✅ Full |
-| CockroachDB | `pg` | ✅ Full |
-| MySQL | `mysql2` | ✅ Full |
-| MariaDB | `mariadb` or `mysql2` | ✅ Full |
-| SQLite | `better-sqlite3` | ✅ Full |
-| LibSQL / Turso | `@libsql/client` | ✅ Full |
-| Cloudflare D1 | — | ✅ Full |
-| Neon | `@neondatabase/serverless` | ✅ Full |
-| MongoDB | `mongodb` | ✅ Full |
+| Database | Driver Package | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| Bun SQL Native | `bun:sql` | ✅ Full | Built-in, no install needed |
+| PostgreSQL | `pg` | ✅ Full | Production-ready |
+| CockroachDB | `pg` | ✅ Full | Compatible with PostgreSQL driver |
+| MySQL | `mysql2` | ✅ Full | Production-ready |
+| MariaDB | `mariadb` or `mysql2` | ✅ Full | Use `mariadb` for native support |
+| SQLite | `better-sqlite3` | ✅ Full | Synchronous, single-file |
+| LibSQL / Turso | `@libsql/client` | ✅ Full | SQLite fork for serverless |
+| Cloudflare D1 | — | ✅ Full | Use `uql-orm/d1` |
+| Neon | `@neondatabase/serverless` | ✅ Full | Serverless Postgres |
+| MongoDB | `mongodb` | ✅ Full | Document database |
 
 ---
 
@@ -174,4 +225,47 @@ UQL uses subpath exports to keep your bundles lean:
 - **Decorators not working**: Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in `tsconfig.json`, and that your bundler supports decorators.  
 - **ESM import issues**: UQL is Pure ESM — set your `module` to `NodeNext`, `ESNext`, or `Bundler`, and avoid mixing `require()` with `import`.  
 - **Connection errors**: Double-check database credentials and that your driver package (for example `pg`, `mysql2`, or `better-sqlite3`) is installed and compatible with your runtime.  
+- **Pool not exported**: When using `uql.config.ts` for migrations, ensure you **export both the config and the pool** as shown in the example above.
 ::::
+
+---
+
+## Troubleshooting
+
+### "Cannot find module" errors
+
+If you see module resolution errors, ensure:
+1. Your `tsconfig.json` has `"module": "NodeNext"` or `"module": "ESNext"`
+2. Your `package.json` has `"type": "module"`
+3. All imports use the `.js` extension (TypeScript will resolve to `.ts`)
+
+### "Connection refused" errors
+
+1. Verify your database is running
+2. Check credentials in `uql.config.ts`
+3. Ensure the database exists (PostgreSQL: `createdb uql_app`)
+4. For Docker: verify network settings and port mappings
+
+### "Decorators are not enabled" errors
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "ES2021"
+  }
+}
+```
+
+For Bun, no special configuration is needed.
+
+---
+
+## Next Steps
+
+- [Define Entities](/entities/basic) — Explore all decorators and type abstractions.
+- [Define Relations](/entities/relations) — Map complex relationships with ease.
+- [Querying](/querying/querier) — Deep selection, filtering, and sorting.
+- [Transactions](/querying/transactions) — Automatic and manual transaction patterns.
+- [Migrations](/migrations) — Schema evolution with the CLI and Drift Detection.
