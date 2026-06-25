@@ -14,7 +14,7 @@ const config: AstroUserConfig = {
     starlight({
       title: 'UQL',
       favicon: '/logo.svg',
-      tagline: 'The best ORM for TypeScript',
+      tagline: 'A JSON-native ORM for TypeScript',
       description: projectDescription,
       head: [
         {
@@ -52,6 +52,7 @@ const config: AstroUserConfig = {
       },
       components: {
         Head: './src/components/Head.astro',
+        Hero: './src/components/Hero.astro',
         SocialIcons: './src/components/SocialIcons.astro',
       },
       editLink: {
@@ -79,7 +80,6 @@ const config: AstroUserConfig = {
             {
               label: 'Comparison',
               link: '/comparison',
-              badge: { text: 'New', variant: 'success' },
             },
             {
               label: 'Benchmark',
@@ -100,7 +100,7 @@ const config: AstroUserConfig = {
         },
         {
           label: 'Querying',
-          autogenerate: { directory: 'querying' },
+          items: [{ autogenerate: { directory: 'querying' } }],
         },
         {
           label: 'Advanced',
