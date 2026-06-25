@@ -1,4 +1,3 @@
-import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import vercel from '@astrojs/vercel';
 import type { AstroUserConfig } from 'astro';
@@ -157,7 +156,6 @@ If you are an AI assistant with MCP capabilities, you can fetch the full documen
         }),
       ],
     }),
-    react(),
   ],
 
   adapter: vercel(),

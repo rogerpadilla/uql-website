@@ -93,9 +93,10 @@ button {
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Motion Implementation: Intentional presence and hierarchy */
-.hero h1, 
-.hero p, 
+/* Motion: intentional presence and hierarchy. The tagline is a `div.tagline`
+   (not a `p`), so target it directly. */
+.hero h1,
+.hero .tagline,
 .hero .actions {
     animation: fade-in-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -104,7 +105,7 @@ button {
     animation-delay: 0.1s;
 }
 
-.hero p {
+.hero .tagline {
     animation-delay: 0.3s;
 }
 
@@ -145,23 +146,6 @@ section, .sl-markdown-content > *:not(.hero) {
     content: '';
     position: absolute;
     inset: 0;
-}
-
-/* "New" badge for the latest blog posts in sidebar */
-#starlight__sidebar [href="/blog/benchmark-typescript-orms/"]::after,
-#starlight__sidebar [href="/blog/semantic-search/"]::after {
-    content: 'New';
-    display: inline-block;
-    background-color: color-mix(in srgb, var(--sl-color-green) 15%, transparent);
-    color: var(--sl-color-green-high, var(--sl-color-green));
-    border: 1px solid color-mix(in srgb, var(--sl-color-green) 40%, transparent);
-    font-size: 0.625rem;
-    font-weight: 600;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    margin-inline-start: 0.5rem;
-    vertical-align: middle;
-    line-height: 1;
 }
 
 /* ── 5. Custom View Transitions ── */
@@ -243,30 +227,5 @@ section, .sl-markdown-content > *:not(.hero) {
     }
 }
 
-/* ── 7. Splash Hero Refinements ── */
-
-/*
- * Starlight's hero uses `padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem)`.
- * The `:where()` wrapper gives it zero specificity, so a bare `.hero` wins.
- * We override both axes to eliminate the dead space.
- */
-.hero {
-    padding-block: 2rem 1rem !important;
-    /* Add a subtle background to the hero to make it a dominant plane */
-    background-color: color-mix(in srgb, var(--sl-color-accent), 2% !important);
-    border-radius: 0 0 2rem 2rem;
-}
-
-/* Scale hero logo on tablet — Starlight uses width-based sizing with `height: auto` */
-@media (max-width: 72rem) {
-    .hero > img {
-        width: min(100%, 14rem) !important;
-    }
-}
-
-/* Scale hero logo on mobile — keep headline + CTAs above fold */
-@media (max-width: 50rem) {
-    .hero > img {
-        width: min(60%, 10rem) !important;
-    }
-}
+/* Hero refinements (padding, background, sizing) live in Hero.astro, whose
+   scoped selector outranks Starlight's `:where(.hero)` base without `!important`. */

@@ -50,7 +50,11 @@ const heroQuery = `await querier.findMany(User, {
 			grid-template-columns: 100%;
 			align-items: center;
 			gap: 1rem;
-			padding-bottom: 1rem;
+			/* Trim Starlight's tall default hero padding; a subtle accent plane
+			   gives the hero a distinct surface. */
+			padding-block: 2rem 1rem;
+			background-color: color-mix(in srgb, var(--sl-color-accent) 4%, var(--sl-color-bg));
+			border-radius: 0 0 2rem 2rem;
 		}
 
 		.hero-code {
@@ -100,7 +104,7 @@ const heroQuery = `await querier.findMany(User, {
 			.hero {
 				grid-template-columns: 5fr 6fr;
 				gap: 5%;
-				padding-block: clamp(2.5rem, calc(1rem + 10vmin), 8rem);
+				padding-block: clamp(2.5rem, calc(1rem + 6vmin), 5rem) 2rem;
 			}
 
 			.hero-code {
