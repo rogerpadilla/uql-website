@@ -4,10 +4,10 @@ sidebar:
   order: 1
   label: Quick Start
 root: true
-description: Go from zero to a working UQL query in under three minutes.
+description: Install UQL, define an entity, and run your first query.
 ---
 
-**[UQL](/)** is the JSON-native query protocol for TypeScript. It is engineered to be **fast**, **safe**, and **universally compatible**.
+**[UQL](/)** is a JSON-native query protocol for TypeScript — fast, type-safe, and the same wherever your code runs.
 
 - **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
 - **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
@@ -162,7 +162,7 @@ UQL uses subpath exports to keep your bundles lean:
 
 - [Define Entities](/entities/basic) — Explore all decorators and type abstractions.
 - [Define Relations](/entities/relations) — Map complex relationships with ease.
-- [Querying](/queryint/querier) — Deep selection, filtering, and sorting.
+- [Querying](/querying/querier) — Deep selection, filtering, and sorting.
 - [Transactions](/querying/transactions) — Automatic and manual transaction patterns.
 - [Migrations](/migrations) — Schema evolution with the CLI and Drift Detection.
 
@@ -173,5 +173,5 @@ UQL uses subpath exports to keep your bundles lean:
 ::::tip
 - **Decorators not working**: Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in `tsconfig.json`, and that your bundler supports decorators.  
 - **ESM import issues**: UQL is Pure ESM — set your `module` to `NodeNext`, `ESNext`, or `Bundler`, and avoid mixing `require()` with `import`.  
-- **Connection errors**: Double‑check database credentials and that your driver package (for example `pg`, `mysql2`, or `better-sqlite3`) is installed and compatible with your runtime.  
+- **Connection errors**: Double-check database credentials and that your driver package (for example `pg`, `mysql2`, or `better-sqlite3`) is installed and compatible with your runtime.  
 ::::

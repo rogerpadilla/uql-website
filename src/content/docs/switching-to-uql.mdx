@@ -12,20 +12,20 @@ Moving to a new ORM is a significant architectural decision. This guide is desig
 
 Most ORMs impose a "tax" on the developer—either in the form of build-time complexity, runtime verbosity, or state-management overhead. UQL is designed to eliminate these taxes.
 
-### ⚡️ The "Generation Tax" (From Prisma)
-**The Shift:** *From Proprietary DSL $\rightarrow$ Pure TypeScript.*
+### The "Generation Tax" (From Prisma)
+**The Shift:** *From Proprietary DSL → Pure TypeScript.*
 Prisma requires a `.prisma` file and a `generate` step. This creates a disconnect between your code and your schema, and can slow down CI/CD pipelines.
-- **Prisma:** Edit `.prisma` $\rightarrow$ `npx prisma generate` $\rightarrow$ Use Client.
-- **UQL:** Edit `@Entity` class $\rightarrow$ Use Querier. **Your code is the schema.**
+- **Prisma:** Edit `.prisma` → `npx prisma generate` → Use Client.
+- **UQL:** Edit `@Entity` class → Use Querier. **Your code is the schema.**
 
-### ⚡️ The "Verbosity Tax" (From Drizzle)
-**The Shift:** *From SQL-Construction $\rightarrow$ Declarative Data.*
+### The "Verbosity Tax" (From Drizzle)
+**The Shift:** *From SQL-Construction → Declarative Data.*
 Drizzle is an excellent thin wrapper, but complex queries often become a forest of `eq()`, `and()`, and `sql` templates. UQL uses a JSON-native declarative API that is easier to read, write, and—crucially—transport over the network.
 - **Drizzle:** `db.select().from(users).where(and(eq(users.id, 1), gte(users.age, 18)))`
 - **UQL:** `querier.findMany(User, { $where: { id: 1, age: { $gte: 18 } } })`
 
-### ⚡️ The "State Tax" (From TypeORM / MikroORM)
-**The Shift:** *From Managed Entities $\rightarrow$ Lean Results.*
+### The "State Tax" (From TypeORM / MikroORM)
+**The Shift:** *From Managed Entities → Lean Results.*
 Heavy ORMs use an "Identity Map" or "Unit of Work." While powerful, this often leads to the dreaded "Detached Entity" error or unexpected database updates when you simply modified a property on an object.
 - **Heavy ORMs:** `user.name = 'New Name'; await em.flush();` (Implicit state tracking).
 - **UQL:** `await querier.updateOneById(User, id, { name: 'New Name' });` (Explicit, predictable mutations).
@@ -147,7 +147,7 @@ Introduce UQL purely for **Read** operations.
 ### Phase 2: The "New Feature" Pilot (Medium Risk)
 Implement all **new** tables and features using UQL.
 - **Strategy**: Use `uql-migrate` to create new tables.
-- **Benefit**: You get to test the full UQL lifecycle (Definition $\rightarrow$ Migration $\rightarrow$ Query) on fresh data before touching legacy tables.
+- **Benefit**: You get to test the full UQL lifecycle (Definition → Migration → Query) on fresh data before touching legacy tables.
 
 ### Phase 3: The Mutation Flip (High Risk)
 Migrate `INSERT`, `UPDATE`, and `DELETE` operations.
@@ -175,8 +175,8 @@ Coming from a different ORM creates "muscle memory" that can lead to bugs. Be mi
 
 | If you are tired of... | ...then UQL is your solution |
 | :--- | :--- |
-| Slow `npx prisma generate` steps | Pure TS entities $\rightarrow$ No codegen |
+| Slow `npx prisma generate` steps | Pure TS entities → No codegen |
 | Writing `sql` templates for everything | Declarative JSON-native API |
 | "Detached Entity" or "Unit of Work" bugs | Lean, plain-object results |
 | Manual JSONB manipulation via raw SQL | First-class atomic JSON operators |
-| Complex build-steps for migrations | Direct Code $\rightarrow$ DB diffing |
+| Complex build-steps for migrations | Direct Code → DB diffing |

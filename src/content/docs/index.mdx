@@ -1,9 +1,9 @@
 ---
 title: UQL
-description: The best ORM for TypeScript and modern JavaScript.
+description: A JSON-native ORM for TypeScript — serializable queries, no codegen, and one API across SQL and MongoDB.
 template: splash
 hero:
-  tagline: The best ORM for TypeScript and modern JavaScript. Fast, safe, and easy.
+  tagline: A JSON-native ORM for TypeScript. Serializable queries, no codegen, and one API across Postgres, MySQL, SQLite, MongoDB, and the edge.
   image:
     file: ../../assets/logo-hero.svg
   actions:
@@ -24,47 +24,46 @@ npm install uql-orm
 
 ---
 
-## Why UQL?
+## What makes UQL different
 
-| Feature | **UQL** | Others |
-| :--- | :--- | :--- |
-| **Syntax** | **Serializable JSON**: Pure data, perfect for APIs/Websockets. | Method-Chaining: Hard to transport over the wire. |
-| **Simplicity** | **Pure TypeScript**: No codegen, no custom DSL, no build-step friction. | High: Requires codegen, proprietary DSLs, or extra build steps. |
-| **API** | **Unified & Intuitive**: Same syntax for SQL & NoSQL. | Fragmented: SQL and Mongo feel like different worlds. |
-| **Intelligence** | **Deep Auto-Completion**: IDE-powered inference for relations & operators at any depth. | Surface-level: Often loses types in complex joins. |
-| **Efficiency** | **Sticky Connections**: [Measured at 3.9M+ ops/s](/comparison#performance). | Heavy: Often generates "SQL Soup" that's hard to debug. |
+A UQL query is a plain JSON object — the same data you can log, cache, send over HTTP, or hand to the browser, with full TypeScript inference at every depth. That one decision shapes everything else:
 
-> See also: [Full 2026 comparison →](/comparison) · [In Search of the Fastest TypeScript ORM →](/blog/in-search-of-the-fastest-typescript-orm) · [Benchmark Repo (GitHub) →](https://github.com/rogerpadilla/ts-orm-benchmark)
+- **Queries are data, not method chains.** Build them dynamically, store them, diff them, or send them straight from the client. There's no DSL to learn and nothing to compile.
+- **No codegen, no build step.** Entities are TypeScript classes, so your code *is* the schema. There's no `.prisma` file to regenerate and no generated client to keep in sync.
+- **One API everywhere.** The same syntax runs on PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, Cloudflare D1, MongoDB, and Bun's native SQL.
+- **Fast by design.** A zero-allocation engine measured at [3.9M+ ops/s](/comparison#performance) — on average ~2.4× faster than the next ORM in our [open benchmark](https://github.com/rogerpadilla/ts-orm-benchmark).
+
+For an operation-by-operation code comparison against Prisma, Drizzle, TypeORM, and MikroORM — including where UQL is *not* the right pick — see the [full ORM comparison](/comparison).
 
 ---
 
 ## Who is UQL for?
 
-UQL shines when you need **modern TypeScript ergonomics** with **hard performance guarantees**:
+UQL fits best when you want modern TypeScript ergonomics without trading away performance or portability:
 
-- **AI & RAG applications**: Native vector search, distance projection, and JSON‑native queries make it easy to build semantic search and retrieval‑augmented generation pipelines.
-- **Multi-tenant SaaS & platforms**: Unified schema and query model across PostgreSQL, MySQL/MariaDB, SQLite, LibSQL, Neon, D1, MongoDB, and **Bun Native SQL** with entity‑first migrations.
-- **High-concurrency APIs**: Zero‑allocation query engine, sticky connections, and first‑class streaming support keep latency and resource usage predictable.
+- **AI and RAG applications** — native vector search, distance projection, and JSON-native queries for semantic search and retrieval pipelines.
+- **Multi-tenant SaaS** — one schema and query model across every supported database, with entity-first migrations.
+- **High-concurrency APIs** — a zero-allocation engine, sticky connections, and first-class streaming keep latency predictable under load.
 
-If you want **Prisma‑level ergonomics** with **query‑builder performance**, UQL is designed for you.
-
----
-
-## Explore the Documentation
-
-### 🚀 The Fast Path
-- [Quick Start](/getting-started) — Go from zero to your first UQL query in under 3 minutes.
-- [Switching to UQL](/switching-to-uql) — Migration guide for Prisma, Drizzle, and TypeORM users.
-
-### 📚 Deep Dives
-- [Core Concepts](/entities/basic) — Entities, relations, type abstractions, and lifecycle hooks.
-- [Querying & Transactions](/querying/querier) — Deep selection, filtering, sorting, and JSON operators.
-- [AI & Semantic Search](/ai-semantic-search) — Add vector similarity and RAG‑style workflows.
-- [Migrations & Ops](/migrations) — Entity-first migrations and drift detection.
-
-### 🛠️ Ecosystem
-- [Extensions & Fullstack](/extensions-express) — Auto-generated REST APIs and type-safe browser queries.
+The goal is Prisma-level ergonomics at query-builder speed.
 
 ---
 
-**🤍 Open-source** · Production-trusted by [Variability.ai](https://variability.ai) — AI meeting and video intelligence platform.
+## Explore the documentation
+
+### The fast path
+- [Quick Start](/getting-started) — install, configure, and run your first query.
+- [Switching to UQL](/switching-to-uql) — migration guide for Prisma, Drizzle, and TypeORM users.
+
+### Deep dives
+- [Core Concepts](/entities/basic) — entities, relations, type abstractions, and lifecycle hooks.
+- [Querying & Transactions](/querying/querier) — selection, filtering, sorting, and JSON operators.
+- [AI & Semantic Search](/ai-semantic-search) — vector similarity and RAG-style workflows.
+- [Migrations & Ops](/migrations) — entity-first migrations and drift detection.
+
+### Ecosystem
+- [Extensions & Fullstack](/extensions-express) — auto-generated REST APIs and type-safe browser queries.
+
+---
+
+Open source · Production-trusted by [Variability.ai](https://variability.ai) — an AI meeting and video intelligence platform.

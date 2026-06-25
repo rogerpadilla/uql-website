@@ -9,7 +9,7 @@ description: This tutorial explains how to use virtual-fields in the entities wi
 
 The `virtual` property of the `@Field` decorator allows you to define non-persistent fields whose values are calculated at runtime using SQL or MongoDB expressions.
 
-UQL's virtual fields use the `QueryContext` pattern, ensuring robust SQL generation and top-tier performance.
+UQL's virtual fields use the `QueryContext` pattern, so the generated SQL stays correct and cheap to produce.
 
 ```ts
 import { Entity, Id, Field, ManyToMany, raw } from 'uql-orm';

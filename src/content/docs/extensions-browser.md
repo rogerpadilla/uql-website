@@ -81,6 +81,6 @@ const users = await querier.findMany(User, {
 ```
 
 :::tip
-For a truly seamless experience, wrap the `HttpQuerier` in a service that automatically injects the current user's token into every request. Combine this with the [Express Extension](/extensions-express) to create a full-stack, type-safe data layer in minutes.
+Wrap the `HttpQuerier` in a service that injects the current user's token into every request. Combined with the [Express Extension](/extensions-express), this gives you a type-safe data layer from the browser all the way to the database.
 :::
 
