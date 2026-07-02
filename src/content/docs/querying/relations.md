@@ -3,7 +3,7 @@ title: Deep Relations
 
 sidebar:
   order: 150
-description: This tutorial explains how to use relations in the queries with the UQL orm.
+description: Populate, filter, and sort across related entities with $populate and relation operators.
 ---
 
 :::tip[Shape (0.8.4+)]

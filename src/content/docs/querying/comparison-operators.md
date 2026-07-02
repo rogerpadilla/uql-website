@@ -2,12 +2,12 @@
 title: Comparison Operators
 sidebar:
   order: 130
-description: This tutorial explains how to use comparison operators with the UQL orm.
+description: Filter by equality, ranges, string matching, and lists with UQL comparison operators.
 ---
 
 ## Comparison Operators
 
-UQL provide a comprehensive set of operators for comparing field values. These operators are context-aware, meaning they are typed according to the field they are applied to.
+UQL's comparison operators are context-aware: each operator is typed according to the field it is applied to.
 
 | Name           | Description                                                                        |
 | -------------- | ---------------------------------------------------------------------------------- |
@@ -95,6 +95,6 @@ SELECT * FROM "User" WHERE "age" BETWEEN $1 AND $2
 
 ### JSONB Dot-Notation Operators
 
-All comparison operators listed above also work on nested JSON field paths using **dot-notation** (e.g., `'settings.isArchived': { $ne: true }`). UQL generates dialect-specific SQL automatically across PostgreSQL, MySQL, and SQLite.
+All comparison operators listed above also work on nested JSON field paths using **dot-notation** (e.g., `'settings.isArchived': { $ne: true }`). UQL generates dialect-specific SQL automatically across PostgreSQL, MySQL, MariaDB, and SQLite.
 
 See the dedicated [JSON / JSONB](/querying/json) page for full documentation including filtering, `$merge`/`$unset` update operators, and sorting by JSON paths.

@@ -7,7 +7,7 @@ description: Learn how to define simple and composite indexes in UQL.
 
 ## Indexes
 
-UQL provides a simple yet powerful way to define indexes on your database tables. Indexes are essential for optimizing query performance and enforcing uniqueness across multiple columns.
+Indexes are defined directly on your entities, either per field or at the class level for composite and specialized indexes.
 
 ### Simple Indexes
 
@@ -67,12 +67,16 @@ export class AuditLog {
 
 The `@Index` decorator accepts several options to fine-tune the index behavior:
 
-| Option   | Type      | Description                                                                               |
-| :------- | :-------- | :---------------------------------------------------------------------------------------- |
-| `name`   | `string`  | Custom index name.                                                                        |
-| `unique` | `boolean` | Whether the index should enforce uniqueness. Defaults to `false`.                         |
-| `type`   | `string`  | Dialect-specific index type (e.g., `'btree'`, `'hash'`, `'gin'`, `'gist'`, `'fulltext'`). |
-| `where`  | `string`  | Partial index condition (SQL WHERE clause).                                               |
+| Option           | Type      | Description                                                                                              |
+| :--------------- | :-------- | :------------------------------------------------------------------------------------------------------- |
+| `name`           | `string`  | Custom index name.                                                                                       |
+| `unique`         | `boolean` | Whether the index should enforce uniqueness. Defaults to `false`.                                        |
+| `type`           | `string`  | Dialect-specific index type (e.g., `'btree'`, `'hash'`, `'gin'`, `'gist'`, `'fulltext'`, `'hnsw'`, `'ivfflat'`). |
+| `where`          | `string`  | Partial index condition (SQL WHERE clause).                                                              |
+| `distance`       | `string`  | Vector indexes: distance metric (e.g., `'cosine'`, `'l2'`), mapped to the operator class.                |
+| `m`              | `number`  | HNSW: max connections per node.                                                                          |
+| `efConstruction` | `number`  | HNSW: construction search depth.                                                                         |
+| `lists`          | `number`  | IVFFlat: number of inverted lists.                                                                       |
 
 #### Unique Composite Index
 Ideal for enforcing uniqueness across a combination of fields, such as "one email per tenant" in a multi-tenant application.
@@ -119,30 +123,34 @@ export class User {
 }
 ```
 
-### High-Performance Vectors
+### Vector Indexes
 
-UQL manages more than just basic B-Tree indexes. It provides industry-leading **Automatic Index Migration** for vector search, handling the complex mathematical parameters required by `pgvector` and MongoDB Atlas.
-
-When you define a vector index (e.g., `HNSW`), UQL's [Drift Detection Engine](/migrations) monitors parameters like `m` and `efConstruction`. If you tune these for performance in your code, UQL automatically generates the `DROP`/`CREATE` cycle to keep your database optimized.
+Vector indexes (for [semantic search](/querying/semantic-search)) are defined with the same `@Index` decorator, using the vector-specific options above:
 
 ```ts
-@Index(['embedding'], { 
-  type: 'hnsw', 
-  distance: 'cosine', 
-  m: 16, 
-  efConstruction: 64 
+@Index(['embedding'], {
+  type: 'hnsw',
+  distance: 'cosine',
+  m: 16,
+  efConstruction: 64
 })
+@Entity()
+export class Article {
+  @Id()
+  id?: number;
+
+  @Field({ type: 'vector', dimensions: 1536 })
+  embedding?: number[];
+}
 ```
+
+[Migrations](/migrations) track these parameters: if you tune `m` or `efConstruction` in code, the diff includes the `DROP`/`CREATE` needed to rebuild the index.
 
 ### Synchronization
 
 UQL handles indexes automatically during [migrations](/migrations):
 1. **Entity to Database**: Whenever you add or remove an index decorator, UQL detects the change during `generate:entities` or `autoSync`.
 2. **Database to Entity**: When you use `generate:from-db`, UQL discovers existing indexes and adds the corresponding `@Field({ index: true })` or `@Index()` decorators to your generated code.
-
-:::info
-Indexes are synchronized in both directions, ensuring your code and database schema are always perfectly aligned.
-:::
 
 ---
 

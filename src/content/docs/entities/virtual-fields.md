@@ -2,7 +2,7 @@
 title: Virtual Fields
 sidebar:
   order: 90
-description: This tutorial explains how to use virtual-fields in the entities with the UQL orm.
+description: Compute fields at query time with raw SQL expressions using the virtual option.
 ---
 
 ## Virtual Fields

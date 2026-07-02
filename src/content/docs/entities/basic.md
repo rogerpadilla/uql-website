@@ -2,7 +2,7 @@
 title: Basics
 sidebar:
   order: 60
-description: This tutorial explains how to define basic entities with the UQL orm.
+description: Define entities with the @Entity, @Id, and @Field decorators, and choose column types.
 ---
 ## Basic entities
 
@@ -59,7 +59,7 @@ UQL provides two levels for specifying column types. **Always prefer `type`** fo
 #### When to Use Each
 
 ```ts
-// ✅ RECOMMENDED: Use `type` for semantic, cross-database types
+// Recommended: use `type` for semantic, cross-database types
 @Field({ type: 'uuid' })
 externalId?: string;
 
@@ -69,7 +69,7 @@ metadata?: Json<{ theme?: string; priority?: number }>;
 @Field({ type: 'text' })
 bio?: string;
 
-// ⚠️ USE SPARINGLY: `columnType` for precise SQL control
+// Use sparingly: `columnType` for precise SQL control
 @Field({ 
   columnType: 'decimal', 
   precision: 10, 
@@ -113,7 +113,7 @@ The `@Field` and `@Id` decorators accept several options for both query validati
 | `onUpdate`     | `function`          | Callback invoked on every update (e.g., `() => new Date()` for `updatedAt`).                                                                                        |
 | `onDelete`     | `function`          | Callback for [soft-delete](/entities/soft-delete) values (e.g., `() => new Date()`).                                                                                |
 | `updatable`    | `boolean`           | Set to `false` to prevent updates on this field (e.g., `createdAt`). Defaults to `true`.                                                                            |
-| `eager`        | `boolean`           | Whether this relation is eagerly loaded. Defaults to `true`.                                                                                                        |
+| `eager`        | `boolean`           | Whether this field is included in queries by default. Set to `false` for fields (e.g., `password`) that should only be returned when explicitly selected. Defaults to `true`. |
 | `virtual`      | `RawExpression`     | Defines a computed/[virtual field](/entities/virtual-fields) via raw SQL.                                                                                            |
 | `references`   | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                          |
 | `foreignKey`   | `string \| false`   | Custom foreign key constraint name, or `false` to disable physical constraints while maintaining logical references.                                                |
@@ -141,13 +141,7 @@ id?: number;
 id?: string;
 ```
 
-:::tip[When to Use Each]
-- **`@Id()`**: laid-back, simple numeric auto-increment keys. The database manages ID generation.
-- **`@Id({ type: 'uuid', onInsert: ... })`**: Professional, distributed systems, APIs, or when you need IDs before database insertion. UUIDs are portable across databases.
-:::
-
-:::note[Senior Insight: Primary Key Strategy]
-Choosing between an Integer and a UUID is more than a syntax choice; it's an architectural decision:
-- **Integers**: Offer the best performance for joins and smaller index sizes. Ideal for internal-only tables or small-to-medium applications.
-- **UUIDs**: Essential for distributed systems, multi-tenant SaaS, and public-facing APIs. They prevent ID enumeration attacks (where users can guess `/users/1`, `/users/2`) and allow you to generate IDs on the client side without waiting for the database.
+:::note[Choosing between Integer and UUID keys]
+- **Integers** (`@Id()`): the database manages ID generation. Faster joins and smaller indexes make them a good default for internal tables and small-to-medium applications.
+- **UUIDs** (`@Id({ type: 'uuid', onInsert: ... })`): better for distributed systems, multi-tenant SaaS, and public-facing APIs. They avoid ID enumeration (users guessing `/users/1`, `/users/2`) and can be generated on the client before the row exists.
 :::

@@ -73,7 +73,7 @@ export class User {
 }
 ```
 
-**In practice:** Schema modeling is a trade-off: Prisma offers a clean DSL with a build step; Drizzle gives total SQL control via dialect-specific imports. MikroORM v7 defaults to `defineEntity` (a programmatic, decorator-free style), TypeORM and UQL use decorator-based TypeScript classes, all keeping the model in pure TS.
+**In practice:** Schema modeling is a trade-off. Prisma offers a clean DSL but adds a build step; Drizzle gives total SQL control via dialect-specific imports. MikroORM v7 defaults to `defineEntity` (a programmatic, decorator-free style), while TypeORM and UQL use decorator-based TypeScript classes; these three keep the model in pure TS.
 
 ---
 
@@ -139,13 +139,13 @@ import { eq, desc } from 'drizzle-orm';
 const results = await db
   .select({ id: users.id, name: users.name, email: users.email })
   .from(users)
-  .where(eq(users.name, 'Lorem'))
+  .where(eq(users.name, 'Jane'))
   .orderBy(desc(users.createdAt))
   .limit(10);
 ```
 
 ```ts title="MikroORM"
-const results = await em.find(User, { name: 'Lorem' }, {
+const results = await em.find(User, { name: 'Jane' }, {
   fields: ['id', 'name', 'email'],
   orderBy: { createdAt: 'DESC' },
   limit: 10,
@@ -155,7 +155,7 @@ const results = await em.find(User, { name: 'Lorem' }, {
 ```ts title="Prisma"
 const results = await prisma.user.findMany({
   select: { id: true, name: true, email: true },
-  where: { name: 'Lorem' },
+  where: { name: 'Jane' },
   orderBy: { createdAt: 'desc' },
   take: 10,
 });
@@ -164,7 +164,7 @@ const results = await prisma.user.findMany({
 ```ts title="TypeORM"
 const results = await repo.find({
   select: { id: true, name: true, email: true },
-  where: { name: 'Lorem' },
+  where: { name: 'Jane' },
   order: { createdAt: 'DESC' },
   take: 10,
 });
@@ -173,7 +173,7 @@ const results = await repo.find({
 ```ts title="UQL"
 const results = await querier.findMany(User, {
   $select: { id: true, name: true, email: true },
-  $where: { name: 'Lorem' },
+  $where: { name: 'Jane' },
   $sort: { createdAt: 'desc' },
   $limit: 10,
 });
@@ -309,9 +309,9 @@ class User {
 ## Mutations
 
 ```ts title="Drizzle"
-const [user] = await db.insert(users).values({ name: 'Lorem' }).returning();
+const [user] = await db.insert(users).values({ name: 'Jane' }).returning();
 
-await db.update(users).set({ name: 'Lorem I.' }).where(eq(users.id, user.id));
+await db.update(users).set({ name: 'Jane D.' }).where(eq(users.id, user.id));
 
 await db.update(users).set({ status: 'archived' }).where(eq(users.status, 'inactive'));
 
@@ -319,10 +319,10 @@ await db.delete(users).where(eq(users.id, user.id));
 ```
 
 ```ts title="MikroORM"
-const user = em.create(User, { name: 'Lorem' });
+const user = em.create(User, { name: 'Jane' });
 await em.flush();
 
-await em.nativeUpdate(User, { id: user.id }, { name: 'Lorem I.' });
+await em.nativeUpdate(User, { id: user.id }, { name: 'Jane D.' });
 
 await em.nativeUpdate(User, { status: 'inactive' }, { status: 'archived' });
 
@@ -330,9 +330,9 @@ await em.nativeDelete(User, { id: user.id });
 ```
 
 ```ts title="Prisma"
-const user = await prisma.user.create({ data: { name: 'Lorem' } });
+const user = await prisma.user.create({ data: { name: 'Jane' } });
 
-await prisma.user.update({ where: { id: user.id }, data: { name: 'Lorem I.' } });
+await prisma.user.update({ where: { id: user.id }, data: { name: 'Jane D.' } });
 
 await prisma.user.updateMany({ where: { status: 'inactive' }, data: { status: 'archived' } });
 
@@ -340,10 +340,10 @@ await prisma.user.delete({ where: { id: user.id } });
 ```
 
 ```ts title="TypeORM"
-const user = repo.create({ name: 'Lorem' });
+const user = repo.create({ name: 'Jane' });
 await repo.save(user);
 
-await repo.update(user.id, { name: 'Lorem I.' });
+await repo.update(user.id, { name: 'Jane D.' });
 
 await repo.update({ status: 'inactive' }, { status: 'archived' });
 
@@ -351,9 +351,9 @@ await repo.delete(user.id);
 ```
 
 ```ts title="UQL"
-const id = await querier.insertOne(User, { name: 'Lorem' });
+const id = await querier.insertOne(User, { name: 'Jane' });
 
-await querier.updateOneById(User, id, { name: 'Lorem I.' });
+await querier.updateOneById(User, id, { name: 'Jane D.' });
 
 await querier.updateMany(User, { $where: { status: 'inactive' } }, { status: 'archived' });
 
@@ -541,7 +541,7 @@ const http = new HttpQuerier('/api');
 const results = await http.findMany(User, { $where: { status: 'active' } });
 ```
 
-**In practice:** Building API boilerplate for every model is pure toil. In this comparison, every ORM except UQL requires you to build your own API bridge, while UQL provides first-party `HttpQuerier` transport between browser and database.
+**In practice:** Every ORM in this comparison except UQL requires you to build your own API bridge per model; UQL provides first-party `HttpQuerier` transport between browser and database.
 
 ---
 
@@ -691,15 +691,13 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 ## Performance
 
-In our [open-source benchmark](/blog/in-search-of-the-fastest-typescript-orm) measuring **pure SQL generation speed** (no database I/O).
-
-You can explore the charts here: [TypeScript ORM Benchmark Charts](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html).
+Our [open-source benchmark](/blog/in-search-of-the-fastest-typescript-orm) measures **pure SQL generation speed**, with no database I/O, to isolate the overhead each tool adds per query. You can explore the [interactive charts](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html).
 
 :::tip
-**Query Builder vs. ORM**: We include Knex and Kysely (pure query builders) to show that UQL's zero-allocation engine is even faster than tools that don't have the overhead of entities and relations.
+**Query Builder vs. ORM**: The benchmark includes Knex and Kysely (pure query builders) to show that UQL is faster even than tools without the overhead of entities and relations.
 :::
 
-Across these benchmark operations (pure SQL generation, no database I/O), UQL is on average **~2.4x** faster than the next fastest tool.
+Across these operations, UQL is on average **~2.4x** faster than the next fastest tool.
 
 | Operation group | Avg advantage (vs. next fastest) |
 | :--- | ---: |
@@ -725,7 +723,7 @@ Across these benchmark operations (pure SQL generation, no database I/O), UQL is
 | DELETE | Sequelize (1,349K) | 3,642K ops/s | **2.7x** |
 
 :::note
-UQL achieves this via **zero-allocation architecture** and pre-computed schema lookups at startup. The benchmark is fully [open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
+UQL achieves this by pre-computing schema lookups at startup and writing SQL directly into a string buffer instead of building intermediate objects. The benchmark is fully [open-source](https://github.com/rogerpadilla/ts-orm-benchmark).
 :::
 
 <LinkCard title="Full Benchmark Analysis →" href="/blog/in-search-of-the-fastest-typescript-orm" description="Methodology, interactive charts, and reproduction instructions." />

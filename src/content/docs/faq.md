@@ -11,10 +11,10 @@ description: Frequently asked questions about UQL ORM
 ### What is UQL and when should I use it?
 
 UQL is a JSON-native ORM for TypeScript that offers:
-- **Serializable queries** — Queries are plain JSON objects you can cache, send over HTTP, or store
-- **No codegen** — Your TypeScript classes are the schema, no build step needed
-- **One API everywhere** — Same syntax works on PostgreSQL, MySQL, MongoDB, SQLite, and edge runtimes
-- **Zero-allocation engine** — 3.9M+ ops/s query generation performance
+- **Serializable queries**: plain JSON objects you can cache, send over HTTP, or store
+- **No codegen**: your TypeScript classes are the schema, no build step needed
+- **One API everywhere**: the same syntax works on PostgreSQL, MySQL, MongoDB, SQLite, and edge runtimes
+- **Fast SQL generation**: fastest in all 8 categories of our [open benchmark](/comparison#performance)
 
 ### How is UQL different from Prisma, Drizzle, or TypeORM?
 
@@ -22,13 +22,13 @@ UQL is a JSON-native ORM for TypeScript that offers:
 |---------|-----|--------|---------|---------|
 | Query format | JSON object | Object literal | Function chains | Method chains |
 | Codegen | None needed | Required | None | None |
-| Multi-DB API | One syntax | Separate per-database | Separate per-database | Separate per-database |
-| Browser queries | First-class | Not supported | Manual | Manual |
-| Vector search | Native operator | Raw SQL | Raw SQL | Raw SQL |
+| Multi-DB API | One syntax | Mostly consistent | Per-dialect schemas | Diverges for MongoDB |
+| Browser queries | Built-in | Not supported | Manual | Manual |
+| Vector search | Native operator | Via extension | Via extension | Raw SQL |
 
 ### Is UQL production-ready?
 
-Yes. UQL powers [Variability.ai](https://variability.ai), an AI meeting intelligence platform processing thousands of requests daily. The ORM is battle-tested in production.
+Yes. UQL powers [Variability.ai](https://variability.ai), an AI meeting intelligence platform, in production.
 
 ---
 
@@ -82,21 +82,17 @@ A UQL query is a plain JavaScript object:
 }
 ```
 
-This means:
-- ✅ You can `JSON.stringify()` and send over HTTP
-- ✅ Cache queries easily
-- ✅ Diff queries programmatically
-- ✅ Share between backend and frontend
+Because the query is data rather than code, you can `JSON.stringify()` it and send it over HTTP, cache it, diff it programmatically, or share it between backend and frontend.
 
 ### What's the difference between `type` and `columnType`?
 
 Use `type` for portability, `columnType` for precise SQL control:
 
 ```ts
-// ✅ RECOMMENDED: Cross-database portable
+// Recommended: cross-database portable
 @Field({ type: 'uuid' })
 
-// ⚠️ USE RARELY: Exact SQL control
+// Use rarely: exact SQL control
 @Field({ columnType: 'CHAR(36)' })
 ```
 
@@ -137,12 +133,9 @@ Works across all SQL dialects — UQL generates dialect-specific SQL automatical
 
 ```ts
 await querier.findMany(Post, {
-  $select: {
-    id: true,
-    title: true,
-    author: {
-      $select: { id: true, name: true }
-    }
+  $select: { id: true, title: true },
+  $populate: {
+    author: { $select: { id: true, name: true } }
   },
   $where: { author: { name: 'Roger' } }
 });
@@ -210,16 +203,13 @@ const results = await querier.findMany(Article, {
 });
 ```
 
-Works on PostgreSQL (pgvector), MySQL 8.4+, MariaDB 11.4+, SQLite (sqlite-vec), and MongoDB Atlas — all with the same query syntax.
+Works on PostgreSQL (pgvector), CockroachDB, MariaDB, SQLite (sqlite-vec), and MongoDB Atlas, all with the same query syntax. See [Semantic Search](/querying/semantic-search).
 
 ### What's the performance like?
 
-UQL achieves 3.9M+ ops/s in our [open benchmark](/comparison#performance) by using:
-- Zero-allocation query generation
-- Pre-computed schema lookups at startup
-- Efficient query planning
-
-On average, UQL is ~2.4× faster than the next fastest ORM.
+In our [open benchmark](/comparison#performance) of SQL-generation speed, UQL is the fastest entry in all 8 query categories, on average ~2.4× faster than the runner-up. Two design choices drive this:
+- Schema metadata (tables, columns, relations) is pre-computed once at startup
+- SQL is written directly into a string buffer, avoiding intermediate objects
 
 ---
 
@@ -244,4 +234,4 @@ On average, UQL is ~2.4× faster than the next fastest ORM.
 1. Check if you're missing indexes on filtered columns
 2. Use `findManyStream` for large result sets
 3. Consider pagination with `$limit` and `$skip`
-4. Profile with `console.time()` to identify bottlenecks
+4. Enable [query logging](/logging) to see the generated SQL and per-query timings

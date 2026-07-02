@@ -2,7 +2,7 @@
 title: Logical Operators
 sidebar:
   order: 110
-description: This tutorial explains how to use logical operators with the UQL orm.
+description: Combine conditions with $and, $or, $not, and $nor in UQL queries.
 ---
 
 ## Logical Operators

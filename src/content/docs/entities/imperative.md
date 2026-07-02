@@ -43,12 +43,9 @@ To assist with type-safe imperative setup, UQL exports several helper functions:
 - `defineId`: Configure primary key properties.
 - `defineRelation`: Configure relationship properties.
 
-### Advantages
+### When to prefer it
 
-- **Decorator-free**: Works in environments *without* `experimentalDecorators` enabled.
-- **Centralized Configuration**: Define your entire schema in a single configuration object or script.
-- **Dynamic Schemas**: Easily generate entities from external metadata or JSON configurations at runtime.
-- **Clean Classes**: Keeps your domain models focused solely on properties, without metadata clutter.
+Beyond working without `experimentalDecorators`, the imperative API lets you define the whole schema in one configuration object, generate entities from external metadata or JSON at runtime, and keep domain classes free of metadata.
 
 :::tip[Compatibility]
 The imperative API is fully compatible with the decorator-based approach. You can mix and match both styles within the same project.

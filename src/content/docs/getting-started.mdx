@@ -7,7 +7,7 @@ root: true
 description: Install UQL, define an entity, and run your first query.
 ---
 
-**[UQL](/)** is a JSON-native query protocol for TypeScript — fast, type-safe, and the same wherever your code runs.
+**[UQL](/)** is a type-safe TypeScript ORM whose queries are plain JSON, so the same query works on the server, in the browser, and over the network.
 
 ---
 
@@ -48,16 +48,14 @@ If you use the **decorator-based approach**, make sure your `tsconfig.json` has:
 }
 ```
 
-**For `defineEntity` (imperative API), these flags are NOT required.**
+If you use the [imperative API](/entities/imperative) (`defineEntity`) instead, these flags are **not required**.
 
-If you use the **imperative API** (`defineEntity`), these flags are **not required**.
-
-UQL is Modern Pure ESM — ensure your project's `module` supports ESM imports (e.g., `NodeNext`, `ESNext`, `Bundler`).
+UQL is ESM-only, so ensure your project's `module` supports ESM imports (e.g., `NodeNext`, `ESNext`, `Bundler`).
 :::
 
 ---
 
-## 2. Fast-Track Example
+## 2. Complete Example
 
 Here is a complete example of defining an entity, setting up a pool, and running a query.
 
@@ -112,7 +110,7 @@ console.log(users);
 ## Next Steps
 
 - [Define Entities](/entities/basic) — Explore all decorators and type abstractions.
-- [Define Relations](/entities/relations) — Map complex relationships with ease.
+- [Define Relations](/entities/relations) — One-to-one, one-to-many, and many-to-many mappings.
 - [Querying](/querying/querier) — Deep selection, filtering, and sorting.
 - [Transactions](/querying/transactions) — Automatic and manual transaction patterns.
 - [Migrations](/migrations) — Schema evolution with the CLI and Drift Detection.

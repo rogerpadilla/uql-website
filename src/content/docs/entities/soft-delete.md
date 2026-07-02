@@ -2,7 +2,7 @@
 title: Soft Delete
 sidebar:
   order: 80
-description: This tutorial explains how to use soft-delete in the entities with the UQL orm.
+description: Mark rows as deleted without removing them, using softDelete and onDelete callbacks.
 ---
 
 ## Soft-Delete

@@ -3,38 +3,31 @@ title: Switching to UQL
 sidebar:
   order: 2
   label: Switching to UQL
-description: A comprehensive migration guide for developers moving from Prisma, Drizzle, TypeORM, or MikroORM.
+description: A migration guide for developers moving from Prisma, Drizzle, TypeORM, or MikroORM.
 ---
 
-Moving to a new ORM is a significant architectural decision. This guide is designed to help you translate your existing mental models and patterns into the UQL way of doing things, focusing on reducing friction, eliminating "ORM taxes," and avoiding common migration pitfalls.
+This guide maps the concepts you already know from Prisma, Drizzle, TypeORM, or MikroORM onto UQL, and outlines a phased strategy for migrating a production system.
 
 ## The Mental Model Shift
 
-Most ORMs charge a "tax" on the developer: build-time complexity, runtime verbosity, or state-management overhead. UQL is built to avoid all three.
+### From Prisma: no schema file, no codegen
+Prisma requires a `.prisma` file and a `generate` step, which creates a gap between your code and your schema and adds a build step to CI.
+- **Prisma:** Edit `.prisma` → `npx prisma generate` → use the generated client.
+- **UQL:** Edit the `@Entity` class → use the querier. The TypeScript class is the schema.
 
-### The "Generation Tax" (From Prisma)
-**The Shift:** *From Proprietary DSL → Pure TypeScript.*
-Prisma requires a `.prisma` file and a `generate` step. This creates a disconnect between your code and your schema, and can slow down CI/CD pipelines.
-- **Prisma:** Edit `.prisma` → `npx prisma generate` → Use Client.
-- **UQL:** Edit `@Entity` class → Use Querier. **Your code is the schema.**
-
-### The "Verbosity Tax" (From Drizzle)
-**The Shift:** *From SQL-Construction → Declarative Data.*
-Drizzle is an excellent thin wrapper, but complex queries often become a forest of `eq()`, `and()`, and `sql` templates. UQL uses a JSON-native declarative API that is easier to read, easier to write, and — crucially — transportable over the network.
+### From Drizzle: declarative JSON instead of SQL construction
+Drizzle composes SQL from functions, so complex queries accumulate `eq()`, `and()`, and `sql` template calls. UQL queries are JSON objects, which also makes them transportable over the network.
 - **Drizzle:** `db.select().from(users).where(and(eq(users.id, 1), gte(users.age, 18)))`
 - **UQL:** `querier.findMany(User, { $where: { id: 1, age: { $gte: 18 } } })`
 
-### The "State Tax" (From TypeORM / MikroORM)
-**The Shift:** *From Managed Entities → Lean Results.*
-Heavy ORMs use an "Identity Map" or "Unit of Work." While powerful, this often leads to the dreaded "Detached Entity" error or unexpected database updates when you simply modified a property on an object.
-- **Heavy ORMs:** `user.name = 'New Name'; await em.flush();` (Implicit state tracking).
-- **UQL:** `await querier.updateOneById(User, id, { name: 'New Name' });` (Explicit, predictable mutations).
+### From TypeORM / MikroORM: explicit mutations instead of managed state
+ORMs built on a Unit of Work / Identity Map track loaded entities and flush changes implicitly. That model is powerful but produces "detached entity" errors and surprise updates when an object is modified outside a managed context. UQL returns plain objects and mutates only when you ask it to.
+- **Managed:** `user.name = 'New Name'; await em.flush();` (implicit state tracking)
+- **UQL:** `await querier.updateOneById(User, id, { name: 'New Name' });` (explicit mutation)
 
 ---
 
 ## Pattern Translation: Before & After
-
-The following examples demonstrate how to translate common "industry standard" patterns into UQL.
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
@@ -65,7 +58,7 @@ How to handle multiple conditions and range filters.
       $where: {
         age: { $gte: 18 },
         status: 'active',
-        email: { $contains: '@uql-orm.dev' }
+        email: { $includes: '@uql-orm.dev' }
       }
     });
     ```
@@ -98,9 +91,9 @@ Fetching a user, their posts, and the comments on those posts.
   <TabItem label="UQL">
     ```ts
     querier.findMany(User, {
-      $select: {
+      $populate: {
         posts: {
-          $select: {
+          $populate: {
             comments: true
           }
         }
@@ -110,11 +103,11 @@ Fetching a user, their posts, and the comments on those posts.
   </TabItem>
 </Tabs>
 
-### 3. JSONB Power-Moves
+### 3. Atomic JSON Updates
 Updating a specific key inside a JSONB column without overwriting the whole object.
 
 <Tabs>
-  <TabItem label="Legacy (Raw SQL)">
+  <TabItem label="Other ORMs (Raw SQL)">
     ```ts
     // Most ORMs require raw SQL for atomic JSON updates
     await db.execute(
@@ -124,9 +117,9 @@ Updating a specific key inside a JSONB column without overwriting the whole obje
   </TabItem>
   <TabItem label="UQL (Native)">
     ```ts
-    // Atomic JSON update via the $set operator
+    // Atomic JSON update via the $merge operator
     await querier.updateOneById(User, 1, {
-      settings: { $set: { theme: 'dark' } }
+      settings: { $merge: { theme: 'dark' } }
     });
     ```
   </TabItem>
@@ -134,49 +127,39 @@ Updating a specific key inside a JSONB column without overwriting the whole obje
 
 ---
 
-## Migration Strategy: The "Zero-Downtime" Path
+## Migration Strategy
 
-We strongly discourage a "Big Bang" rewrite. Instead, use this phased approach to migrate a production system with confidence.
+A full rewrite in one release is risky. This phased approach lets you migrate a production system incrementally, with a working fallback at every step.
 
-### Phase 1: The Read-Only Shadow (Low Risk)
-Introduce UQL purely for **Read** operations. 
+### Phase 1: Read-only (low risk)
+Introduce UQL purely for **read** operations.
 - **Strategy**: Pick a non-critical endpoint and implement it with UQL.
-- **Verification**: Run both queries (Legacy and UQL) in parallel and log any discrepancies in the result sets.
-- **Why**: UQL returns plain objects, so it can coexist with any other ORM without interfering with their internal caches or state.
+- **Verification**: Run both queries (legacy and UQL) in parallel and log any discrepancies in the result sets.
+- **Why it's safe**: UQL returns plain objects, so it can coexist with any other ORM without interfering with their internal caches or state.
 
-### Phase 2: The "New Feature" Pilot (Medium Risk)
+### Phase 2: New features (medium risk)
 Implement all **new** tables and features using UQL.
 - **Strategy**: Use `uql-migrate` to create new tables.
-- **Benefit**: You get to test the full UQL lifecycle (Definition → Migration → Query) on fresh data before touching legacy tables.
+- **Benefit**: You test the full UQL lifecycle (definition → migration → query) on fresh data before touching legacy tables.
 
-### Phase 3: The Mutation Flip (High Risk)
+### Phase 3: Mutations (high risk)
 Migrate `INSERT`, `UPDATE`, and `DELETE` operations.
-- **Strategy**: Move mutations one entity at a time. 
-- **Tip**: This is where you will first notice the performance gains of the zero-allocation engine and the simplicity of the atomic JSON operators.
+- **Strategy**: Move mutations one entity at a time, keeping the legacy path available until each entity is verified.
 
-### Phase 4: The Total Cutover
-Once the legacy ORM is no longer being used for any queries, remove it from your `package.json`.
-- **Final Step**: Delete the `.prisma` files, the Drizzle snapshots, or the complex TypeORM config. Your `@Entity` classes are now your only source of truth.
+### Phase 4: Cutover
+Once the legacy ORM is no longer used for any queries, remove it from `package.json`, along with the `.prisma` files, Drizzle snapshots, or TypeORM config. Your `@Entity` classes are the only source of truth left.
 
 ---
 
-## Common Pitfalls & "Muscle Memory" Warnings
+## Common Pitfalls
 
-:::warning[The "Migration Mindset" Shift]
-Coming from a different ORM creates "muscle memory" that can lead to bugs. Be mindful of these:
-
-- **The "Identity Map" Reflex**: If you are coming from MikroORM, remember: **UQL does not track state.** Changing `user.name = 'Bob'` does nothing to the database. You must explicitly call `updateOne`.
-- **The "DSL" Reflex**: If you are coming from Prisma, you might look for a schema file to check a relation. **Stop.** Look at the `@Entity` class. If it's not in the TS class, it's not in the DB.
-- **The "CommonJS" Trap**: UQL is **Pure ESM**. If your project is still using `require()`, you will need to migrate to `import` and set `"type": "module"` in your `package.json`.
-- **The "Generation" Habit**: You no longer need to run a "generate" command after changing a field. Just save the file and run your migration.
+:::warning[Habits to unlearn]
+- **Implicit flushes**: UQL does not track state. Coming from MikroORM or TypeORM, remember that assigning `user.name = 'Bob'` does nothing to the database; call `updateOne` explicitly.
+- **Looking for the schema file**: Coming from Prisma, the `@Entity` class is the schema. If a field or relation is not on the class, it does not exist in the database.
+- **CommonJS**: UQL is ESM-only. If your project still uses `require()`, migrate to `import` and set `"type": "module"` in `package.json`.
+- **Running a generate step**: There is no codegen. After changing a field, just save the file and generate a [migration](/migrations).
 :::
 
-## Summary: When should you actually switch?
+## When to Switch (and When Not To)
 
-| If you are tired of... | ...then UQL is your solution |
-| :--- | :--- |
-| Slow `npx prisma generate` steps | Pure TS entities → No codegen |
-| Writing `sql` templates for everything | Declarative JSON-native API |
-| "Detached Entity" or "Unit of Work" bugs | Lean, plain-object results |
-| Manual JSONB manipulation via raw SQL | First-class atomic JSON operators |
-| Complex build-steps for migrations | Direct Code → DB diffing |
+UQL is a good fit if you want serializable queries, no codegen, atomic JSON operators, or one query API across SQL and MongoDB; see the [side-by-side comparison](/comparison) for details. It is a poor fit if you depend on MSSQL or Oracle (not supported), or if your codebase relies heavily on Unit of Work semantics that would be costly to make explicit.

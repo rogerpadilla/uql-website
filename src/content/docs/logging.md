@@ -1,11 +1,11 @@
 ---
 title: Logging & Monitoring
-description: Professional-grade monitoring and logging with UQL.
+description: Configure query logging, slow-query alerts, and custom loggers in UQL.
 sidebar:
   order: 175
 ---
 
-UQL features a professional-grade, structured logging system designed for high visibility and sub-millisecond performance monitoring.
+UQL includes a structured logging system that reports generated queries, per-query execution times, slow-query alerts, and migration activity.
 
 ## Configuration
 
@@ -59,18 +59,18 @@ For security-sensitive environments, you can suppress query parameters from slow
 
 ## Log Levels
 
-| Level              | Description                                                                                                                       |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| `query`            | **Standard Queries**: Beautifully formatted SQL/Command logs with execution time.                                                 |
-| `slowQuery`        | **Bottleneck Alerts**: Dedicated logging for queries exceeding your `slowQuery.threshold`. Use `logParams: false` to omit params. |
-| `error` / `warn`   | **System Health**: Detailed error traces and potential issue warnings.                                                            |
-| `migration`        | **Audit Trail**: Step-by-step history of schema changes.                                                                          |
-| `skippedMigration` | **Safety**: Logs blocked unsafe schema changes during `autoSync`.                                                                 |
-| `schema` / `info`  | **Lifecycle**: Informative logs about ORM initialization and sync events.                                                         |
+| Level              | Description                                                                                              |
+| :----------------- | :-------------------------------------------------------------------------------------------------------- |
+| `query`            | Each executed SQL statement/command, with its parameters and execution time.                             |
+| `slowQuery`        | Queries exceeding `slowQuery.threshold`. Use `logParams: false` to omit params.                          |
+| `error` / `warn`   | Error traces and warnings.                                                                               |
+| `migration`        | Step-by-step history of schema changes.                                                                  |
+| `skippedMigration` | Unsafe schema changes blocked during `autoSync`.                                                         |
+| `schema` / `info`  | ORM initialization and sync events.                                                                      |
 
-## Visual Feedback
+## Output Format
 
-The `DefaultLogger` provides high-contrast, colored output out of the box:
+The `DefaultLogger` writes colored output like this:
 
 ```text
 query: SELECT * FROM "user" WHERE "id" = $1 -- [123] [2ms]
@@ -132,5 +132,5 @@ class MyLogger implements Logger {
 ```
 
 :::tip
-Even if you disable general query logging in production (e.g., `logger: ['error', 'warn', 'slowQuery']`), UQL stays silent *until* a query exceeds your threshold, making it perfect for monitoring performance bottlenecks in real-time.
+With general query logging disabled in production (e.g., `logger: ['error', 'warn', 'slowQuery']`), UQL stays silent until a query exceeds your threshold, which makes it a low-noise way to catch performance regressions.
 :::

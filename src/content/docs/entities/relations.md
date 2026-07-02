@@ -2,7 +2,7 @@
 title: Relations
 sidebar:
   order: 70
-description: This tutorial explains how to use relations in the entities with the UQL orm.
+description: Define one-to-one, one-to-many, and many-to-many relations between UQL entities.
 ---
 
 ## Relations between entities
@@ -153,14 +153,13 @@ Always use `Relation<T>` for properties decorated with `@OneToOne`, `@OneToMany`
 
 ### Querying Relations
 
-When you query relations in UQL, the syntax remains consistent and type-safe. You can select specific fields from related entities or filter based on them.
+When you query relations in UQL, scalar columns go in `$select` and related entities go in `$populate`. You can select specific fields from related entities or filter based on them.
 
 ```ts title="You write"
 // Assuming `querier` is obtained from the pool
 const posts = await querier.findMany(Post, {
-  $select: {
-    id: true,
-    title: true,
+  $select: { id: true, title: true },
+  $populate: {
     author: {
       $select: { id: true, name: true }
     },
@@ -193,7 +192,7 @@ SELECT "Tag"."name", "PostTag"."postId"
 FROM "Tag"
 INNER JOIN "PostTag" ON "PostTag"."tagId" = "Tag"."id"
 WHERE "PostTag"."postId" IN ($1, $2, ...)
-  AND "Tag"."name" ILIKE $2
+  AND "Tag"."name" ILIKE $3
 ```
 
 Check the [querying relations](/querying/relations) section for more advanced examples on deep filtering and selection.

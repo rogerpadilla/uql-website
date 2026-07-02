@@ -2,12 +2,12 @@
 title: Sub-Queries
 sidebar:
   order: 165
-description: This tutorial explains how to use sub-queries with the UQL orm.
+description: Write correlated sub-queries and raw SQL fragments with the raw() helper in UQL.
 ---
 
 ## Sub-Queries
 
-UQL provides a powerful way to write sub-queries using `raw` expressions that interact directly with the `QueryContext`. These expressions allow you to inject raw SQL fragments while still benefiting from UQL's parameterization and dialect-aware engine.
+Sub-queries in UQL are written with `raw` expressions that interact directly with the `QueryContext`. They let you inject raw SQL fragments while still benefiting from UQL's parameterization and dialect-aware engine.
 
 ### Using `raw` in `$where`
 
@@ -19,20 +19,20 @@ import { Item } from './shared/models/index.js';
 
 const items = await querier.findMany(Item, {
   $select: { id: true },
-  $where: { 
+  $where: {
     $and: [
-      { companyId: 1 }, 
-      raw('SUM(salePrice) > 500') 
-    ] 
+      { companyId: 1 },
+      raw('"salePrice" > "cost" * 2')
+    ]
   }
 });
 ```
 
 ```sql title="Generated SQL"
-SELECT "id" FROM "Item" WHERE "companyId" = 1 AND SUM(salePrice) > 500
+SELECT "id" FROM "Item" WHERE "companyId" = $1 AND "salePrice" > "cost" * 2
 ```
 
-### Advanced: Context-Aware Sub-Queries (`$exists`)
+### Advanced: Context-Aware Sub-Queries (`$exists` / `$nexists`)
 
 For complex sub-queries like `EXISTS` or `IN`, you can pass a callback to `raw`. This callback provides access to the `QueryContext` and the `dialect`, allowing you to generate sub-queries that are correctly prefixed and compatible with your database.
 
@@ -80,7 +80,7 @@ The `raw()` function from `uql-orm` injects SQL fragments into queries. It has t
 
 | Form | Syntax | Use Case |
 | :--- | :--- | :--- |
-| **String** | `raw('SQL fragment')` | Simple expressions (e.g., `raw('SUM(price) > 100')`). |
+| **String** | `raw('SQL fragment')` | Simple expressions (e.g., `raw('"salePrice" > "cost" * 2')`). |
 | **Callback** | `raw(({ ctx, dialect, escapedPrefix }) => { ... })` | Complex sub-queries that need dialect-aware SQL generation. |
 
 The callback receives:

@@ -116,7 +116,7 @@ try {
 | `release()`                                 | Return the connection to the pool.             |
 
 :::note
-Read methods (`findOne`, `findMany`, `findManyAndCount`, `count`, `deleteMany`) also support an RPC-friendly call pattern: `querier.findMany({ $entity: User, ...query })`. This makes serialization for RPC/REST endpoints trivial.
+The query-based methods (`findOne`, `findMany`, `findManyAndCount`, `count`, and `deleteMany`) also support an RPC-friendly call pattern: `querier.findMany({ $entity: User, ...query })`. This makes serialization for RPC/REST endpoints trivial.
 :::
 
 ---

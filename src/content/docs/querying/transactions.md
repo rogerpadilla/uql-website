@@ -204,9 +204,9 @@ If the inner callback throws, the error propagates to the outer transaction whic
 
 | Method | Lifecycle | Isolation Level | Nesting |
 | :--- | :--- | :--- | :--- |
-| `pool.transaction(callback, opts?)` | **Automatic** — acquires, commits/rollbacks, releases. | ✅ via `opts` | Fresh querier |
-| `querier.transaction(callback, opts?)` | **Semi-Automatic** — commits/rollbacks (caller releases). | ✅ via `opts` | Reuses outer |
-| `querier.beginTransaction(opts?)` | **Manual** — caller commits/rollbacks/releases. | ✅ via `opts` | Throws |
+| `pool.transaction(callback, opts?)` | **Automatic** — acquires, commits/rollbacks, releases. | Yes, via `opts` | Fresh querier |
+| `querier.transaction(callback, opts?)` | **Semi-Automatic** — commits/rollbacks (caller releases). | Yes, via `opts` | Reuses outer |
+| `querier.beginTransaction(opts?)` | **Manual** — caller commits/rollbacks/releases. | Yes, via `opts` | Throws |
 | `querier.commitTransaction()` | Commits the active transaction. | — | — |
 | `querier.rollbackTransaction()` | Rolls back the active transaction. | — | — |
-| `@Transactional({ isolationLevel? })` | **Automatic** — full lifecycle via decorator. | ✅ via options | Reuses outer |
+| `@Transactional({ isolationLevel? })` | **Automatic** — full lifecycle via decorator. | Yes, via options | Reuses outer |

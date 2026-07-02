@@ -19,6 +19,8 @@ import onceUponATime from '../../../assets/once-upon-a-time.webp';
 
 *Originally published on [Medium](https://medium.com/@rogerpadillac/in-search-of-the-perfect-orm-e01fcc9bce3d).*
 
+<Image src={onceUponATime} alt="Once upon a time — handwritten" />
+
 ## What is an ORM?
 
 An ORM provides a simpler way to interact with databases in an app — it allows developers to work with data using objects.
@@ -28,8 +30,6 @@ An ORM provides a simpler way to interact with databases in an app — it allows
 Below are the ideal features a TypeScript ORM should have, why such features are the most important ones, and how the existing ORMs fall short in most of these areas.
 
 **The top 5 features a perfect TypeScript ORM should have are:**
-
-<Image src={onceUponATime} alt="Once upon a time — handwritten" />
 
 ### 1. Serializable Queries
 
@@ -254,11 +254,11 @@ const items = await querier.findMany(Item, {
 
 ### 4. Consistent API Across Databases
 
-Its API is unified across different databases — it does the magic under the hood so the same entities and queries could transparently work on any supported database. This makes it easier to switch from a Document to a Relational database (or vice-versa).
+Its API is unified across different databases: the same entities and queries transparently work on any supported database, with the dialect-specific SQL (or MongoDB commands) generated under the hood. This makes it easier to switch from a Document to a Relational database (or vice-versa).
 
 ### 5. Universal Syntax Across Languages
 
-Its syntax is 100% standard JSON, opening the door for many possibilities with other languages — like interoperation or even creating versions of UQL in other languages such as Python or Rust with ease.
+Its syntax is standard JSON, so queries can be produced or consumed from other languages, enabling interoperation or even implementations of UQL in languages such as Python or Rust.
 
 ---
 

@@ -35,9 +35,7 @@ npx uql-migrate generate:entities add_user_nickname
 npx uql-migrate up
 ```
 
-That's it. No manual `ALTER TABLE`, no keeping entities and migrations in sync, no schema DSLs.
-
-Want manual migrations for data backfills or custom SQL? You can do that too — full automation + full control when you need it.
+The generated migration contains the `ALTER TABLE` statements derived from the diff, so entities and migrations cannot drift apart. Manual migrations for data backfills or custom SQL are also supported (see below).
 :::
 
 ### Generated files and custom generators
@@ -156,7 +154,7 @@ export default {
 
 The pool constructor takes Bun’s `SQL.Options` (e.g. `{ url }`, `{ adapter, hostname, ... }`, or SQLite `filename`). The migrator reads the dialect id from `pool.dialect.dialectName`.
 
-When running migrations, use the `--bun` flag to ensure Bun's high-performance runtime handles TypeScript resolution and native driver loading:
+When running migrations, use the `--bun` flag so Bun's runtime handles TypeScript resolution and native driver loading:
 ```bash
 bun run --bun uql-migrate up
 ```
@@ -200,11 +198,11 @@ await migrator.autoSync({ logging: true });
 
 ### Advanced Capabilities
 
-The synchronization engine is built on a powerful **Schema AST (Abstract Syntax Tree)** that treats your database schema as a graph, not just a list of tables.
+The synchronization engine is built on a **Schema AST (Abstract Syntax Tree)** that treats your database schema as a graph, not just a list of tables.
 
 #### 1. Schema AST Engine
-*   **Graph-Based Diffing**: Handles complex circular dependencies and ensures correct topological sort order when creating or dropping tables.
-*   **100% Accurate**: Eliminates "phantom diffs" by understanding the semantic differences between dialect-specific types (e.g., `INTEGER` vs `INT`).
+*   **Graph-Based Diffing**: Handles circular dependencies and ensures correct topological sort order when creating or dropping tables.
+*   **Dialect-Aware Comparison**: Avoids "phantom diffs" by understanding equivalences between dialect-specific types (e.g., `INTEGER` vs `INT`).
 
 #### 2. Smart Relation Detection
 When scaffolding entities from an existing database (`generate:from-db`), UQL automatically detects relationships by analyzing your schema:

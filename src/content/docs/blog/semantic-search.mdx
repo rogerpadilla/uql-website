@@ -1,6 +1,6 @@
 ---
 title: "Semantic Search: Native Vector Similarity in a Multi-Dialect ORM"
-description: "UQL 0.3 brings native vector similarity search to PostgreSQL, MariaDB, SQLite, and MongoDB Atlas through one type-safe query API — with zero-allocation overhead and automatic index migration for AI and RAG workloads."
+description: "UQL 0.3 brings native vector similarity search to PostgreSQL, MariaDB, SQLite, and MongoDB Atlas through one type-safe query API, including automatic index migration for AI and RAG workloads."
 date: 2026-03-12
 authors:
   - rogerpadilla
@@ -8,12 +8,12 @@ tags:
   - release
   - semantic-search
   - vector
-excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas — featuring zero-allocation overhead and automatic index migration."
+excerpt: "UQL 0.3 ships native semantic search across PostgreSQL, MariaDB, SQLite, and MongoDB Atlas, with automatic index migration."
 ---
 
-AI-powered search is everywhere, but if you use an ORM, you've probably hit this wall: the moment you need vector similarity, you're forced to use raw SQL. Hand-written distance expressions, and dialect-specific quirks — all outside your type-safe query API.
+Most ORMs stop at vector similarity: the moment you need it, you drop to raw SQL, with hand-written distance expressions and dialect-specific quirks outside your type-safe query API.
 
-**UQL 0.3 changes that.** Native semantic search is now a first-class citizen, featuring **automatic index migration** for HNSW/IVFFlat and zero-allocation performance.
+UQL 0.3 adds native semantic search to the regular query API, including automatic index migration for HNSW and IVFFlat indexes.
 
 ## What It Looks Like
 
@@ -45,9 +45,9 @@ ORDER BY vec_distance_cosine(`embedding`, ?)
 LIMIT 10
 ```
 
-No raw SQL. No dialect checks. Same query everywhere.
+The same query works on every dialect, with no raw SQL or dialect checks in your code.
 
-For MongoDB, UQL translates into an Atlas `$vectorSearch` pipeline — same API, zero config:
+For MongoDB, UQL translates the same query into an Atlas `$vectorSearch` pipeline. Note that the Atlas search index itself must be created in Atlas; see the [reference](/querying/semantic-search) for details.
 
 ```json title="MongoDB Atlas"
 [
@@ -73,7 +73,7 @@ export class Article {
 }
 ```
 
-For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector`. MariaDB and SQLite just work — no extensions needed.
+For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector`. MariaDB has vector support built in; SQLite requires loading the [sqlite-vec](https://github.com/asg017/sqlite-vec) extension.
 
 ## Key Features
 
@@ -90,10 +90,10 @@ const results = await querier.findMany(Article, {
   $limit: 10,
 }) as WithDistance<Article, 'similarity'>[];
 
-results[0].similarity; // autocomplete works ✓
+results[0].similarity;
 ```
 
-`WithDistance<E, K>` adds a typed distance property to each result — your IDE autocompletes it, and typos are caught at compile time.
+`WithDistance<E, K>` adds a typed distance property to each result, so your IDE autocompletes it and typos are caught at compile time.
 
 ### 5 Distance Metrics
 
@@ -135,7 +135,6 @@ const results = await querier.findMany(Article, {
 });
 ```
 
-No new concepts to learn. The query API you already know now handles AI search.
 
 ## Get Started
 
@@ -146,7 +145,7 @@ npm i uql-orm
 - **[Full documentation →](/querying/semantic-search)**
 - **[GitHub](https://github.com/rogerpadilla/uql)**
 
-We'd love to hear how you're using vector search in your projects — open an issue on [GitHub](https://github.com/rogerpadilla/uql) and let us know!
+If you run into issues or missing features, open an issue on [GitHub](https://github.com/rogerpadilla/uql).
 
 ---
 

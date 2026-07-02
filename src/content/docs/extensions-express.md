@@ -2,7 +2,7 @@
 title: Express
 sidebar:
   order: 300
-description: This tutorial explains how to use the Express extension with the UQL orm.
+description: Auto-generate REST endpoints for your entities with the UQL Express middleware.
 ---
 
 ## Express Extension
@@ -88,7 +88,7 @@ Starting with `0.7.0`, the middleware automatically detects the primary key defi
 :::
 
 :::tip
-All `GET` endpoints support UQL's powerful [Serializable JSON Query Syntax](/querying/querier), allowing your frontend to perform complex joins and filters directly via URL parameters.
+All `GET` endpoints support UQL's [serializable JSON query syntax](/querying/querier), allowing your frontend to perform complex joins and filters directly via URL parameters.
 
 When using `parseQuery` from `uql-orm/express`, JSON-shaped fields **`$select`**, **`$populate`**, **`$exclude`**, **`$where`**, and **`$sort`** can be sent as **strings** (stringified JSON) in the query string; the middleware parses them into objects on `req.query`.
 :::

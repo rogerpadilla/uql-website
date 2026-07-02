@@ -1,6 +1,6 @@
 ---
 title: "In Search of the Fastest TypeScript ORM"
-description: "A SQL-generation speed benchmark across 7 TypeScript ORMs and query builders — including Prisma, Drizzle, TypeORM, and UQL. See the numbers and why the slowest contender was a query builder, not an ORM."
+description: "A SQL-generation speed benchmark across 7 TypeScript ORMs and query builders (Drizzle, TypeORM, Sequelize, Knex, Kysely, MikroORM, and UQL), with a reproducible open-source methodology."
 date: 2026-03-10
 authors:
   - rogerpadilla
@@ -9,7 +9,7 @@ tags:
   - performance
   - typescript
   - orm
-excerpt: "Pure SQL generation speed across 7 ORMs and query builders. The slowest was a query builder — not an ORM."
+excerpt: "Pure SQL generation speed across 7 TypeScript ORMs and query builders, measured with an open, reproducible benchmark."
 cover:
   alt: "Bar chart comparing SQL generation speed across TypeScript ORMs and query builders"
   image: ../../../assets/benchmark-cover.webp
@@ -17,9 +17,7 @@ cover:
 
 I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a query builder"* repeated everywhere. So I decided to actually measure it.
 
-**Pure SQL generation speed** — no database, no network, no connection pool. Just the overhead your ORM adds to every single request.
-
-7 entries. 8 query types. 3 runs averaged. Apple Silicon M4.
+The benchmark measures **pure SQL generation speed**: no database, no network, no connection pool. That isolates the overhead the ORM adds to every request. 7 entries, 8 query types, 3 runs averaged, on an Apple Silicon M4.
 
 ---
 
@@ -27,9 +25,9 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 - **Environment:** Node.js v24, Apple Silicon M4, 3 runs averaged.
 - **Versions:** Latest stable of every ORM/QB as of March 2026.
-- **Fairness:** Each ORM uses its most idiomatic API — QueryBuilder for TypeORM/MikroORM, which benefits them by skipping entity overhead.
-- **What's measured:** Pure SQL string generation — no database, no I/O, no connection pool. This isolates ORM overhead only.
-- **Why no Prisma?** Prisma is not a pure TypeScript/JavaScript ORM — only its client is JS/TS. The query engine is a separate Rust binary that builds SQL, making it architecturally incomparable and not even testable this way.
+- **Fairness:** Each ORM uses its most idiomatic API (QueryBuilder for TypeORM/MikroORM), which benefits them by skipping entity overhead.
+- **What's measured:** Pure SQL string generation, with no database, no I/O, and no connection pool. This isolates ORM overhead only.
+- **Why no Prisma?** Prisma is not a pure TypeScript/JavaScript ORM; only its client is JS/TS. The query engine is a separate Rust binary that builds SQL, making it architecturally incomparable and not even testable this way.
 
 ---
 
@@ -39,7 +37,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 606K 🥇 | —         |
+| UQL       | 606K | —         |
 | Knex      | 407K    | 0.67x     |
 | Sequelize | 202K    | 0.33x     |
 | Kysely    | 197K    | 0.33x     |
@@ -51,7 +49,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,817K 🥇 | —        |
+| UQL       | 1,817K | —        |
 | Kysely    | 819K     | 0.45x    |
 | Knex      | 601K     | 0.33x    |
 | TypeORM   | 321K     | 0.18x    |
@@ -63,7 +61,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 693K 🥇 | —         |
+| UQL       | 693K | —         |
 | Knex      | 349K    | 0.50x     |
 | Sequelize | 334K    | 0.48x     |
 | Kysely    | 334K    | 0.48x     |
@@ -75,7 +73,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 3,642K 🥇 | —        |
+| UQL       | 3,642K | —        |
 | Sequelize | 1,349K   | 0.37x    |
 | Kysely    | 1,290K   | 0.35x    |
 | Knex      | 962K     | 0.26x    |
@@ -87,7 +85,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 3,994K 🥇 | —        |
+| UQL       | 3,994K | —        |
 | Sequelize | 3,143K   | 0.79x    |
 | Kysely    | 1,559K   | 0.39x    |
 | Knex      | 994K     | 0.25x    |
@@ -99,7 +97,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,200K 🥇 | —        |
+| UQL       | 1,200K | —        |
 | Knex      | 480K     | 0.40x    |
 | Kysely    | 425K     | 0.35x    |
 | Sequelize | 385K     | 0.32x    |
@@ -111,7 +109,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 644K 🥇 | —         |
+| UQL       | 644K | —         |
 | Kysely    | 218K    | 0.34x     |
 | Knex      | 199K    | 0.31x     |
 | TypeORM   | 186K    | 0.29x     |
@@ -123,7 +121,7 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,489K 🥇 | —        |
+| UQL       | 1,489K | —        |
 | Sequelize | 407K     | 0.27x    |
 | TypeORM   | 364K     | 0.24x    |
 | Knex      | 284K     | 0.19x    |
@@ -131,45 +129,39 @@ I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a 
 | Drizzle   | 77K      | 0.05x    |
 | MikroORM  | 64K      | 0.04x    |
 
-📊 **[Interactive charts →](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html)**
+**[Interactive charts →](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html)**
 
 ---
 
 ## Three Things That Surprised Me
 
-**1. The "lightweight" query builder is the slowest thing in the benchmark.**
+**1. The "lightweight" option is the slowest thing in the benchmark.**
 
-Drizzle — marketed as lightweight — is slower than Sequelize (a full ORM from 2014) in every single category. The functional expression-tree approach creates more intermediate objects than Sequelize's simple string concatenation.
+Drizzle, marketed as lightweight, is slower than Sequelize (a full ORM from 2014) in every single category. The functional expression-tree approach creates more intermediate objects than Sequelize's simple string concatenation.
 
 **2. Standalone query builders can't beat a well-designed ORM.**
 
-Knex and Kysely have zero entity/relation overhead. They're just SQL string builders. Yet UQL — a full ORM with entities, relations, and migrations — is faster than both in all 8 categories. This **4x-40x overhead advantage** demonstrates that the conventional wisdom ("ORMs are slow") doesn't hold when the ORM is designed for performance with a **Zero-Allocation** architecture from day one.
+Knex and Kysely have zero entity/relation overhead; they're just SQL string builders. Yet UQL, a full ORM with entities, relations, and migrations, is faster than both in all 8 categories, by 1.5x to 6.6x depending on the query. The conventional wisdom ("ORMs are slow") doesn't hold when the ORM pre-computes its metadata and avoids intermediate allocations.
 
 **3. MikroORM pays double.**
 
-MikroORM uses Knex internally as its SQL generator. So every query goes through two compilation layers: MikroORM → Knex → SQL string. The result? MikroORM averages 4-5x slower than Knex alone. That's the cost of layering abstractions.
+MikroORM uses Knex internally as its SQL generator, so every query goes through two compilation layers: MikroORM → Knex → SQL string. In these tables, MikroORM averages about 6x slower than Knex alone (from 2.7x on UPSERT to 10x on WHERE + SORT + LIMIT). That's the cost of layering abstractions.
 
 ---
 
 ## How UQL Gets There
 
-I got curious why the gap was so large, so I dug into the approach. Most ORMs figure out your schema at query time: *"What table does `User` map to? What column is `companyId`? Is it nullable?"* — they answer these questions on every single query.
+I got curious why the gap was so large, so I dug into the approach. Most ORMs figure out your schema at query time: *"What table does `User` map to? What column is `companyId`? Is it nullable?"* They answer these questions on every single query.
 
-UQL answers them once at startup. Field-to-column mappings, table names, relation paths — all pre-computed into lookup tables before the first query runs. At query time, generating SQL is just reading from a cache.
+UQL answers them once at startup. Field-to-column mappings, table names, and relation paths are all pre-computed into lookup tables before the first query runs. At query time, generating SQL is just reading from a cache.
 
-The other difference is allocation. When TypeORM builds a SELECT, it creates a QueryBuilder, then an expression tree, then walks the tree to produce SQL. UQL pushes SQL fragments directly into a string buffer — no intermediate objects, no garbage collection pressure.
+The other difference is allocation. When TypeORM builds a SELECT, it creates a QueryBuilder, then an expression tree, then walks the tree to produce SQL. UQL pushes SQL fragments directly into a string buffer, creating no intermediate objects and no garbage-collection pressure.
 
 ---
 
-## Does This Matter in Production?
+## When This Matters in Production
 
-Database latency is 1-50ms. ORM overhead is microseconds. So who cares?
-
-You care at scale. If you're running a moderately busy API — say 1,000 req/s:
-- UQL adds **1 CPU-second** of ORM overhead
-- MikroORM adds **20 CPU-seconds** — for the same queries
-
-That's 20x more CPU burned on generating SQL strings — pure waste before a single byte hits the network. In serverless (where you pay per ms), that's your bill. In containers, that's your horizontal scaling cost.
+Database latency is 1-50ms and ORM overhead is microseconds, so for a low-traffic app the difference is noise. It starts to matter at scale. Take the WHERE + SORT + LIMIT query at 1,000 req/s: UQL (1,200K ops/s) spends roughly 1ms of CPU per second generating SQL, while MikroORM (46K ops/s) spends roughly 20ms, about 20x more CPU for the same queries before a single byte hits the network. In serverless, where you pay per ms of CPU, that shows up on the bill; in containers, it shows up as horizontal scaling cost.
 
 ---
 
@@ -177,7 +169,7 @@ That's 20x more CPU burned on generating SQL strings — pure waste before a sin
 
 Full disclosure: I'm the author of UQL. That's exactly why I built the benchmark as an independent repo anyone can audit and reproduce.
 
-The full benchmark is open source — clone it, audit it, run it, share results. No database needed, finishes in seconds. See how UQL maintains its [4x-40x performance lead](/comparison#performance) across every modern TypeScript environment.
+The full benchmark is open source and needs no database; it runs in seconds on Node.js. If your results differ, open an issue. There's also a broader feature-by-feature comparison on the [comparison page](/comparison#performance).
 
 Repo: [ts-orm-benchmark](https://github.com/rogerpadilla/ts-orm-benchmark)
 

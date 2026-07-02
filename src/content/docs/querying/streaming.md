@@ -34,9 +34,7 @@ For relation-heavy reads, use [`findMany`](/querying/querier) with [`$populate`]
 
 ## Why use Streaming?
 
-1.  **Memory Efficiency**: You can process 1,000,000 rows with the same memory footprint as processing 10 rows.
-2.  **Early Processing**: Start handling the first row before the database has even finished finding the last one.
-3.  **Backpressure**: UQL respects the database cursor's speed, ensuring your application isn't overwhelmed by data.
+Memory stays flat regardless of result size, since rows are processed as they arrive rather than buffered into an array. You also start handling the first row before the database finishes producing the last one, and because iteration drives the cursor, the database only sends rows as fast as your loop consumes them.
 
 ## Native Driver Implementation
 
@@ -51,10 +49,6 @@ UQL uses the optimal streaming mechanism for each individual driver:
 | **MongoDB** (`mongodb`) | Native MongoDB `Cursor`. |
 | **LibSQL** / **D1** | Emulated streaming (async row fetching). |
 
-## RPC & Remote Bridges
-
-Like all UQL queries, the stream query is fully serializable. If you are using the **Fullstack Bridge**, the streaming protocol is handled automatically over the network, allowing you to stream data from your database directly to a browser or mobile app.
-
----
-
-**Senior Insight:** Streaming is powerful but holds a database connection open for the duration of the loop. Always ensure your processing logic inside the `for await` loop is fast, or use a technical queue if you need to perform heavy work on each row.
+:::caution
+Streaming holds a database connection open for the duration of the loop. Keep the processing logic inside the `for await` loop fast; if each row needs heavy work, push it to a task queue and let the loop move on.
+:::

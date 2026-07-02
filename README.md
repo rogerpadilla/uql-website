@@ -1,10 +1,10 @@
 # UQL Website
 
-The official documentation for **[UQL](https://uql-orm.dev)**, the best ORM for TypeScript.
+The official documentation for **[UQL](https://uql-orm.dev)**, the JSON-native TypeScript ORM.
 
-Built with **[Astro Starlight](https://starlight.astro.build)** for extreme performance and ease of use.
+Built with **[Astro Starlight](https://starlight.astro.build)**.
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **Install dependencies**:
    ```bash
@@ -21,6 +21,6 @@ Built with **[Astro Starlight](https://starlight.astro.build)** for extreme perf
    npm run build
    ```
 
-## ❤️ Sponsorship
+## Sponsorship
 
 Proudly supported by **[Variability.ai](https://variability.ai)** - *"Intelligence in Every Fluctuation"*.

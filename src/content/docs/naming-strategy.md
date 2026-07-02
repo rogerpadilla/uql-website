@@ -5,7 +5,7 @@ sidebar:
     text: New
     variant: success
 title: Naming Strategy
-description: This tutorial explains how to use naming strategies with UQL.
+description: Configure global and per-entity naming strategies for tables and columns in UQL.
 ---
 
 ## Naming Strategies

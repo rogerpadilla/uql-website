@@ -2,7 +2,7 @@
 title: Browser
 sidebar:
   order: 400
-description: This tutorial explains how to use the browser extension with the UQL orm.
+description: Run type-safe UQL queries from the browser with HttpQuerier and shared entity classes.
 ---
 
 ## Browser Extension
@@ -28,12 +28,9 @@ This extension is completely optional. UQL works perfectly fine as a standalone 
     ```ts
     import { User } from './shared/models/index.js';
 
-    // Deeply type-safe queries in the browser!
     const users = await querier.findMany(User, {
-      $select: { 
-        email: true, 
-        profile: { $select: { picture: true } } 
-      },
+      $select: { email: true },
+      $populate: { profile: { $select: { picture: true } } },
       $where: { email: { $endsWith: '@domain.com' } },
       $sort: { createdAt: 'desc' },
       $limit: 10
@@ -42,7 +39,7 @@ This extension is completely optional. UQL works perfectly fine as a standalone 
 
 ### Shared Entities & Type Safety
 
-One of the biggest advantages of the Browser Extension is the ability to easily share your entity classes between your backend and frontend.
+Because queries are validated against your entity classes, you can share those classes between backend and frontend and get the same types on both sides.
 
 ```ts
 // shared/models/User.ts

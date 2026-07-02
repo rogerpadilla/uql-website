@@ -2,7 +2,7 @@
 title: Inheritance
 sidebar:
   order: 100
-description: This tutorial explains how to use inheritance between entities with the UQL orm.
+description: Share fields across entities with abstract base classes and inheritance in UQL.
 ---
 
 ## Inheritance between entities
@@ -15,7 +15,7 @@ A common pattern is to define a base class with common fields like `id`, `create
 
 ```ts
 import { v7 as uuidv7 } from 'uuid';
-import { Entity, Id, Field, ManyToOne, type Relation } from 'uql-orm';
+import { Entity, Id, Field, OneToOne, type Relation } from 'uql-orm';
 
 /**
  * An abstract class for shared audit fields.
@@ -79,7 +79,7 @@ export class User extends BaseEntity {
   password?: string;
 
   @OneToOne({ entity: () => Profile, mappedBy: 'userId', cascade: true })
-  profile?: Profile;
+  profile?: Relation<Profile>;
 }
 ```
 
@@ -105,8 +105,4 @@ export class TaxCategory extends BaseEntity {
 }
 ```
 
-### Benefits of Inheritance
-
-- **Consistency**: Ensure all entities have standard audit fields.
-- **Refactoring**: Change a base field type in one place, and it propagates to all children.
-- **Type Safety**: UQL's query engine understands inherited fields, giving you full auto-completion on `Company.id` or `Profile.createdAt`.
+Inherited fields behave exactly like fields declared on the class itself: the query engine understands them, so `Company.id` or `Profile.createdAt` get full auto-completion and validation, and changing a base field type propagates to every child entity.

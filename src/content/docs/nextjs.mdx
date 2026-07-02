@@ -2,7 +2,7 @@
 title: Next.js + UQL
 sidebar:
   order: 60
-description: Use UQL with Next.js App Router to build a type-safe, AI-ready backend.
+description: Use UQL with Next.js App Router in route handlers and server actions.
 ---
 
 ## Overview
@@ -117,7 +117,25 @@ export async function createUser(formData: FormData) {
 
 ## 5. Add AI & semantic search
 
-Once you have entities in place, you can plug in **semantic search** for AI features:
+Once you have entities in place, you can plug in **semantic search** for AI features. Add an entity with a vector field to `src/db/entities.ts` (and register it in the pool's `entities` list):
+
+```ts
+import { Entity, Id, Field } from 'uql-orm';
+
+@Entity()
+export class Article {
+  @Id({ type: 'uuid' })
+  id?: string;
+
+  @Field()
+  title?: string;
+
+  @Field({ type: 'vector', dimensions: 1536 })
+  embedding?: number[];
+}
+```
+
+Then query it by similarity:
 
 ```ts
 import { Article } from '@/db/entities';
