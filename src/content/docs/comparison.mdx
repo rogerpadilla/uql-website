@@ -115,7 +115,7 @@ const results = await repo.createQueryBuilder('item')
 ```ts title="UQL"
 const results = await querier.findMany(Item, {
   $select: { id: true, title: true },
-  $sort: { $vector: { embedding: queryVector } },
+  $sort: { embedding: { $vector: queryVector, $distance: 'cosine' } },
   $limit: 10,
 });
 ```
@@ -223,9 +223,8 @@ const results = await repo.find({
 
 ```ts title="UQL"
 const results = await querier.findMany(User, {
-  $select: {
-    id: true,
-    name: true,
+  $select: { id: true, name: true },
+  $populate: {
     company: { $select: { name: true }, $where: { country: 'US' } },
   },
 });
