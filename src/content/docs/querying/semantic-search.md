@@ -2,6 +2,9 @@
 title: Semantic Search
 sidebar:
   order: 108
+  badge:
+    text: New
+    variant: success
 description: Vector similarity search with $vector, $distance, and $project across PostgreSQL, CockroachDB, MariaDB, SQLite, and MongoDB Atlas.
 ---
 
