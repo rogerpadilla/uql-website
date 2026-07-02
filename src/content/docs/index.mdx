@@ -29,19 +29,11 @@ A UQL query is a plain JSON object — the same data you can log, cache, send ov
 
 ```mermaid
 graph LR
-    subgraph Client
-        B[Browser / App] -- "JSON Query" --> H[HttpQuerier]
-    end
-    subgraph Server
-        H -- "HTTP Request" --> E[API Endpoint]
-        E -- "Execute" --> P[QuerierPool]
-    end
-    subgraph Database
-        P -- "Dialect SQL" --> DB[(SQL / MongoDB)]
-        DB -- "Typed Result" --> P
-    end
-    P -- "Typed Result" --> E
-    E -- "JSON Response" --> B
+    S["Server code"] --> Q["Plain JSON query"]
+    C["Any HTTP client"] -. "HTTP" .-> Q
+    Q --> P["QuerierPool"]
+    P -- "dialect SQL / commands" --> DB[("SQL · MongoDB")]
+    DB -- "typed result" --> P
 ```
 
 - **Queries are data, not method chains.** Build them dynamically, store them, diff them, or send them straight from the client. There's no DSL to learn and nothing to compile.
