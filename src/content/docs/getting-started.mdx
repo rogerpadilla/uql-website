@@ -9,36 +9,10 @@ description: Install UQL, define an entity, and run your first query.
 
 **[UQL](/)** is a JSON-native query protocol for TypeScript — fast, type-safe, and the same wherever your code runs.
 
----
-
-## Installation
-
-Install the core package and your preferred database driver:
-
-<Tabs>
-  <TabItem label="npm">
-    ```sh
-    npm install uql-orm pg
-    # install driver according to your DB (pg, mysql2, better-sqlite3, mongodb, etc.)
-    ```
-  </TabItem>
-  <TabItem label="bun">
-    ```sh
-    bun add uql-orm
-    # Bun has native SQL drivers built-in via `bun:sql`
-    # No external drivers required for PostgreSQL, MySQL, SQLite
-    ```
-  </TabItem>
-  <TabItem label="pnpm">
-    ```sh
-    pnpm add uql-orm pg
-    # install driver according to your DB (pg, mysql2, better-sqlite3, mongodb, etc.)
-    ```
-  </TabItem>
-</Tabs>
-
 - **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
 - **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
+
+---
 
 :::note[New to UQL? Start here]
 
@@ -253,13 +227,3 @@ If you see module resolution errors, ensure:
 ```
 
 For Bun, no special configuration is needed.
-
----
-
-## Next Steps
-
-- [Define Entities](/entities/basic) — Explore all decorators and type abstractions.
-- [Define Relations](/entities/relations) — Map complex relationships with ease.
-- [Querying](/querying/querier) — Deep selection, filtering, and sorting.
-- [Transactions](/querying/transactions) — Automatic and manual transaction patterns.
-- [Migrations](/migrations) — Schema evolution with the CLI and Drift Detection.
