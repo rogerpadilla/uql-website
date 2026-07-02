@@ -12,6 +12,17 @@ description: Learn how to manage database schema evolution with UQL's migration 
 
 UQL takes an **Entity-First** approach: you modify your TypeScript entity classes, and UQL auto-generates the migration files for you.
 
+```mermaid
+graph TD
+    A[TypeScript Entity Class] -->|Diff against| B[(Live Database)]
+    B --> C{Schema AST Engine}
+    C -->|Generate| D[Timestamped SQL Migration]
+    D -->|Apply| B
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+    style B fill:#dfd,stroke:#333,stroke-width:2px
+```
+
 :::important[Your entities are the single source of truth]
 **No need to write DDL manually.** UQL diffs your entities against the live database and generates the exact SQL needed. The only thing you maintain is your entity classes — UQL handles everything else.
 

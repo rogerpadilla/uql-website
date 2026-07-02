@@ -1,10 +1,10 @@
 ---
-title: A JSON-native ORM for TypeScript
-description: A JSON-native ORM for TypeScript — serializable queries, no codegen, and one API across SQL and MongoDB.
+title: The Smartest TypeScript ORM
+description: UQL is a JSON-native ORM for TypeScript — serializable queries, no codegen, and one API across SQL and MongoDB.
 template: splash
 hero:
   title: UQL
-  tagline: A JSON-native ORM for TypeScript. Serializable queries, no codegen, and one API across Postgres, MySQL, SQLite, MongoDB, and the edge.
+  tagline: The Smartest TypeScript ORM. Serializable queries, no codegen, and one API across Postgres, MySQL, SQLite, MongoDB, and the edge.
   actions:
     - text: Get Started
       link: /getting-started
@@ -27,50 +27,26 @@ npm install uql-orm
 
 A UQL query is a plain JSON object — the same data you can log, cache, send over HTTP, or hand to the browser, with full TypeScript inference at every depth. That one decision shapes everything else:
 
+```mermaid
+graph LR
+    subgraph Client
+        B[Browser / App] -- "JSON Query" --> H[HttpQuerier]
+    end
+    subgraph Server
+        H -- "HTTP Request" --> E[API Endpoint]
+        E -- "Execute" --> P[QuerierPool]
+    end
+    subgraph Database
+        P -- "Dialect SQL" --> DB[(SQL / MongoDB)]
+        DB -- "Typed Result" --> P
+    end
+    P -- "Typed Result" --> E
+    E -- "JSON Response" --> B
+```
+
 - **Queries are data, not method chains.** Build them dynamically, store them, diff them, or send them straight from the client. There's no DSL to learn and nothing to compile.
 - **No codegen, no build step.** Entities are TypeScript classes, so your code *is* the schema. There's no `.prisma` file to regenerate and no generated client to keep in sync.
 - **One API everywhere.** The same syntax runs on PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, Cloudflare D1, MongoDB, and Bun's native SQL.
 - **Fast by design.** A zero-allocation engine measured at [3.9M+ ops/s](/comparison#performance) — on average ~2.4× faster than the next ORM in our [open benchmark](https://github.com/rogerpadilla/ts-orm-benchmark).
 
-For an operation-by-operation code comparison against Prisma, Drizzle, TypeORM, and MikroORM — including where UQL is *not* the right pick — see the [full ORM comparison](/comparison).
-
----
-
-## Who is UQL for?
-
-UQL fits best when you want modern TypeScript ergonomics without trading away performance or portability:
-
-- **AI and RAG applications** — native vector search, distance projection, and JSON-native queries for semantic search and retrieval pipelines.
-- **Multi-tenant SaaS** — one schema and query model across every supported database, with entity-first migrations.
-- **High-concurrency APIs** — a zero-allocation engine, sticky connections, and first-class streaming keep latency predictable under load.
-
-The goal is Prisma-level ergonomics at query-builder speed.
-
----
-
-## Explore the documentation
-
-### The fast path
-- [Quick Start](/getting-started) — install, configure, and run your first query.
-- [FAQ](/faq) — answers to frequently asked questions.
-- [Switching to UQL](/switching-to-uql) — migration guide for Prisma, Drizzle, and TypeORM users.
-
-### Deep dives
-- [Core Concepts](/entities/basic) — entities, relations, type abstractions, and lifecycle hooks.
-- [Querying & Transactions](/querying/querier) — selection, filtering, sorting, and JSON operators.
-- [AI & Semantic Search](/ai-semantic-search) — vector similarity and RAG-style workflows.
-- [Migrations & Ops](/migrations) — entity-first migrations and drift detection.
-- [JSON / JSONB](/querying/json) — work with nested JSON fields and dot-notation operators.
-- [Streaming](/querying/streaming) — process millions of rows with stable memory.
-- [Aggregate Queries](/querying/aggregate) — GROUP BY, HAVING, and analytics.
-- [Raw SQL](/querying/raw-sql) — execute vanilla SQL with type safety.
-
-### Ecosystem
-- [Extensions & Fullstack](/extensions-express) — auto-generated REST APIs and type-safe browser queries.
-- [Bun Native SQL](/bun-sql) — use Bun's built-in SQL drivers.
-- [Cloudflare D1](/cloudflare-d1) — run on the edge.
-- [Next.js](/nextjs) — fullstack integration.
-
----
-
-Open source · Production-trusted by [Variability.ai](https://variability.ai) — an AI meeting and video intelligence platform.
+Open source · Production-trusted by [Variability.ai](https://variability.ai).

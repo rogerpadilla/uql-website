@@ -9,29 +9,11 @@ description: Install UQL, define an entity, and run your first query.
 
 **[UQL](/)** is a JSON-native query protocol for TypeScript — fast, type-safe, and the same wherever your code runs.
 
-- **Runs Everywhere**: Node.js, Bun, Deno, Cloudflare Workers, Electron, React Native, and the Browser.
-- **Unified API**: A consistent interface for PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Neon, D1, and MongoDB.
-
----
-
-:::note[New to UQL? Start here]
-
-For your first week with UQL, follow this path:
-
-1. **[Quick Start](/getting-started)** (this page) — install, configure, and run your first query.  
-2. **[Entities](/entities/basic)** — define your models and types.  
-3. **[Relations](/entities/relations)** — map associations between entities.  
-4. **[Querying](/querying/querier)** — learn `$select`, `$where`, `$sort`, and friends.  
-5. **[Transactions](/querying/transactions)** — wrap operations safely.  
-6. **[Migrations](/migrations)** — keep your database in sync with your code.
-
-:::
-
 ---
 
 ## 1. Install
 
-import { Tabs, TabItem, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Install the core and your preferred driver:
 
@@ -67,7 +49,6 @@ If you use the **decorator-based approach**, make sure your `tsconfig.json` has:
 ```
 
 **For `defineEntity` (imperative API), these flags are NOT required.**
-```
 
 If you use the **imperative API** (`defineEntity`), these flags are **not required**.
 
@@ -101,15 +82,6 @@ import type { Config } from 'uql-orm';
 import { PgQuerierPool } from 'uql-orm/postgres';
 import { User } from './entities.js';
 
-// For production, use environment variables:
-// const pool = new PgQuerierPool({ 
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_NAME
-// });
-
-// For local development:
 const pool = new PgQuerierPool({ 
   host: 'localhost',
   user: 'postgres',
@@ -137,46 +109,6 @@ console.log(users);
 
 ---
 
-## Supported Databases
-
-| Database | Driver Package | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| Bun SQL Native | `bun:sql` | ✅ Full | Built-in, no install needed |
-| PostgreSQL | `pg` | ✅ Full | Production-ready |
-| CockroachDB | `pg` | ✅ Full | Compatible with PostgreSQL driver |
-| MySQL | `mysql2` | ✅ Full | Production-ready |
-| MariaDB | `mariadb` or `mysql2` | ✅ Full | Use `mariadb` for native support |
-| SQLite | `better-sqlite3` | ✅ Full | Synchronous, single-file |
-| LibSQL / Turso | `@libsql/client` | ✅ Full | SQLite fork for serverless |
-| Cloudflare D1 | — | ✅ Full | Use `uql-orm/d1` |
-| Neon | `@neondatabase/serverless` | ✅ Full | Serverless Postgres |
-| MongoDB | `mongodb` | ✅ Full | Document database |
-
----
-
-## Import Paths
-
-UQL uses subpath exports to keep your bundles lean:
-
-| Path | Purpose |
-| :--- | :--- |
-| `uql-orm` | Core decorators, types, and query utilities |
-| `uql-orm/postgres` | PostgreSQL driver pool |
-| `uql-orm/cockroach` | CockroachDB driver pool |
-| `uql-orm/mysql` | MySQL driver pool (also works with MariaDB) |
-| `uql-orm/maria` | MariaDB driver pool (dedicated `mariadb` driver) |
-| `uql-orm/sqlite` | SQLite driver pool |
-| `uql-orm/bunSql` | **Bun Native SQL** driver pool (Postgres, MySQL, SQLite) |
-| `uql-orm/libsql` | LibSQL / Turso driver pool |
-| `uql-orm/neon` | Neon serverless driver pool |
-| `uql-orm/d1` | Cloudflare D1 driver pool |
-| `uql-orm/mongo` | MongoDB driver pool |
-| `uql-orm/express` | Express middleware (auto-generated REST APIs) |
-| `uql-orm/browser` | Browser HTTP querier |
-| `uql-orm/migrate` | Migration engine & CLI |
-
----
-
 ## Next Steps
 
 - [Define Entities](/entities/basic) — Explore all decorators and type abstractions.
@@ -184,46 +116,3 @@ UQL uses subpath exports to keep your bundles lean:
 - [Querying](/querying/querier) — Deep selection, filtering, and sorting.
 - [Transactions](/querying/transactions) — Automatic and manual transaction patterns.
 - [Migrations](/migrations) — Schema evolution with the CLI and Drift Detection.
-
----
-
-## Common pitfalls
-
-::::tip
-- **Decorators not working**: Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in `tsconfig.json`, and that your bundler supports decorators.  
-- **ESM import issues**: UQL is Pure ESM — set your `module` to `NodeNext`, `ESNext`, or `Bundler`, and avoid mixing `require()` with `import`.  
-- **Connection errors**: Double-check database credentials and that your driver package (for example `pg`, `mysql2`, or `better-sqlite3`) is installed and compatible with your runtime.  
-- **Pool not exported**: When using `uql.config.ts` for migrations, ensure you **export both the config and the pool** as shown in the example above.
-::::
-
----
-
-## Troubleshooting
-
-### "Cannot find module" errors
-
-If you see module resolution errors, ensure:
-1. Your `tsconfig.json` has `"module": "NodeNext"` or `"module": "ESNext"`
-2. Your `package.json` has `"type": "module"`
-3. All imports use the `.js` extension (TypeScript will resolve to `.ts`)
-
-### "Connection refused" errors
-
-1. Verify your database is running
-2. Check credentials in `uql.config.ts`
-3. Ensure the database exists (PostgreSQL: `createdb uql_app`)
-4. For Docker: verify network settings and port mappings
-
-### "Decorators are not enabled" errors
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "ES2021"
-  }
-}
-```
-
-For Bun, no special configuration is needed.

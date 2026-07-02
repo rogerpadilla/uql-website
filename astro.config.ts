@@ -2,6 +2,7 @@ import starlight from '@astrojs/starlight';
 import vercel from '@astrojs/vercel';
 import type { AstroUserConfig } from 'astro';
 import { defineConfig } from 'astro/config';
+import mermaid from 'astro-mermaid';
 import starlightBlog from 'starlight-blog';
 import starlightLlmsTxt from 'starlight-llms-txt';
 
@@ -10,10 +11,11 @@ import { projectDescription } from './src/constants';
 const config: AstroUserConfig = {
   site: 'https://uql-orm.dev',
   integrations: [
+    mermaid(),
     starlight({
       title: 'UQL',
       favicon: '/logo.svg',
-      tagline: 'A JSON-native ORM for TypeScript',
+      tagline: 'The Smartest TypeScript ORM',
       description: projectDescription,
       head: [
         {
@@ -26,16 +28,16 @@ const config: AstroUserConfig = {
         {
           tag: 'script',
           content: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+             window.dataLayer = window.dataLayer || [];
+             function gtag(){dataLayer.push(arguments);}
+             gtag('js', new Date());
 
-            document.addEventListener('astro:page-load', () => {
-                gtag('config', 'G-PE9RVX8QYB', {
-                    page_path: window.location.pathname,
-                });
-            });
-          `,
+             document.addEventListener('astro:page-load', () => {
+                 gtag('config', 'G-PE9RVX8QYB', {
+                     page_path: window.location.pathname,
+                 });
+             });
+           `,
         },
         {
           tag: 'meta',
@@ -56,7 +58,7 @@ const config: AstroUserConfig = {
           tag: 'meta',
           attrs: {
             property: 'og:image:alt',
-            content: 'UQL — a JSON-native ORM for TypeScript',
+            content: 'UQL, the Smartest TypeScript ORM',
           },
         },
         {
@@ -80,7 +82,6 @@ const config: AstroUserConfig = {
         baseUrl: 'https://github.com/rogerpadilla/uql-website/edit/main/',
       },
       lastUpdated: true,
-
       tableOfContents: {
         minHeadingLevel: 2,
         maxHeadingLevel: 3,
