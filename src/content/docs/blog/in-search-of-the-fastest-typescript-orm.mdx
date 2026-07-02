@@ -15,6 +15,8 @@ cover:
   image: ../../../assets/benchmark-cover.webp
 ---
 
+*Updated July 2026: re-run with the latest versions (TypeORM 1.0, MikroORM 7.1, UQL 0.9) and fairness improvements. All 7 entries now compile the PostgreSQL dialect, and MikroORM is measured via its parameterized `toQuery()` instead of the slower debug helper `getFormattedQuery()`.*
+
 I kept seeing *"just use Drizzle, it's lightweight"* and *"ORMs are slow, use a query builder"* repeated everywhere. So I decided to actually measure it.
 
 The benchmark measures **pure SQL generation speed**: no database, no network, no connection pool. That isolates the overhead the ORM adds to every request. 7 entries, 8 query types, 3 runs averaged, on an Apple Silicon M4.
@@ -24,7 +26,7 @@ The benchmark measures **pure SQL generation speed**: no database, no network, n
 ## Methodology
 
 - **Environment:** Node.js v24, Apple Silicon M4, 3 runs averaged.
-- **Versions:** Latest stable of every ORM/QB as of March 2026.
+- **Versions:** Latest stable of every ORM/QB as of July 2026 (TypeORM 1.0.0, MikroORM 7.1.5, Sequelize 6.37.8, Drizzle 0.45.2, Knex 3.3.0, Kysely 0.29.2, UQL 0.9.4).
 - **Fairness:** Each ORM uses its most idiomatic API (QueryBuilder for TypeORM/MikroORM), which benefits them by skipping entity overhead.
 - **What's measured:** Pure SQL string generation, with no database, no I/O, and no connection pool. This isolates ORM overhead only.
 - **Why no Prisma?** Prisma is not a pure TypeScript/JavaScript ORM; only its client is JS/TS. The query engine is a separate Rust binary that builds SQL, making it architecturally incomparable and not even testable this way.
@@ -37,97 +39,97 @@ The benchmark measures **pure SQL generation speed**: no database, no network, n
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 606K | —         |
-| Knex      | 407K    | 0.67x     |
-| Sequelize | 202K    | 0.33x     |
-| Kysely    | 197K    | 0.33x     |
-| MikroORM  | 50K     | 0.08x     |
-| TypeORM   | 47K     | 0.08x     |
+| UQL       | 565K | —         |
+| Knex      | 477K    | 0.84x     |
+| Sequelize | 201K    | 0.36x     |
+| Kysely    | 194K    | 0.34x     |
+| MikroORM  | 111K    | 0.20x     |
+| TypeORM   | 41K     | 0.07x     |
 | Drizzle   | 13K     | 0.02x     |
 
 ### UPDATE — SET + WHERE
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,817K | —        |
-| Kysely    | 819K     | 0.45x    |
-| Knex      | 601K     | 0.33x    |
-| TypeORM   | 321K     | 0.18x    |
-| Sequelize | 234K     | 0.13x    |
-| MikroORM  | 119K     | 0.07x    |
-| Drizzle   | 81K      | 0.04x    |
+| UQL       | 1,772K | —        |
+| Kysely    | 812K     | 0.46x    |
+| Knex      | 711K     | 0.40x    |
+| TypeORM   | 289K     | 0.16x    |
+| Sequelize | 242K     | 0.14x    |
+| MikroORM  | 222K     | 0.13x    |
+| Drizzle   | 79K      | 0.04x    |
 
 ### UPSERT — ON CONFLICT by id
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 693K | —         |
-| Knex      | 349K    | 0.50x     |
-| Sequelize | 334K    | 0.48x     |
-| Kysely    | 334K    | 0.48x     |
-| TypeORM   | 316K    | 0.46x     |
-| MikroORM  | 130K    | 0.19x     |
-| Drizzle   | 38K     | 0.05x     |
+| UQL       | 656K | —         |
+| Knex      | 443K    | 0.68x     |
+| Kysely    | 339K    | 0.52x     |
+| Sequelize | 334K    | 0.51x     |
+| TypeORM   | 269K    | 0.41x     |
+| MikroORM  | 265K    | 0.40x     |
+| Drizzle   | 37K     | 0.06x     |
 
 ### DELETE — simple WHERE
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 3,642K | —        |
-| Sequelize | 1,349K   | 0.37x    |
-| Kysely    | 1,290K   | 0.35x    |
-| Knex      | 962K     | 0.26x    |
-| TypeORM   | 542K     | 0.15x    |
-| Drizzle   | 212K     | 0.06x    |
-| MikroORM  | 148K     | 0.04x    |
+| UQL       | 3,525K | —        |
+| Sequelize | 1,361K   | 0.39x    |
+| Kysely    | 1,269K   | 0.36x    |
+| Knex      | 1,090K   | 0.31x    |
+| TypeORM   | 521K     | 0.15x    |
+| MikroORM  | 261K     | 0.07x    |
+| Drizzle   | 209K     | 0.06x    |
 
 ### SELECT — 1 field
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 3,994K | —        |
-| Sequelize | 3,143K   | 0.79x    |
-| Kysely    | 1,559K   | 0.39x    |
-| Knex      | 994K     | 0.25x    |
-| TypeORM   | 817K     | 0.20x    |
-| MikroORM  | 297K     | 0.07x    |
-| Drizzle   | 238K     | 0.06x    |
+| UQL       | 3,472K | —        |
+| Sequelize | 3,052K   | 0.88x    |
+| Kysely    | 1,551K   | 0.45x    |
+| Knex      | 1,129K   | 0.33x    |
+| TypeORM   | 585K     | 0.17x    |
+| MikroORM  | 566K     | 0.16x    |
+| Drizzle   | 229K     | 0.07x    |
 
 ### SELECT — WHERE + SORT + LIMIT
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,200K | —        |
-| Knex      | 480K     | 0.40x    |
-| Kysely    | 425K     | 0.35x    |
-| Sequelize | 385K     | 0.32x    |
-| TypeORM   | 355K     | 0.30x    |
+| UQL       | 1,190K | —        |
+| Knex      | 614K     | 0.52x    |
+| Kysely    | 412K     | 0.35x    |
+| Sequelize | 403K     | 0.34x    |
+| TypeORM   | 284K     | 0.24x    |
+| MikroORM  | 73K      | 0.06x    |
 | Drizzle   | 60K      | 0.05x    |
-| MikroORM  | 46K      | 0.04x    |
 
 ### SELECT — Complex $or + operators
 
 | Entry     | ops/sec | vs winner |
 | --------- | ------- | --------- |
-| UQL       | 644K | —         |
-| Kysely    | 218K    | 0.34x     |
-| Knex      | 199K    | 0.31x     |
-| TypeORM   | 186K    | 0.29x     |
-| Sequelize | 152K    | 0.24x     |
-| Drizzle   | 35K     | 0.05x     |
-| MikroORM  | 22K     | 0.03x     |
+| UQL       | 612K | —         |
+| Knex      | 247K    | 0.40x     |
+| Kysely    | 218K    | 0.36x     |
+| TypeORM   | 162K    | 0.26x     |
+| Sequelize | 155K    | 0.25x     |
+| Drizzle   | 35K     | 0.06x     |
+| MikroORM  | 27K     | 0.04x     |
 
 ### AGGREGATE — GROUP BY + COUNT + HAVING
 
 | Entry     | ops/sec  | vs winner |
 | --------- | -------- | --------- |
-| UQL       | 1,489K | —        |
-| Sequelize | 407K     | 0.27x    |
-| TypeORM   | 364K     | 0.24x    |
-| Knex      | 284K     | 0.19x    |
-| Kysely    | 227K     | 0.15x    |
-| Drizzle   | 77K      | 0.05x    |
-| MikroORM  | 64K      | 0.04x    |
+| UQL       | 1,431K | —        |
+| Sequelize | 410K     | 0.29x    |
+| Knex      | 310K     | 0.22x    |
+| TypeORM   | 286K     | 0.20x    |
+| Kysely    | 206K     | 0.14x    |
+| Drizzle   | 74K      | 0.05x    |
+| MikroORM  | 72K      | 0.05x    |
 
 **[Interactive charts →](https://rogerpadilla.github.io/ts-orm-benchmark/chart.html)**
 
@@ -141,11 +143,11 @@ Drizzle, marketed as lightweight, is slower than Sequelize (a full ORM from 2014
 
 **2. Standalone query builders can't beat a well-designed ORM.**
 
-Knex and Kysely have zero entity/relation overhead; they're just SQL string builders. Yet UQL, a full ORM with entities, relations, and migrations, is faster than both in all 8 categories, by 1.5x to 6.6x depending on the query. The conventional wisdom ("ORMs are slow") doesn't hold when the ORM pre-computes its metadata and avoids intermediate allocations.
+Knex and Kysely have zero entity/relation overhead; they're just SQL string builders. Yet UQL, a full ORM with entities, relations, and migrations, is faster than both in all 8 categories, by 1.2x to 6.9x depending on the query. The conventional wisdom ("ORMs are slow") doesn't hold when the ORM pre-computes its metadata and avoids intermediate allocations.
 
 **3. MikroORM pays double.**
 
-MikroORM uses Knex internally as its SQL generator, so every query goes through two compilation layers: MikroORM → Knex → SQL string. In these tables, MikroORM averages about 6x slower than Knex alone (from 2.7x on UPSERT to 10x on WHERE + SORT + LIMIT). That's the cost of layering abstractions.
+MikroORM v7 uses Kysely internally as its SQL generator (it replaced Knex in v7), so every query goes through two compilation layers: MikroORM → Kysely → SQL string. In these tables, MikroORM averages about 4x slower than Kysely alone (from 1.3x on UPSERT to 8x on complex `$or`). That's the cost of layering abstractions.
 
 ---
 
@@ -161,7 +163,7 @@ The other difference is allocation. When TypeORM builds a SELECT, it creates a Q
 
 ## When This Matters in Production
 
-Database latency is 1-50ms and ORM overhead is microseconds, so for a low-traffic app the difference is noise. It starts to matter at scale. Take the WHERE + SORT + LIMIT query at 1,000 req/s: UQL (1,200K ops/s) spends roughly 1ms of CPU per second generating SQL, while MikroORM (46K ops/s) spends roughly 20ms, about 20x more CPU for the same queries before a single byte hits the network. In serverless, where you pay per ms of CPU, that shows up on the bill; in containers, it shows up as horizontal scaling cost.
+Database latency is 1-50ms and ORM overhead is microseconds, so for a low-traffic app the difference is noise. It starts to matter at scale. Take the WHERE + SORT + LIMIT query at 1,000 req/s: UQL (1,190K ops/s) spends roughly 1ms of CPU per second generating SQL, while MikroORM (73K ops/s) spends roughly 14ms, about 16x more CPU for the same queries before a single byte hits the network. In serverless, where you pay per ms of CPU, that shows up on the bill; in containers, it shows up as horizontal scaling cost.
 
 ---
 

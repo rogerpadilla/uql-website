@@ -207,7 +207,7 @@ Works on PostgreSQL (pgvector), CockroachDB, MariaDB, SQLite (sqlite-vec), and M
 
 ### What's the performance like?
 
-In our [open benchmark](/comparison#performance) of SQL-generation speed, UQL is the fastest entry in all 8 query categories, on average ~2.4× faster than the runner-up. Two design choices drive this:
+In our [open benchmark](/comparison#performance) of SQL-generation speed, UQL is the fastest entry in all 8 query categories, on average ~2.1× faster than the runner-up. Two design choices drive this:
 - Schema metadata (tables, columns, relations) is pre-computed once at startup
 - SQL is written directly into a string buffer, avoiding intermediate objects
 
