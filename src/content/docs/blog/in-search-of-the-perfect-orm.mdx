@@ -210,13 +210,9 @@ Every operator and field is validated according to the context. For example, the
 
 ```ts
 const lastUsersWithProfiles = await querier.findMany(User, {
-  $select: {
-    id: true,
-    name: true,
-    profile: {
-      $select: { id: true, picture: true },
-      $required: true,
-    },
+  $select: { id: true, name: true },
+  $populate: {
+    profile: { $select: { id: true, picture: true }, $required: true }
   },
   $sort: { createdAt: -1 },
   $limit: 20,

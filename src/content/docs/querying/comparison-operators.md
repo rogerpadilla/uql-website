@@ -17,6 +17,9 @@ UQL's comparison operators are context-aware: each operator is typed according t
 | `$lte`         | Less than or equal to.                                                             |
 | `$gt`          | Greater than.                                                                      |
 | `$gte`         | Greater than or equal to.                                                          |
+| `$like`        | SQL `LIKE` pattern match (case sensitive). E.g. `{ name: { $like: 'John%' } }`.   |
+| `$ilike`       | SQL `ILIKE` pattern match (case insensitive). E.g. `{ name: { $ilike: 'john%' } }`. |
+| `$regex`       | Regular expression match. E.g. `{ name: { $regex: '^test' } }`.                    |
 | `$startsWith`  | Starts with (case-sensitive).                                                      |
 | `$istartsWith` | Starts with (case-insensitive).                                                    |
 | `$endsWith`    | Ends with (case-sensitive).                                                        |

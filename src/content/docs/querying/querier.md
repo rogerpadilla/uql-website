@@ -116,7 +116,13 @@ try {
 | `release()`                                 | Return the connection to the pool.             |
 
 :::note
-The query-based methods (`findOne`, `findMany`, `findManyAndCount`, `count`, and `deleteMany`) also support an RPC-friendly call pattern: `querier.findMany({ $entity: User, ...query })`. This makes serialization for RPC/REST endpoints trivial.
+The query-based methods also support an RPC-friendly call pattern:
+
+```ts
+const users = await querier.findMany({ $entity: User, $where: { status: 'active' } });
+```
+
+This lets you serialize queries as plain JSON and pass them across RPC/REST boundaries. The `$entity` field is stripped before query execution.
 :::
 
 ---
