@@ -7,7 +7,7 @@ description: Learn how to use lifecycle hook decorators to run logic before/afte
 
 ## Overview
 
-Lifecycle hooks let you run custom logic at key moments in an entity's lifecycle — before/after inserts, updates, deletes, and after loading from the database. Use them for validation, automatic timestamps, slug generation, computed fields, data masking, and more.
+Lifecycle hooks let you run custom logic at key moments in an entity's lifecycle: before/after inserts, updates, deletes, and after loading from the database. Use them for validation, automatic timestamps, slug generation, computed fields, data masking, and more.
 
 UQL provides **7 decorator hooks** and a **global listener** system:
 
@@ -64,9 +64,9 @@ When you insert an `Article`, the `generateSlug` hook runs **before** the SQL is
 
 ### Mutation Semantics
 
-- **`before*` hooks** (`@BeforeInsert`, `@BeforeUpdate`, `@BeforeDelete`): Mutations via `this` are **propagated** to the payload — this is how you transform data before persistence.
-- **`@AfterLoad`**: Mutations via `this` are **propagated** — this is how you compute virtual fields and mask data after loading.
-- **`after*` hooks** (`@AfterInsert`, `@AfterUpdate`, `@AfterDelete`): Side-effect only — for logging, cache invalidation, or notifications. Data is already persisted.
+- **`before*` hooks** (`@BeforeInsert`, `@BeforeUpdate`, `@BeforeDelete`): Mutations via `this` are **propagated** to the payload. This is how you transform data before persistence.
+- **`@AfterLoad`**: Mutations via `this` are **propagated**. This is how you compute virtual fields and mask data after loading.
+- **`after*` hooks** (`@AfterInsert`, `@AfterUpdate`, `@AfterDelete`): Side-effect only, for logging, cache invalidation, or notifications. Data is already persisted.
 
 ### Async Hooks
 
@@ -211,4 +211,4 @@ This ordering lets global listeners perform setup (e.g., inject audit metadata) 
 
 ## Cross-Dialect Compatibility
 
-Lifecycle hooks work identically across all supported databases — PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Cloudflare D1, and MongoDB. Hooks operate at the querier abstraction layer, not at the dialect level.
+Lifecycle hooks work identically across all supported databases: PostgreSQL, MySQL, MariaDB, SQLite, LibSQL, Cloudflare D1, and MongoDB. Hooks operate at the querier abstraction layer, not at the dialect level.

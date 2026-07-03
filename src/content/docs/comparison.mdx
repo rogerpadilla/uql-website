@@ -2,7 +2,7 @@
 title: ORM Comparison
 sidebar:
   order: 500
-description: Side-by-side API comparison of UQL vs Prisma, Drizzle, TypeORM, and MikroORM — with actual code for every common operation.
+description: Side-by-side API comparison of UQL vs Prisma, Drizzle, TypeORM, and MikroORM, with actual code for every common operation.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
@@ -137,7 +137,7 @@ const results = await querier.findMany(Item, {
 
 ---
 
-## Find — Selection & Filtering
+## Find: Selection & Filtering
 
 ```ts title="Drizzle"
 import { eq, desc } from 'drizzle-orm';
@@ -189,7 +189,7 @@ const results = await querier.findMany(User, {
 
 ---
 
-## Querying — Relations
+## Querying: Relations
 
 ```ts title="Drizzle"
 const results = await db.query.users.findMany({
@@ -427,7 +427,7 @@ await querier.deleteOneById(User, id);
 
 ---
 
-## Filtering — Comparison Operators
+## Filtering: Comparison Operators
 
 ```ts title="Drizzle"
 import { gte, lte, ilike, notInArray, and } from 'drizzle-orm';
@@ -636,7 +636,7 @@ for await (const user of results) {
 }
 ```
 
-**In practice:** Processing millions of rows requires native cursors to keep memory stable. MikroORM and UQL provide consistent `AsyncIterable` support across all drivers — including MongoDB — replacing event-emitters with clean `for await` loops.
+**In practice:** Processing millions of rows requires native cursors to keep memory stable. MikroORM and UQL provide consistent `AsyncIterable` support across all drivers (including MongoDB), replacing event-emitters with clean `for await` loops.
 
 ---
 

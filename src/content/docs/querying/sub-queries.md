@@ -85,6 +85,6 @@ The `raw()` function from `uql-orm` injects SQL fragments into queries. It has t
 
 The callback receives:
 
-- **`ctx`** — the `QueryContext` for building parameterized SQL via `ctx.append(sql)` and `ctx.value(val)`.
-- **`dialect`** — the current SQL dialect instance for generating nested queries (e.g., `dialect.find(...)`).
-- **`escapedPrefix`** — the escaped alias of the parent table, used to reference parent columns in correlated sub-queries.
+- **`ctx`**: the `QueryContext` for building parameterized SQL via `ctx.append(sql)` and `ctx.value(val)`.
+- **`dialect`**: the current SQL dialect instance for generating nested queries (e.g., `dialect.find(...)`).
+- **`escapedPrefix`**: the escaped alias of the parent table, used to reference parent columns in correlated sub-queries.

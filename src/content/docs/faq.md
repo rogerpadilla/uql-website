@@ -49,7 +49,7 @@ Yes. UQL powers [Variability.ai](https://variability.ai), an AI meeting intellig
 | Bun SQL Native | Built-in (no install) |
 | Cloudflare D1 | Built-in Workers binding (no install) |
 
-For Bun, you don't need external drivers — Bun's native SQL supports PostgreSQL, MySQL, and SQLite out of the box.
+For Bun, you don't need external drivers. Bun's native SQL supports PostgreSQL, MySQL, and SQLite out of the box.
 
 ### Do I need special TypeScript configuration?
 
@@ -106,8 +106,8 @@ Use `type` for portability, `columnType` for precise SQL control:
 
 ### What's the difference between `$select` and `$populate`?
 
-- **`$select`** — Scalar fields (strings, numbers, dates, JSON)
-- **`$populate`** — Related entities (relations)
+- **`$select`**: Scalar fields (strings, numbers, dates, JSON)
+- **`$populate`**: Related entities (relations)
 
 ```ts
 {
@@ -133,7 +133,7 @@ await querier.findMany(Company, {
 });
 ```
 
-Works across all SQL dialects — UQL generates dialect-specific SQL automatically.
+Works across all SQL dialects. UQL generates dialect-specific SQL automatically.
 
 ### How do I join relations?
 

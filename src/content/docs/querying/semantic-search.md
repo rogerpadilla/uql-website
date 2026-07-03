@@ -145,9 +145,9 @@ UQL merges `$where` into the `$vectorSearch.filter` instead of adding a separate
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `cosine` | `<=>` | `VEC_DISTANCE_COSINE` | `vec_distance_cosine` | ✅ (index-defined) | Text embeddings (OpenAI, Cohere) |
 | `l2` | `<->` | `VEC_DISTANCE_EUCLIDEAN` | `vec_distance_L2` | ✅ (index-defined) | Image search, spatial data |
-| `inner` | `<#>` | — | — | ✅ (index-defined) | Maximum inner product |
-| `l1` | `<+>` | — | — | — | Manhattan distance |
-| `hamming` | `<~>` | — | `vec_distance_hamming` | — | Binary embeddings |
+| `inner` | `<#>` | ❌ | ❌ | ✅ (index-defined) | Maximum inner product |
+| `l1` | `<+>` | ❌ | ❌ | ❌ | Manhattan distance |
+| `hamming` | `<~>` | ❌ | `vec_distance_hamming` | ❌ | Binary embeddings |
 
 If omitted, `$distance` defaults to `'cosine'`. You can also set a default per-field:
 
@@ -248,8 +248,8 @@ Define vector indexes with `@Index()` for efficient approximate nearest-neighbor
 | :--- | :--- | :--- | :--- | :--- |
 | `hnsw` | ✅ `USING hnsw` with operator classes | ❌ | ❌ | Best accuracy, higher memory |
 | `ivfflat` | ✅ `USING ivfflat` with `lists` param | ❌ | ❌ | Faster build, large datasets |
-| `vector` | — | ✅ Inline `VECTOR INDEX` | ❌ | MariaDB's native vector index |
-| `vectorSearch` | — | — | ✅ Atlas vector search index | MongoDB's managed ANN index |
+| `vector` | ❌ | ✅ Inline `VECTOR INDEX` | ❌ | MariaDB's native vector index |
+| `vectorSearch` | ❌ | ❌ | ✅ Atlas vector search index | MongoDB's managed ANN index |
 
 ```ts title="Postgres HNSW"
 @Index(['embedding'], { type: 'hnsw', distance: 'cosine', m: 16, efConstruction: 64 })

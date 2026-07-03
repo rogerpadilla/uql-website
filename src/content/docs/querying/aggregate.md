@@ -65,12 +65,12 @@ LIMIT 10
 
 The `$group` map defines both the grouping columns and the aggregate functions. Each key becomes an alias in the result.
 
-- **`true`** — Group by this column (`GROUP BY "column"`)
-- **`{ $count: '*' }`** — `COUNT(*)`
-- **`{ $sum: 'field' }`** — `SUM("field")`
-- **`{ $avg: 'field' }`** — `AVG("field")`
-- **`{ $min: 'field' }`** — `MIN("field")`
-- **`{ $max: 'field' }`** — `MAX("field")`
+- **`true`**: Group by this column (`GROUP BY "column"`)
+- **`{ $count: '*' }`**: `COUNT(*)`
+- **`{ $sum: 'field' }`**: `SUM("field")`
+- **`{ $avg: 'field' }`**: `AVG("field")`
+- **`{ $min: 'field' }`**: `MIN("field")`
+- **`{ $max: 'field' }`**: `MAX("field")`
 
 ```ts title="You write"
 // Total revenue with no grouping
@@ -89,8 +89,8 @@ SELECT SUM(`amount`) `revenue` FROM `Order`
 
 ### `$where` vs `$having`
 
-- **`$where`** — Filters rows **before** grouping (`WHERE` clause).
-- **`$having`** — Filters groups **after** aggregation (`HAVING` clause).
+- **`$where`**: Filters rows **before** grouping (`WHERE` clause).
+- **`$having`**: Filters groups **after** aggregation (`HAVING` clause).
 
 ```ts title="You write"
 const results = await querier.aggregate(Order, {
