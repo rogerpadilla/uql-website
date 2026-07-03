@@ -5,7 +5,7 @@ sidebar:
   badge:
     text: New
     variant: success
-description: Work with JSON/JSONB fields: type-safe filtering, atomic updates, and sorting across PostgreSQL, MySQL, MariaDB, and SQLite.
+description: Work with JSON/JSONB fields with type-safe filtering, atomic updates, and sorting across PostgreSQL, MySQL, MariaDB, and SQLite.
 ---
 
 UQL provides first-class support for JSON/JSONB fields across **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite**. Query, update, and sort by nested JSON properties using a consistent, type-safe API. UQL generates dialect-specific SQL automatically.
