@@ -118,7 +118,7 @@ const config: AstroUserConfig = {
           ],
         },
         {
-          label: 'Querying',
+          label: 'Queries',
           items: [{ autogenerate: { directory: 'querying' } }],
         },
         {
