@@ -1,6 +1,6 @@
 ---
 title: "In Search of the Perfect TypeScript ORM"
-description: "What makes a perfect TypeScript ORM? A breakdown of the five features every ORM should have — type safety, serializable queries, no codegen, deep relations, and multi-dialect support — and where today's ORMs fall short."
+description: "What makes a perfect TypeScript ORM? A breakdown of five features: serializable queries, native TypeScript, multi-level operators, one API across databases, and language-agnostic JSON syntax, and where today's ORMs fall short."
 date: 2024-06-15
 authors:
   - rogerpadilla
@@ -8,7 +8,7 @@ tags:
   - orm
   - typescript
   - architecture
-excerpt: "What makes a perfect ORM? I evaluated the top 5 features every TypeScript ORM should have — and why the existing ones fall short."
+excerpt: "What makes a perfect ORM? I evaluated the top 5 features every TypeScript ORM should have, and why the existing ones fall short."
 cover:
   alt: "Colorful illustration of database connections"
   image: ../../../assets/orm-databases.webp
@@ -19,11 +19,11 @@ import onceUponATime from '../../../assets/once-upon-a-time.webp';
 
 *Originally published on [Medium](https://medium.com/@rogerpadillac/in-search-of-the-perfect-orm-e01fcc9bce3d).*
 
-<Image src={onceUponATime} alt="Once upon a time — handwritten" />
+<Image src={onceUponATime} alt="Once upon a time, handwritten" />
 
 ## What is an ORM?
 
-An ORM provides a simpler way to interact with databases in an app — it allows developers to work with data using objects.
+An ORM provides a simpler way to interact with databases in an app: it lets developers work with data as objects.
 
 ## What is a Perfect ORM for TypeScript?
 
@@ -33,15 +33,15 @@ Below are the ideal features a TypeScript ORM should have, why such features are
 
 ### 1. Serializable Queries
 
-The ability to transport queries between the layers of a system is great for flexibility and simplicity. For example, via HTTP requests, APIs, websockets, or even the frontend/client (optional) could transmit the queries to the backend/server using the same (ORM) syntax and avoid the need for an additional syntax layer like what happens with GraphQL in the flow `GraphQL => ORM => Database`. The flow could instead be simplified as `ORM => Database`; with the following advantages:
+Queries that can travel between the layers of a system keep the design simple. If the client can send a query to the server over HTTP or websockets using the ORM's own syntax, you no longer need an extra query language on top: the `GraphQL => ORM => Database` flow collapses to `ORM => Database`. Concretely:
 
-- Keep away from the need for pseudo-languages to define the queries (context-switching). Instead, use standard JSON as the syntax for the queries so they are entirely declarative and serializable.
-- Avoid additional servers and steps in the build process of the app.
-- Native support of the editors/IDEs for the queries without any custom plugins/extensions.
+- No pseudo-language for queries and no context switching: the syntax is standard JSON, entirely declarative and serializable.
+- No additional servers and no extra steps in the build process.
+- Editors and IDEs understand the queries natively, without custom plugins or extensions.
 
 ### 2. Native TypeScript
 
-Squeeze TypeScript's power with JSON, classes, and decorators.
+Use TypeScript itself for everything: JSON queries, classes, and decorators.
 
 - Type-safe queries and models that are natively validated by the same language that you use to write your app.
 - Context-aware queries allow auto-completion of the appropriate operators and fields according to the different parts of a query.
@@ -57,7 +57,7 @@ Write the queries for any database in a consistent way and then transparently op
 
 ### 5. Universal Syntax (Language Agnostic)
 
-The ability to write queries in any language opens the door to many possibilities, even porting the ORM to other languages. For example, JSON is a first-class citizen format on almost any modern language out there, including Python, Rust, and others (besides JavaScript).
+Because the queries are standard JSON, they can be produced or consumed from any language: JSON is a first-class format in Python, Rust, Go, and virtually everything else. That also makes UQL implementations in other languages feasible.
 
 ---
 
@@ -67,7 +67,7 @@ The ability to write queries in any language opens the door to many possibilitie
 
 **1. Lack of 100% serializable queries:**
 
-Notice how the `LessThan` operator is a function that has to be imported and called — this precludes any capability to serialize the query.
+Notice how the `LessThan` operator is a function that has to be imported and called; that alone makes the query impossible to serialize.
 
 ```ts
 import { LessThan } from 'typeorm';
@@ -79,7 +79,7 @@ const loadedPosts = await dataSource.getRepository(Post).findBy({
 
 **2. Lack of Native TypeScript:**
 
-The query dissolves into strings because `relations` and `where` can accept any string, thus any invalid string can be put there.
+The query dissolves into strings because `relations` and `where` accept any string, so any invalid string can go there.
 
 ```ts
 const posts = await connection.manager.find(Post, {
@@ -147,7 +147,7 @@ It relies on its own proprietary DSL to define the models.
 
 **1. Lack of 100% serializable queries:**
 
-Notice how that query uses two separate methods, one for the update and another for the where — this disallows the serialization of its queries.
+Notice how that query uses two separate methods, one for the update and another for the where; that structure cannot be serialized.
 
 ```ts
 const qb = orm.em.createQueryBuilder(Author);
@@ -160,7 +160,7 @@ qb.update({ name: 'test 123', type: PublisherType.GLOBAL }).where({
 
 **2. Lack of Native TypeScript:**
 
-Dissolves into strings — any string can go inside the `fields` array, so the query loses the possibility of being type-safe.
+Dissolves into strings: any string can go inside the `fields` array, so the query loses the possibility of being type-safe.
 
 ```ts
 const author = await em.findOne(

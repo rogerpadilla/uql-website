@@ -57,7 +57,7 @@ For MongoDB, UQL translates the same query into an Atlas `$vectorSearch` pipelin
 
 ## Entity Setup
 
-Define your vector field and index — UQL handles schema generation, extension creation, and index building:
+Define your vector field and index; UQL handles schema generation, extension creation, and index building:
 
 ```ts
 import { Entity, Id, Field, Index } from 'uql-orm';
@@ -79,7 +79,7 @@ For Postgres, UQL automatically emits `CREATE EXTENSION IF NOT EXISTS vector`. M
 
 ### Distance Projection
 
-Project the computed distance into your results with `$project` — no duplicate computation:
+Project the computed distance into your results with `$project`, without computing the distance twice:
 
 ```ts
 import type { WithDistance } from 'uql-orm';
@@ -113,7 +113,7 @@ results[0].similarity;
 | `'halfvec'` | 16-bit float | 50% storage savings, near-identical accuracy |
 | `'sparsevec'` | Sparse | SPLADE, BM25-style sparse retrieval |
 
-`halfvec` and `sparsevec` are Postgres-only. MariaDB and SQLite transparently map them to their native `VECTOR` type — your entities work everywhere.
+`halfvec` and `sparsevec` are Postgres-only. MariaDB and SQLite transparently map them to their native `VECTOR` type, so your entities work everywhere.
 
 ### Vector Indexes
 
