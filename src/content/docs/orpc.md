@@ -23,7 +23,7 @@ function entityRouter<E extends object>(entity: Type<E>) {
       .input(type<Query<E>>())
       .handler(({ input }) => pool.withQuerier((querier) => querier.findMany(entity, input))),
     insertOne: os
-      .input(type<E>())
+      .input(type<E>((value) => value)) // identity mapper: needed when the input type is an open generic
       .handler(({ input }) => pool.transaction((querier) => querier.insertOne(entity, input))),
   };
 }
@@ -50,6 +50,14 @@ export default {
 On the client, the query object is fully typed end to end:
 
 ```ts
+import { createORPCClient } from '@orpc/client';
+import { RPCLink } from '@orpc/client/fetch';
+import type { RouterClient } from '@orpc/server';
+import type { router } from './router.js';
+
+const link = new RPCLink({ url: 'https://api.example.com/rpc' });
+const client: RouterClient<typeof router> = createORPCClient(link);
+
 const users = await client.user.findMany({
   $where: { email: { $endsWith: '@domain.com' } },
   $limit: 10,
