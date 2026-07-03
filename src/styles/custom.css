@@ -197,13 +197,13 @@ section, .sl-markdown-content > *:not(.hero) {
    the page animation: with its scroll position restored before first paint,
    old and new snapshots are identical and the pane stays visually frozen. */
 .sidebar-pane {
-    view-transition-name: sidebar;
+    view-transition-name: site-sidebar;
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root),
-::view-transition-old(sidebar),
-::view-transition-new(sidebar) {
+::view-transition-old(site-sidebar),
+::view-transition-new(site-sidebar) {
     animation: none;
 }
 
