@@ -18,13 +18,17 @@ import { User } from './shared/models/index.js';
 const t = initTRPC.create();
 const pool = getQuerierPool();
 
+function passthrough<T>(): (value: unknown) => T {
+  return (value) => value as T;
+}
+
 function entityRouter<E extends object>(entity: Type<E>) {
   return t.router({
     findMany: t.procedure
-      .input((value) => value as Query<E>)
+      .input(passthrough<Query<E>>())
       .query(({ input }) => pool.withQuerier((querier) => querier.findMany(entity, input))),
     insertOne: t.procedure
-      .input((value) => value as E)
+      .input(passthrough<E>())
       .mutation(({ input }) => pool.transaction((querier) => querier.insertOne(entity, input))),
   });
 }
@@ -44,7 +48,7 @@ const users = await trpc.user.findMany.query({
 ```
 
 :::caution[Validate public inputs]
-The cast-style `input` above trusts the caller's shape at runtime. For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side, the same way the [HTTP core hooks](/extensions-http) fold tenant filters into `$where`.
+`passthrough<T>()` declares the input type without runtime validation, trusting the caller's shape. For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side, the same way the [HTTP core hooks](/extensions-http) fold tenant filters into `$where`.
 :::
 
 :::tip
