@@ -154,4 +154,4 @@ UQL handles indexes automatically during [migrations](/migrations):
 
 ---
 
-Read more about [Basic Entities](/entities/basic) or [Migrations](/migrations).
+Read more about [entity definition](/entities/basic) or [Migrations](/migrations).

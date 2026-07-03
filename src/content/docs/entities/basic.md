@@ -1,10 +1,10 @@
 ---
-title: Basics
+title: Decorators
 sidebar:
   order: 60
 description: Define entities with the @Entity, @Id, and @Field decorators, and choose column types.
 ---
-## Basic entities
+## Entities via decorators
 
 An entity is a plain TypeScript class; its decorators carry the metadata UQL uses for type-safe querying and DDL generation.
 
