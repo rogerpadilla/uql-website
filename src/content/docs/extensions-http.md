@@ -9,7 +9,7 @@ description: Serve UQL entities over HTTP from any framework with the framework-
 
 `uql-orm/http` turns your entities into a REST API without tying you to a web framework. It contains the whole transport: the route table, the request/response envelopes, query (de)serialization, querier lifecycle, transactions, and authorization hooks. Framework adapters are thin bindings on top:
 
-- `createFetchHandler` returns a web-standard `(request: Request) => Promise<Response>` that mounts natively on Hono, Next.js route handlers, Bun.serve, Deno.serve, Cloudflare Workers, and SvelteKit.
+- `createFetchHandler` returns a web-standard `(request: Request) => Promise<Response>` that mounts natively on Hono, Elysia, Next.js route handlers, Bun.serve, Deno.serve, Cloudflare Workers, SvelteKit, and Astro.
 - [`uql-orm/express`](/extensions-express) binds the same core to Express.
 - `createRequestHandler` is the underlying normalized-request handler if you need to bind a framework that is neither fetch-native nor Express (see the Fastify bridge below).
 
@@ -38,6 +38,10 @@ import { Hono } from 'hono';
 const app = new Hono();
 app.mount('/api', handler);
 
+// Elysia (prefix stripped automatically by mount)
+import { Elysia } from 'elysia';
+new Elysia().mount('/api', handler).listen(3000);
+
 // Next.js: app/api/uql/[[...uql]]/route.ts
 const handler = createFetchHandler({ include: [User], basePath: '/api/uql' });
 export { handler as GET, handler as HEAD, handler as POST, handler as PUT, handler as PATCH, handler as DELETE };
@@ -51,9 +55,14 @@ Deno.serve(handler);
 // SvelteKit: src/routes/api/[...uql]/+server.ts
 const handler = createFetchHandler({ include: [User], basePath: '/api' });
 export const fallback = ({ request }) => handler(request);
+
+// Astro: src/pages/api/uql/[...uql].ts (on-demand rendering: SSR adapter required)
+const handler = createFetchHandler({ include: [User], basePath: '/api/uql' });
+export const prerender = false;
+export const ALL = ({ request }) => handler(request);
 ```
 
-Use `basePath` to strip a URL prefix when the runtime does not strip it for you (Next.js, SvelteKit, plain `Bun.serve` under a sub-path).
+Use `basePath` to strip a URL prefix when the runtime does not strip it for you (Next.js, SvelteKit, Astro, plain `Bun.serve` under a sub-path).
 
 ### Wire protocol
 
