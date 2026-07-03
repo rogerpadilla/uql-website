@@ -2,51 +2,80 @@
 title: Imperative (Decorator-free) Definition
 sidebar:
   order: 65
-description: Learn how to define entities without decorators using the imperative API.
+description: Define entities without decorators using defineEntity, with the same options as the decorator API.
 ---
 
 ## Imperative Registration
 
-If you prefer a functional approach or are working in an environment where decorators are disabled (such as certain edge runtimes or specific build pipelines), UQL provides an imperative API for entity registration. **Crucially, this approach works without requiring `experimentalDecorators` or `emitDecoratorMetadata` in your `tsconfig.json`.**
-
-This approach allows you to register entities using `defineEntity`, which accepts a configuration object containing all the metadata typically provided by decorators.
+`defineEntity` registers the exact same metadata as the [decorators](/entities/basic), without requiring `experimentalDecorators` or `emitDecoratorMetadata` in `tsconfig.json`. Use it when decorators are unavailable (some edge runtimes and build pipelines), when generating entities from external metadata or JSON at runtime, or when you prefer domain classes free of annotations.
 
 ### Using `defineEntity`
 
-With `defineEntity`, you can define `fields`, `relations`, `indexes`, and `hooks` directly within the configuration. This is particularly useful for dynamic entity loading or when you want to keep your class definitions clean of metadata.
+The configuration object mirrors the decorator API one to one:
 
 ```ts
+import { v7 as uuidv7 } from 'uuid';
 import { defineEntity } from 'uql-orm';
 
-class User {}
+export class User {
+  id?: string;
+  name?: string;
+  email?: string;
+}
+
+export class Post {
+  id?: number;
+  title?: string;
+  authorId?: string;
+  author?: User;
+}
 
 defineEntity(User, {
-  name: 'users',
   fields: {
-    id: { type: 'uuid', isId: true },
-    name: { type: String },
-    email: { type: String },
+    id: { type: 'uuid', isId: true, onInsert: () => uuidv7() },
+    name: { type: String, index: true },
+    email: { type: String, unique: true, comment: 'User login email' },
   },
-  indexes: [
-    { columns: ['name'] },
-    { columns: ['email'], unique: true },
-  ],
-  // You can also define hooks and relations here
+});
+
+defineEntity(Post, {
+  fields: {
+    id: { type: Number, isId: true },
+    title: { type: String, nullable: false },
+    authorId: { type: 'uuid', references: () => User },
+  },
+  relations: {
+    author: { cardinality: 'm1', entity: () => User },
+  },
+  indexes: [{ columns: ['title', 'authorId'], unique: true }],
 });
 ```
 
-### Helper Functions
+Every entry maps directly to a decorator:
 
-To assist with type-safe imperative setup, UQL exports several helper functions:
+| Key         | Decorator equivalent          | Notes                                                                                                    |
+| :---------- | :---------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `fields`    | `@Field` / `@Id`              | Same [field options](/entities/basic#field-options); mark the primary key with `isId: true` instead of `@Id`. |
+| `relations` | `@OneToOne` ... `@ManyToMany` | Same [relation options](/entities/relations), plus `cardinality`: `'11'`, `'1m'`, `'m1'`, or `'mm'`.       |
+| `indexes`   | `@Index`                      | `{ columns, name?, unique?, type?, where? }`, see [Indexes](/entities/indexes).                            |
+| `hooks`     | `@BeforeInsert()`, ...        | Maps each [lifecycle event](/entities/lifecycle-hooks) to method names, e.g. `{ beforeInsert: ['stamp'] }`. |
+| `softDelete`| `@Entity({ softDelete })`     | Requires exactly one field with `onDelete`, see [Soft Delete](/entities/soft-delete).                      |
 
-- `defineField`: Define field properties.
-- `defineId`: Configure primary key properties.
-- `defineRelation`: Configure relationship properties.
+### Incremental registration
 
-### When to prefer it
+For dynamic schemas, register piece by piece with `defineField`, `defineId`, and `defineRelation`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
 
-Beyond working without `experimentalDecorators`, the imperative API lets you define the whole schema in one configuration object, generate entities from external metadata or JSON at runtime, and keep domain classes free of metadata.
+```ts
+import { defineEntity, defineField, defineId, defineRelation } from 'uql-orm';
+
+class Article {}
+
+defineId(Article, 'id', { type: 'uuid' });
+defineField(Article, 'title', { type: String, nullable: false });
+defineRelation(Article, 'author', { cardinality: 'm1', entity: () => User });
+defineEntity(Article, { name: 'articles' });
+```
 
 :::tip[Compatibility]
-The imperative API is fully compatible with the decorator-based approach. You can mix and match both styles within the same project.
+The imperative API is fully compatible with the decorator-based approach; both write to the same metadata registry, so you can mix styles within one project, and everything downstream (querying, migrations, the [HTTP transport](/extensions-http)) behaves identically.
 :::

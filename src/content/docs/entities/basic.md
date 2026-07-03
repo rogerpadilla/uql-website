@@ -6,7 +6,7 @@ description: Define entities with the @Entity, @Id, and @Field decorators, and c
 ---
 ## Basic entities
 
-The following are the steps to define a basic `entity`:
+An entity is a plain TypeScript class; its decorators carry the metadata UQL uses for type-safe querying and DDL generation.
 
 ### Core Decorators
 
@@ -46,6 +46,10 @@ export class User {
   bio?: string;
 }
 ```
+
+:::note[Decorator-free alternative]
+Decorators require `experimentalDecorators` and `emitDecoratorMetadata` in `tsconfig.json`. If your toolchain can't enable them, or you prefer plain classes, the [imperative API](/entities/imperative) (`defineEntity`) registers identical metadata with the same options as the decorators on this page.
+:::
 
 ### Type Abstraction
 
@@ -102,6 +106,8 @@ The `@Field` and `@Id` decorators accept several options for both query validati
 | `type`         | `Type \| string`    | Logical type: `String`, `Number`, `Boolean`, `Date`, `BigInt`, or strings like `'uuid'`, `'text'`, `'json'`, `'jsonb'`, `'timestamp'`, `'timestamptz'`, `'vector'`, `'halfvec'`, `'sparsevec'`. |
 | `columnType`   | `ColumnType`        | Explicit SQL column type (e.g., `varchar`, `text`, `jsonb`, `vector`, `halfvec`, `sparsevec`). Takes highest priority.                                                                      |
 | `length`       | `number`            | Column length. If unspecified, defaults to `TEXT` (Postgres/SQLite) or `VARCHAR(255)` (MySQL/Maria).                                                                |
+| `precision`    | `number`            | Numeric precision, e.g. for `decimal` columns.                                                                                                                      |
+| `scale`        | `number`            | Numeric scale, e.g. for `decimal` columns.                                                                                                                          |
 | `nullable`     | `boolean`           | Whether the column allows NULL values. Defaults to `true`.                                                                                                          |
 | `unique`       | `boolean`           | Adds a UNIQUE constraint.                                                                                                                                           |
 | `index`        | `boolean \| string` | Adds an index. Pass a string to name it.                                                                                                                            |
@@ -116,7 +122,7 @@ The `@Field` and `@Id` decorators accept several options for both query validati
 | `eager`        | `boolean`           | Whether this field is included in queries by default. Set to `false` for fields (e.g., `password`) that should only be returned when explicitly selected. Defaults to `true`. |
 | `virtual`      | `RawExpression`     | Defines a computed/[virtual field](/entities/virtual-fields) via raw SQL.                                                                                            |
 | `references`   | `() => Entity`      | Marks this field as a foreign key referencing another entity's primary key.                                                                                          |
-| `foreignKey`   | `string \| false`   | Custom foreign key constraint name, or `false` to disable physical constraints while maintaining logical references.                                                |
+| `foreignKey`   | `boolean \| string` | `true` for a plain constraint (the default when `references` is set), a string to name it, or `false` to disable the physical constraint while keeping the logical reference. |
 
 ### Primary Key Options
 
