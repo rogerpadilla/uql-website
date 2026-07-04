@@ -489,19 +489,19 @@ const results = await querier.findMany(User, {
 
 | JSON capability | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Nested / Dot-notation JSON filtering | ❌¹ | ✅⁴ | ✅³ | 🔌² | ✅ |
-| Atomic JSON key merge/update | ❌¹ | ❌⁴ | 🔌² | 🔌² | ✅ |
-| Atomic JSON key removal (`unset`) | ❌¹ | ❌⁴ | ❌ | ❌ | ✅ |
-| Atomic JSON array append (`push`) | ❌¹ | ❌⁴ | ❌ | ❌ | ✅ |
-| JSON array query operators (`size`, `all`, `elemMatch`) | ❌¹ | ✅⁴ | 🔌² | 🔌² | ✅ |
-| Same JSON API across 5 SQL dialects | ❌ | ✅⁴ | ❌ | ❌ | ✅ |
+| Nested / Dot-notation JSON filtering | ❌¹ | ✅² | ✅³ | 🔌⁴ | ✅ |
+| Atomic JSON key merge/update | ❌¹ | ❌² | 🔌⁴ | 🔌⁴ | ✅ |
+| Atomic JSON key removal (`unset`) | ❌¹ | ❌² | ❌ | ❌ | ✅ |
+| Atomic JSON array append (`push`) | ❌¹ | ❌² | ❌ | ❌ | ✅ |
+| JSON array query operators (`size`, `all`, `elemMatch`) | ❌¹ | ✅² | 🔌⁴ | 🔌⁴ | ✅ |
+| Same JSON API across 4 SQL dialects | ❌ | ✅² | ❌ | ❌ | ✅ |
 
 <small>
 
 ¹ Requires raw SQL.
-² Achievable with dialect-specific SQL expressions or query-builder escape hatches, not a unified high-level JSON operator API.
+² MikroORM provides a unified interface for querying JSON properties (via nested objects and `$elemMatch`) natively across SQL dialects, but relies on full object substitution rather than atomic diffing operators for JSON mutations.
 ³ Prisma advanced JSON filtering is available on selected connectors and has connector-specific limitations.
-⁴ MikroORM provides a unified interface for querying JSON properties (via nested objects and `$elemMatch`) natively across SQL dialects, but relies on full object substitution rather than atomic diffing operators for JSON mutations.
+⁴ Achievable with dialect-specific SQL expressions or query-builder escape hatches, not a unified high-level JSON operator API.
 
 </small>
 
@@ -647,7 +647,7 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 | Capability | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Native semantic search | ✅⁶ | ❌ | 🔌 | ❌ | ✅ |
+| Native semantic search | ✅¹ | ❌ | 🔌 | ❌ | ✅ |
 | Virtual fields (computed) | 🔌 | ✅ | ❌ | ✅ | ✅ |
 | No custom DSL needed | ✅ | ✅ | ❌ | ✅ | ✅ |
 | No codegen needed | ✅ | ✅ | ❌ | ✅ | ✅ |
@@ -660,13 +660,13 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 | Auto REST API | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Browser querier | ❌ | ❌ | ❌ | ❌ | ✅ |
 | MongoDB support | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Unified query mental model across SQL + MongoDB | ❌ | ✅ | 🔌⁴ | ❌⁵ | ✅ |
+| Unified query mental model across SQL + MongoDB | ❌ | ✅ | 🔌² | ❌³ | ✅ |
 
 <small>
 
-⁴ Prisma Client is broadly consistent across SQL/Mongo, but connector-specific capabilities and raw-query APIs diverge.
-⁵ TypeORM's Mongo path diverges from SQL behavior (for example, QueryBuilder support differs).
-⁶ PostgreSQL (pgvector) only.
+¹ PostgreSQL (pgvector) only.
+² Prisma Client is broadly consistent across SQL/Mongo, but connector-specific capabilities and raw-query APIs diverge.
+³ TypeORM's Mongo path diverges from SQL behavior (for example, QueryBuilder support differs).
 </small>
 
 ---
@@ -675,12 +675,12 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 | Database | **Drizzle** | **MikroORM** | **Prisma** | **TypeORM** | **UQL** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Cloudflare D1 | ✅ | 🔌³ | ✅ | ❌ | ✅ |
+| Cloudflare D1 | ✅ | 🔌¹ | ✅ | ❌ | ✅ |
 | CockroachDB | ✅ | ✅ | ✅ | ✅ | ✅ |
 | LibSQL / Turso | ✅ | ✅ | ✅ | ❌ | ✅ |
 | MariaDB | ✅ | ✅ | ✅ | ✅ | ✅ |
 | MongoDB | ❌ | ✅ | ✅ | ✅ | ✅ |
-| MSSQL | ✅⁷ | ✅ | ✅ | ✅ | ❌ |
+| MSSQL | ✅² | ✅ | ✅ | ✅ | ❌ |
 | MySQL | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Neon Serverless | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Oracle | ❌ | ✅ | ❌ | ✅ | ❌ |
@@ -689,8 +689,8 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 
 <small>
 
-³ MikroORM Cloudflare D1 support is currently documented as an experimental path through its SQL/Kysely integration.
-⁷ Drizzle MSSQL support shipped in the v1.0 beta line (not yet in a stable release).
+¹ MikroORM Cloudflare D1 support is currently documented as an experimental path through its SQL/Kysely integration.
+² Drizzle MSSQL support shipped in the v1.0 beta line (not yet in a stable release).
 
 </small>
 
