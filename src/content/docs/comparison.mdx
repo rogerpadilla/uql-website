@@ -62,7 +62,7 @@ export class User {
 ```
 
 ```ts title="UQL"
-import { Entity, Id, Field } from 'uql-orm';
+import { Entity, Id, Field, ManyToOne, type Relation } from 'uql-orm';
 
 @Entity()
 export class User {
@@ -70,6 +70,7 @@ export class User {
   @Field({ unique: true }) email?: string;
   @Field() name?: string;
   @Field({ references: () => Company }) companyId?: number;
+  @ManyToOne({ entity: () => Company }) company?: Relation<Company>;
 }
 ```
 
