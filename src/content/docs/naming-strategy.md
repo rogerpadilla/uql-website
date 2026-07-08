@@ -54,7 +54,7 @@ When using `SnakeCaseNamingStrategy`:
 
 ### Custom Naming Strategy
 
-You can implement your own naming strategy by extending the `NamingStrategy` interface or inheriting from `DefaultNamingStrategy`.
+You can implement your own naming strategy by implementing the `NamingStrategy` interface or extending `DefaultNamingStrategy`.
 
 ```ts
 import { DefaultNamingStrategy } from 'uql-orm';

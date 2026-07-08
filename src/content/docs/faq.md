@@ -25,6 +25,8 @@ UQL is a JSON-native ORM for TypeScript that offers:
 | Multi-DB API | One syntax | Mostly consistent | Per-dialect schemas | Diverges for MongoDB |
 | Browser queries | Built-in | Not supported | Manual | Manual |
 | Vector search | Native operator | Via extension | Via extension | Raw SQL |
+| Query filters / scopes | Built-in (`@Filter`) | Via extension | Manual | Soft-delete only |
+| Multi-tenancy / RLS | Built-in (security filters) | Via extension | Manual | Manual |
 
 ### Is UQL production-ready?
 
@@ -210,6 +212,10 @@ const results = await querier.findMany(Article, {
 ```
 
 Works on PostgreSQL (pgvector), CockroachDB, MariaDB, SQLite (sqlite-vec), and MongoDB Atlas, all with the same query syntax. See [Semantic Search](/querying/semantic-search).
+
+### Does UQL support soft delete, restore, and multi-tenancy?
+
+Yes. Mark a field with `@Field({ softDelete: true })` and deletes soft-delete automatically, reads hide trashed rows, and `restoreOneById` / `restoreMany` bring them back (`{ hardDelete: true }` removes for good). Soft-delete is one instance of UQL's general [query filters](/querying/filters) - named, default-on `$where` fragments. Mark a filter `security` and resolve it from a per-request context and you get [multi-tenancy / row-level security](/multi-tenancy): applied to every query (relations and cascades included), non-bypassable from the client, and fail-closed when the context is missing.
 
 ### What's the performance like?
 

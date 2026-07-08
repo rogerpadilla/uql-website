@@ -128,7 +128,7 @@ const handler = createFetchHandler({
 export { handler as GET, handler as HEAD, handler as POST, handler as PUT, handler as PATCH, handler as DELETE };
 ```
 
-Every included entity now has typed REST endpoints (`/api/uql/user`, ...) consumable from the browser with [`HttpQuerier`](/extensions-browser), and hooks handle auth and tenant scoping server-side.
+Every included entity now has typed REST endpoints (`/api/uql/user`, ...) consumable from the browser with [`HttpQuerier`](/extensions-browser). Handle auth and tenant scoping server-side with hooks, or - for real multi-tenancy - pass `getContext` to `createFetchHandler` and add a `security` [filter](/querying/filters), so every request is scoped automatically and can't be bypassed from the client. See [Multi-tenancy](/multi-tenancy).
 
 ---
 

@@ -48,7 +48,7 @@ const users = await trpc.user.findMany.query({
 ```
 
 :::caution[Validate public inputs]
-`passthrough<T>()` declares the input type without runtime validation, trusting the caller's shape. For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side, the same way the [HTTP core hooks](/extensions-http) fold tenant filters into `$where`.
+`passthrough<T>()` declares the input type without runtime validation, trusting the caller's shape. For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side. For tenant isolation, wrap the procedure body in `withContext(getContext(ctx), () => ...)` with a `security` [filter](/querying/filters) - non-bypassable and fail-closed - rather than hand-folding tenant filters into `$where`. See [Multi-tenancy](/multi-tenancy).
 :::
 
 :::tip

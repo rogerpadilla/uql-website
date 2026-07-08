@@ -118,7 +118,7 @@ export class User {
   @Field()
   email?: string;
 
-  @Field({ softDelete: () => new Date() })
+  @Field({ softDelete: true })
   deletedAt?: Date;
 }
 ```

@@ -174,7 +174,8 @@ class Post extends BaseEntity {
 For cross-cutting concerns (audit logging, automatic timestamps across all entities, cache invalidation), register **global listeners** on the querier pool:
 
 ```ts
-import { PgQuerierPool, type QuerierListener } from 'uql-orm';
+import { type QuerierListener } from 'uql-orm';
+import { PgQuerierPool } from 'uql-orm/postgres';
 
 const auditListener: QuerierListener = {
   afterInsert({ entity, payloads, querier }) {

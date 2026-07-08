@@ -7,6 +7,10 @@ description: Execute vanilla SQL queries with type safety using all() and run().
 
 Sometimes you need full control over your queries. UQL provides `all()` and `run()` for executing vanilla SQL while maintaining type safety through generics.
 
+:::caution[Raw SQL is not scoped by filters or context]
+[Query filters](/querying/filters) - including `security` filters and [soft-delete](/entities/soft-delete) - and the [multi-tenancy](/multi-tenancy) request context apply only to UQL's query methods, never to `all()` / `run()`. Scope raw queries by hand (note the explicit `WHERE "deletedAt" IS NULL` below), or rely on database-native row-level security for defense in depth.
+:::
+
 ## Available Methods
 
 | Method | Returns | Use Case |

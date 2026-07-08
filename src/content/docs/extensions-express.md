@@ -59,6 +59,10 @@ app.use('/api', querierMiddleware({
 }));
 ```
 
+:::tip[Multi-tenancy: prefer `getContext` + a `security` filter]
+Hand-folding `$where` in `preFilter` works, but for tenant isolation prefer passing `getContext` to `querierMiddleware` (it takes the same options as the [HTTP core](/extensions-http)) plus a `security` [filter](/querying/filters). That scopes **every** query in the request automatically, can't be bypassed from the wire, and fails closed if the context is missing. See [Multi-tenancy](/multi-tenancy).
+:::
+
 ### Error handling
 
 Errors go to `next(err)`, so your own error middleware keeps working. The exported `errorHandler` renders the canonical [`{ error: { message, code } }` envelope](/extensions-http#wire-protocol), honoring a numeric `status` thrown by hooks:

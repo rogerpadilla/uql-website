@@ -78,7 +78,7 @@ export class User extends BaseEntity {
   @Field({ eager: false })
   password?: string;
 
-  @OneToOne({ entity: () => Profile, mappedBy: 'userId', cascade: true })
+  @OneToOne({ entity: () => Profile, mappedBy: 'user', cascade: true })
   profile?: Relation<Profile>;
 }
 ```

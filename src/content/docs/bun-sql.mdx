@@ -75,7 +75,7 @@ Bun talks to **CockroachDB** through its PostgreSQL wire adapter.
 
 ### PostgreSQL dialect
 
-For `postgres://` / `postgresql://` URLs, UQL uses **`BunSqlPostgresDialect`**, a Postgres AST tuned for Bun’s parameter binding (not the same as **`PgDialect`** for node `pg`). You do not configure this explicitly; the pool infers it from `SQL.Options`.
+For `postgres://` / `postgresql://` URLs, UQL uses **`BunSqlPostgresDialect`**, a Postgres AST tuned for Bun's parameter binding (not the same as **`PgDialect`** for node `pg`). You do not configure this explicitly; the pool infers it from `SQL.Options`.
 
 ---
 
@@ -84,7 +84,7 @@ For `postgres://` / `postgresql://` URLs, UQL uses **`BunSqlPostgresDialect`**, 
 Bun's `sql` client has a "silent fallback" where it defaults to PostgreSQL if an adapter isn't explicitly provided or recognized. 
 `BunSqlQuerierPool` in UQL eliminates this risk by:
 
-- **Enforcing adapter mapping**: Normalizing `SQL.Options` per dialect (e.g. CockroachDB uses Bun’s `postgres` adapter while UQL still emits Cockroach-specific SQL).
+- **Enforcing adapter mapping**: Normalizing `SQL.Options` per dialect (e.g. CockroachDB uses Bun's `postgres` adapter while UQL still emits Cockroach-specific SQL).
 - **Dialect Guardrails**: Ensuring your UQL code uses the correct SQL AST generator for the target database.
 - **Unified Result Mapping**: Correctly handles Bun's custom result objects, including `affectedRows` and `lastInsertRowid`, mapping them to UQL's standard `QueryUpdateResult`.
 

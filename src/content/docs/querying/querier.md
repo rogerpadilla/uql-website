@@ -90,23 +90,25 @@ try {
 
 | Method                                      | Description                                    |
 | :------------------------------------------ | :--------------------------------------------- |
-| `findMany(Entity, query)`                   | Find multiple records matching the query.      |
-| `findManyStream(Entity, query)`             | [Stream records](/querying/streaming) as an `AsyncIterable` for memory-efficient row-by-row iteration. Relation loading rules differ from `findMany`; see [streaming & relations](/querying/streaming#relations--streaming). |
-| `findManyAndCount(Entity, query)`           | Find records and return `[rows, totalCount]`.  |
-| `findOne(Entity, query)`                    | Find a single record matching the query.       |
-| `findOneById(Entity, id, query?)`           | Find a record by its primary key.              |
-| `count(Entity, query)`                      | Count records matching the query.              |
-| `aggregate(Entity, query)`                  | Run an [aggregate query](/querying/aggregate) (`GROUP BY`, `HAVING`, etc.). |
+| `findMany(Entity, query, opts?)`            | Find multiple records matching the query.      |
+| `findManyStream(Entity, query, opts?)`      | [Stream records](/querying/streaming) as an `AsyncIterable` for memory-efficient row-by-row iteration. Relation loading rules differ from `findMany`; see [streaming & relations](/querying/streaming#relations--streaming). |
+| `findManyAndCount(Entity, query, opts?)`    | Find records and return `[rows, totalCount]`.  |
+| `findOne(Entity, query, opts?)`             | Find a single record matching the query.       |
+| `findOneById(Entity, id, query?, opts?)`    | Find a record by its primary key.              |
+| `count(Entity, query, opts?)`               | Count records matching the query.              |
+| `aggregate(Entity, query, opts?)`           | Run an [aggregate query](/querying/aggregate) (`GROUP BY`, `HAVING`, etc.). |
 | `insertOne(Entity, data)`                   | Insert a single record and return its ID.      |
 | `insertMany(Entity, data[])`                | Insert multiple records and return their IDs.  |
-| `updateOneById(Entity, id, data)`           | Update a record by its primary key.            |
-| `updateMany(Entity, query, data)`           | Update multiple records matching the query.    |
+| `updateOneById(Entity, id, data, opts?)`    | Update a record by its primary key.            |
+| `updateMany(Entity, query, data, opts?)`    | Update multiple records matching the query.    |
 | `saveOne(Entity, data)`                     | Insert or update based on ID presence.         |
 | `saveMany(Entity, data[])`                  | Bulk insert or update based on ID presence.    |
 | `upsertOne(Entity, conflictPaths, data)`    | Insert or update based on conflict paths.      |
 | `upsertMany(Entity, conflictPaths, data[])` | Bulk insert or update based on conflict paths. |
-| `deleteOneById(Entity, id)`                 | Delete a record by its primary key.            |
-| `deleteMany(Entity, query)`                 | Delete multiple records matching the query.    |
+| `deleteOneById(Entity, id, opts?)`          | Delete by primary key. [Soft-deletes](/entities/soft-delete) when the entity has a soft-delete field; pass `{ hardDelete: true }` to remove permanently. |
+| `deleteMany(Entity, query, opts?)`          | Delete multiple records matching the query (soft by default; `{ hardDelete: true }` removes permanently). |
+| `restoreOneById(Entity, id)`                | Restore a [soft-deleted](/entities/soft-delete) record by its primary key. |
+| `restoreMany(Entity, query)`                | Restore soft-deleted records matching the query. |
 | [`run(sql, values?)`](/querying/raw-sql)    | Execute [raw SQL](/querying/raw-sql) (INSERT, UPDATE, DELETE). |
 | [`all<T>(sql, values?)`](/querying/raw-sql) | Execute [raw SQL SELECT](/querying/raw-sql) with generics. |
 | `transaction(callback, opts?)`              | Run a [transaction](/querying/transactions) within a callback. |
@@ -114,6 +116,8 @@ try {
 | `commitTransaction()`                       | Commit the active transaction.                 |
 | `rollbackTransaction()`                     | Roll back the active transaction.              |
 | `release()`                                 | Return the connection to the pool.             |
+
+The trailing `opts?` on reads, updates, and deletes is a [`QueryOptions`](/querying/filters): bypass [query filters](/querying/filters) for the call (e.g. `withDeleted()` to include soft-deleted rows, or `{ filters: false }`), or force `{ hardDelete: true }` on a delete.
 
 :::note
 The query-based methods also support an RPC-friendly call pattern:

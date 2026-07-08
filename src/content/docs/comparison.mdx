@@ -418,13 +418,15 @@ await repo.softDelete(id);
 @Entity()
 export class User {
   @Id() id: number;
-  @Field({ softDelete: () => new Date() }) deletedAt: Date;
+  @Field({ softDelete: true }) deletedAt: Date;
 }
 // Marking the field enables global soft-deletion behavior
-await querier.deleteOneById(User, id);
+await querier.deleteOneById(User, id); // soft delete
+await querier.restoreOneById(User, id); // bring it back
+await querier.deleteOneById(User, id, { hardDelete: true }); // remove for good
 ```
 
-**In practice:** Hand-filtering `deletedAt: null` in every query is a bug magnet. TypeORM, MikroORM, and UQL handle this at the engine level, ensuring deleted records are hidden automatically without manual discipline.
+**In practice:** Hand-filtering `deletedAt: null` in every query is a bug magnet. TypeORM, MikroORM, and UQL handle this at the engine level, ensuring deleted records are hidden automatically without manual discipline. UQL also ships first-class `restoreOneById`/`restoreMany` and a `{ hardDelete: true }` escape hatch, and exposes soft-delete as one instance of its general [query-filter](/querying/filters) primitive.
 
 ---
 
@@ -654,7 +656,9 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 | Serializable queries (JSON) | ❌ | ❌ | ✅ | ❌ | ✅ |
 | Deep relation operators | ❌ | ✅ | ✅ | ❌ | ✅ |
 | Cursor streaming (AsyncIterable) | ✅ | ✅ | ❌ | 🔌 | ✅ |
-| Soft delete (built-in) | ❌ | 🔌 | 🔌 | ✅ | ✅ |
+| Soft delete (built-in) + restore | ❌ | 🔌 | 🔌 | ✅⁴ | ✅ |
+| Global query filters (scopes) | ❌ | ✅ | 🔌 | ❌ | ✅ |
+| Multi-tenancy / RLS (non-bypassable) | ❌ | 🔌 | 🔌 | ❌ | ✅ |
 | Lifecycle hooks | ❌ | ✅ | 🔌 | ✅ | ✅ |
 | Works without an active ORM context (no Unit of Work / flush cycle) | ✅ | ❌ | ✅ | ✅ | ✅ |
 | Auto REST API | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -667,6 +671,7 @@ Features marked as: ✅ native, 🔌 via extension/plugin, ❌ not available.
 ¹ PostgreSQL (pgvector) only.
 ² Prisma Client is broadly consistent across SQL/Mongo, but connector-specific capabilities and raw-query APIs diverge.
 ³ TypeORM's Mongo path diverges from SQL behavior (for example, QueryBuilder support differs).
+⁴ TypeORM soft-deletes and restores (`restore()`); MikroORM/Prisma need a plugin or extension. UQL's `security` filters are non-bypassable and fail closed on missing context; MikroORM's filters and Prisma's extensions/DB-native RLS are the closest equivalents.
 </small>
 
 ---

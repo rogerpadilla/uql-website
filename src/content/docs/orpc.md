@@ -41,7 +41,7 @@ const users = await client.user.findMany({
 ```
 
 :::caution[Validate public inputs]
-`type<T>()` declares the input type without runtime validation, the same trust model as `passthrough<T>()` in the [tRPC recipe](/trpc). For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side, the same way the [HTTP core hooks](/extensions-http) fold tenant filters into `$where`. Note that oRPC generates OpenAPI specs only from real schemas; type-only inputs are excluded.
+`type<T>()` declares the input type without runtime validation, the same trust model as `passthrough<T>()` in the [tRPC recipe](/trpc). For procedures exposed to untrusted clients, validate with a schema (e.g. zod) and scope the query server-side. For tenant isolation, wrap the handler in `withContext(getContext(ctx), () => ...)` with a `security` [filter](/querying/filters) - non-bypassable and fail-closed - rather than hand-folding tenant filters into `$where`; see [Multi-tenancy](/multi-tenancy). Note that oRPC generates OpenAPI specs only from real schemas; type-only inputs are excluded.
 :::
 
 :::tip
