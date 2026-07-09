@@ -42,7 +42,7 @@ declare module 'uql-orm' {
 
 ### 2. Set the context for a unit of work
 
-`withContext` establishes the ambient context; it propagates across `await`, `Promise.all`, and transactions:
+`withContext` establishes the ambient context; it propagates across `await`, `Promise.all`, and transactions - including the [pool-level reads](/querying/querier#parallel-reads-on-the-pool), so one wrapper scopes a whole parallel fan-out:
 
 ```ts
 import { withContext } from 'uql-orm';
@@ -51,6 +51,8 @@ await withContext({ tenantId: 42 }, async () => {
   await querier.findMany(Invoice, { $where: { total: { $gt: 100 } } });
   // Generated SQL:
   //   SELECT ... FROM "Invoice" WHERE ("total" > $1) AND ("companyId" = $2)   -- $2 = 42
+
+  await Promise.all([pool.findMany(Invoice, {}), pool.count(Invoice, {})]); // both scoped to tenant 42
 });
 ```
 

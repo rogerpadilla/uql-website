@@ -25,6 +25,9 @@ ORMs built on a Unit of Work / Identity Map track loaded entities and flush chan
 - **Managed:** `user.name = 'New Name'; await em.flush();` (implicit state tracking)
 - **UQL:** `await querier.updateOneById(User, id, { name: 'New Name' });` (explicit mutation)
 
+### Connection model: the same default you're used to
+In Prisma, TypeORM, and Sequelize, a plain query grabs its own pooled connection, so `Promise.all` parallelizes. UQL's [pool reads](/querying/querier#parallel-reads-on-the-pool) work the same way - `pool.findMany(User, {...})` acquires, runs, and releases per call. Reach for `pool.withQuerier` / `pool.transaction` when statements must share one connection or run atomically.
+
 ---
 
 ## Pattern Translation: Before & After

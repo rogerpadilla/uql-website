@@ -50,15 +50,13 @@ LIMIT 10
 This is especially useful when you want to **release the connection before doing slow non-DB work** (e.g. calling an external API or LLM), preventing connection pool starvation:
 
 ```ts
-// Phase 1: read from DB (connection held briefly)
-const data = await pool.withQuerier((querier) => 
-  querier.findOne(Resource, { $where: { id: resourceId } })
-);
+// Phase 1: read from DB (single read - the pool one-liner acquires and releases for you)
+const data = await pool.findOne(Resource, { $where: { id: resourceId } });
 
 // Phase 2: slow external call (no connection held)
 const result = await callExternalApi(data);
 
-// Phase 3: write result back (connection held briefly)
+// Phase 3: write result back (writes belong in a unit of work)
 await pool.withQuerier((querier) => 
   querier.updateOneById(Resource, resourceId, { result })
 );
@@ -140,10 +138,46 @@ The pool manages the connection lifecycle. These are the main `pool` methods:
 | `pool.withQuerier(callback)`    | Acquire a querier, run `callback`, and auto-release, even on errors.       |
 | `pool.transaction(callback)`    | Like `withQuerier`, but wraps the callback in a transaction.                |
 | `pool.getQuerier()`             | Manually acquire a querier. **You must call `querier.release()`** yourself. |
+| `pool.findMany(...)` and the other reads | Run a single read on its own connection - see [parallel reads](#parallel-reads-on-the-pool) below. |
+| [`pool.all(sql, values?)` / `pool.run(sql, values?)`](/querying/raw-sql#raw-sql-on-the-pool) | Run one [raw SQL](/querying/raw-sql) statement on its own connection (SQL pools only). |
 | `pool.end()`                    | Gracefully shut down the pool (close all connections).                      |
 
 :::tip
-Always prefer `pool.withQuerier()` or `pool.transaction()`. They guarantee the connection is released. Use `pool.getQuerier()` only when you need manual lifecycle control (e.g., long-lived operations).
+Always prefer `pool.withQuerier()` or `pool.transaction()` for multi-statement work. They guarantee the connection is released. Use `pool.getQuerier()` only when you need manual lifecycle control (e.g., long-lived operations).
+:::
+
+### Parallel Reads on the Pool
+
+The read methods - `findMany`, `findOne`, `findOneById`, `findManyAndCount`, `count`, and `aggregate` - are available directly on the pool. Each call acquires its own connection, runs the single read, and releases it, so independent reads fan out in parallel with `Promise.all`:
+
+```ts title="Two connections, in parallel"
+const [invoices, total] = await Promise.all([
+  pool.findMany(Invoice, { $where: { paid: false } }),
+  pool.count(Invoice, {}),
+]);
+```
+
+The same calls inside one `withQuerier` callback share a single pinned connection, so they queue instead:
+
+```ts title="One pinned connection - queries serialize"
+await pool.withQuerier((querier) =>
+  Promise.all([querier.findMany(Invoice, {}), querier.count(Invoice, {})]),
+);
+```
+
+Both are correct - pick by intent: **pool reads** for independent one-shot queries, **`withQuerier`/`transaction`** for a unit of work that should share one connection (or be atomic).
+
+An enclosing [`withContext`](/multi-tenancy) scopes pool reads like any other query - one wrapper covers a whole parallel fan-out:
+
+```ts
+await withContext({ tenantId }, () =>
+  Promise.all([pool.findMany(Invoice, {}), pool.count(Invoice, {})]),
+);
+```
+
+:::note
+- Pool reads take the entity-as-argument form only; for the `{ $entity }` form, [streaming](/querying/streaming), or **writes** (they need a unit of work), use `withQuerier` / `transaction`.
+- On single-connection backends (better-sqlite3, Bun sqlite, D1) pool reads stay correct but share the one connection, so they serialize rather than parallelize.
 :::
 
 ### Upsert Operations

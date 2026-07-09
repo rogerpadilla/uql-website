@@ -64,10 +64,25 @@ console.log(result.changes); // Number of affected rows
 
 ---
 
+## Raw SQL on the Pool
+
+SQL pools expose `all()` and `run()` directly. Each call acquires its own connection, runs the single statement, and releases it - so independent statements fan out in parallel with `Promise.all`, without `withQuerier` ceremony:
+
+```ts title="Two aggregates, two connections, in parallel"
+const [payments, usages] = await Promise.all([
+  pool.all<{ sum: number }>('SELECT COALESCE(SUM(value), 0) sum FROM "Payment" WHERE "workspaceId" = $1', [id]),
+  pool.all<{ sum: number }>('SELECT COALESCE(SUM(cost), 0) sum FROM "Usage" WHERE "workspaceId" = $1', [id]),
+]);
+```
+
+For multiple statements that must share a connection or run atomically, use `pool.withQuerier()` / `pool.transaction()` and the querier's `all()`/`run()` instead.
+
+---
+
 :::tip
 UQL automatically handles parameter binding (e.g., `$1`, `$2` or `?`) to prevent SQL injection. Always pass dynamic inputs as an array in the second parameter.
 :::
 
 :::note
-While `run()` is available on all queriers, `all<T>()` is specific to SQL-based dialects through the `SqlQuerier` interface.
+While `run()` is available on all queriers, `all<T>()` is specific to SQL-based dialects through the `SqlQuerier` interface - as are `pool.all()` / `pool.run()`, which exist only on SQL pools (`SqlQuerierPool`).
 :::

@@ -29,6 +29,10 @@ const result = await pool.transaction(async (querier) => {
 // The querier is automatically released after the transaction
 ```
 
+:::caution[Use the callback's querier inside a transaction]
+Pool-level calls like [`pool.findMany(...)`](/querying/querier#parallel-reads-on-the-pool) or [`pool.all(...)`](/querying/raw-sql#raw-sql-on-the-pool) acquire their **own** connection - inside a transaction callback they run *outside* the transaction and won't see its uncommitted changes. Reads that must observe or join the transaction go through the callback's `querier`.
+:::
+
 #### Using `querier.transaction()`
 
 If you already have an active `querier` instance (e.g. inside a `pool.withQuerier()` callback), you can use its `transaction` method to make just a section of the work transactional, with automatic commit/rollback:
