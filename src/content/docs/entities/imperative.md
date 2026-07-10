@@ -28,6 +28,7 @@ export class Post {
   title?: string;
   authorId?: string;
   author?: User;
+  publishedAt?: Date;
 }
 
 defineEntity(User, {
@@ -43,6 +44,7 @@ defineEntity(Post, {
     id: { type: Number, isId: true },
     title: { type: String, nullable: false },
     authorId: { references: () => User },
+    publishedAt: { type: Date, nullable: true },
   },
   relations: {
     author: { cardinality: 'm1', entity: () => User },
@@ -69,14 +71,30 @@ Every entry maps directly to a decorator:
 For dynamic schemas, register piece by piece with `defineField`, `defineId`, `defineRelation`, `defineIndex`, `defineFilter`, and `defineHook`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
 
 ```ts
-import { defineEntity, defineField, defineFilter, defineHook, defineId, defineIndex, defineRelation } from 'uql-orm';
+import {
+  defineEntity,
+  defineField,
+  defineFilter,
+  defineHook,
+  defineId,
+  defineIndex,
+  defineRelation,
+  type HookContext,
+} from 'uql-orm';
 
 class Article {
-  stamp(): void {}
+  createdAt?: Date;
+  publishedAt?: Date;
+
+  stamp(_ctx: HookContext): void {
+    this.createdAt = new Date();
+  }
 }
 
 defineId(Article, 'id', { type: 'uuid' });
 defineField(Article, 'title', { type: String, nullable: false });
+defineField(Article, 'createdAt', { type: Date });
+defineField(Article, 'publishedAt', { type: Date, nullable: true });
 defineRelation(Article, 'author', { cardinality: 'm1', entity: () => User });
 defineIndex(Article, { columns: ['title'], unique: true });
 defineFilter(Article, 'published', { condition: { publishedAt: { $ne: null } }, default: false });
