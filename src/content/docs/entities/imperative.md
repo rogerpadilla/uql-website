@@ -48,6 +48,9 @@ defineEntity(Post, {
     author: { cardinality: 'm1', entity: () => User },
   },
   indexes: [{ columns: ['title', 'authorId'], unique: true }],
+  filters: {
+    published: { condition: { publishedAt: { $ne: null } }, default: false },
+  },
 });
 ```
 
@@ -59,19 +62,22 @@ Every entry maps directly to a decorator:
 | `relations` | `@OneToOne` ... `@ManyToMany` | Same [relation options](/entities/relations), plus `cardinality`: `'11'`, `'1m'`, `'m1'`, or `'mm'`.       |
 | `indexes`   | `@Index`                      | `{ columns, name?, unique?, type?, where? }`, see [Indexes](/entities/indexes).                            |
 | `hooks`     | `@BeforeInsert()`, ...        | Maps each [lifecycle event](/entities/lifecycle-hooks) to method names, e.g. `{ beforeInsert: ['stamp'] }`. |
+| `filters`   | `@Filter`                     | Same [filter options](/querying/filters#defining-a-filter): `{ condition, default?, security?, onMissing? }`. |
 
 ### Incremental registration
 
-For dynamic schemas, register piece by piece with `defineField`, `defineId`, and `defineRelation`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
+For dynamic schemas, register piece by piece with `defineField`, `defineId`, `defineRelation`, `defineIndex`, and `defineFilter`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
 
 ```ts
-import { defineEntity, defineField, defineId, defineRelation } from 'uql-orm';
+import { defineEntity, defineField, defineFilter, defineId, defineIndex, defineRelation } from 'uql-orm';
 
 class Article {}
 
 defineId(Article, 'id', { type: 'uuid' });
 defineField(Article, 'title', { type: String, nullable: false });
 defineRelation(Article, 'author', { cardinality: 'm1', entity: () => User });
+defineIndex(Article, { columns: ['title'], unique: true });
+defineFilter(Article, 'published', { condition: { publishedAt: { $ne: null } }, default: false });
 defineEntity(Article, { name: 'articles' });
 ```
 
