@@ -29,6 +29,19 @@ export class Task {
 
 A default-on filter's keys are only added when your `$where` doesn't already mention them, so an explicit `$where` on that field opts out.
 
+The decorator-free equivalent, via `defineFilter` (see [Imperative Definition](/entities/imperative)):
+
+```ts
+import { defineEntity, defineField, defineFilter, defineId } from 'uql-orm';
+
+class Task {}
+
+defineId(Task, 'id', { type: Number });
+defineField(Task, 'status', { type: String });
+defineFilter(Task, 'active', { condition: { status: 'active' }, default: false });
+defineEntity(Task, {});
+```
+
 ### Bypassing filters
 
 Every read/update/delete accepts `QueryOptions.filters`:
