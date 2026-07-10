@@ -165,13 +165,11 @@ Queries on this field will use `l2` unless overridden with `$distance` at query 
 Project the computed distance as a named field in the result with `$project`:
 
 ```ts title="You write"
-import type { WithDistance } from 'uql-orm';
-
 const results = await querier.findMany(Article, {
   $select: { id: true, title: true },
   $sort: { embedding: { $vector: queryVec, $distance: 'cosine', $project: 'similarity' } },
   $limit: 10,
-}) as WithDistance<Article, 'similarity'>[];
+});
 
 results.forEach((r) => console.log(r.title, r.similarity));
 ```
@@ -204,7 +202,7 @@ For MongoDB, `$project` adds a `$meta: 'vectorSearchScore'` projection:
 ```
 
 :::tip[Type Safety]
-`WithDistance<Article, 'similarity'>` adds a typed `similarity: number` property to each result. Your IDE autocompletes `r.similarity` and catches typos at compile time.
+UQL reads the `$project` literal and auto adds a typed `similarity: number` property to each result automatically, so `r.similarity` autocompletes and typos are caught at compile time, no cast needed. For a query whose `$project` key is computed at runtime (not a literal), annotate the result with the exported `WithDistance<Article, 'similarity'>` helper.
 :::
 
 :::note[Performance]

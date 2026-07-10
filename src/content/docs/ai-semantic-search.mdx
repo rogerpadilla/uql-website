@@ -58,13 +58,12 @@ await pool.withQuerier((querier) =>
 ### 3. Query by meaning
 
 ```ts
-import type { WithDistance } from 'uql-orm';
 import { pool } from './uql.config.js';
 import { Article } from './entities.js';
 
 const queryEmbedding = await embed('TypeScript ORM with vector search'); // any embedding model
 
-const results = (await pool.findMany(Article, {
+const results = await pool.findMany(Article, {
   $where: { category: 'docs' },
   $sort: {
     embedding: {
@@ -74,14 +73,14 @@ const results = (await pool.findMany(Article, {
     },
   },
   $limit: 10,
-})) as WithDistance<Article, 'similarity'>[];
+});
 
 for (const article of results) {
   console.log(article.title, article.similarity);
 }
 ```
 
-`$project` adds the computed score to each row (here: `similarity`), so your app can filter, rank, or inspect relevance.
+`$project` adds the computed score to each row (here: `similarity`), so your app can filter, rank, or inspect relevance. UQL infers the projected field from the `$project` literal, so `results` is typed `(Article & { similarity: number })[]` with no cast.
 
 The query shape stays the same across PostgreSQL, CockroachDB, MariaDB, SQLite, and MongoDB Atlas.
 
@@ -123,9 +122,7 @@ const { data: results } = await http.findMany(Article, {
 For RAG, fetch more candidates than you plan to use (e.g. `$limit: 30`), then keep low-signal results out of your context window:
 
 ```ts
-import type { WithDistance } from 'uql-orm';
-
-const candidates = (await pool.findMany(Article, {
+const candidates = await pool.findMany(Article, {
   $where: { category: 'docs' },
   $sort: {
     embedding: {
@@ -135,7 +132,7 @@ const candidates = (await pool.findMany(Article, {
     },
   },
   $limit: 30,
-})) as WithDistance<Article, 'score'>[];
+});
 
 const filtered = candidates.filter((row) => row.score <= 0.35);
 ```
