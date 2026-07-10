@@ -66,18 +66,21 @@ Every entry maps directly to a decorator:
 
 ### Incremental registration
 
-For dynamic schemas, register piece by piece with `defineField`, `defineId`, `defineRelation`, `defineIndex`, and `defineFilter`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
+For dynamic schemas, register piece by piece with `defineField`, `defineId`, `defineRelation`, `defineIndex`, `defineFilter`, and `defineHook`, then call `defineEntity` last; it validates the metadata (fields present, exactly one primary key) and finalizes the entity:
 
 ```ts
-import { defineEntity, defineField, defineFilter, defineId, defineIndex, defineRelation } from 'uql-orm';
+import { defineEntity, defineField, defineFilter, defineHook, defineId, defineIndex, defineRelation } from 'uql-orm';
 
-class Article {}
+class Article {
+  stamp(): void {}
+}
 
 defineId(Article, 'id', { type: 'uuid' });
 defineField(Article, 'title', { type: String, nullable: false });
 defineRelation(Article, 'author', { cardinality: 'm1', entity: () => User });
 defineIndex(Article, { columns: ['title'], unique: true });
 defineFilter(Article, 'published', { condition: { publishedAt: { $ne: null } }, default: false });
+defineHook(Article, 'stamp', 'beforeInsert');
 defineEntity(Article, { name: 'articles' });
 ```
 
