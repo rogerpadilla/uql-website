@@ -250,7 +250,7 @@ const items = await querier.findMany(Item, {
 
 ### 4. Consistent API Across Databases
 
-Its API is unified across different databases: the same entities and queries transparently work on any supported database, with the dialect-specific SQL (or MongoDB commands) generated under the hood. This makes it easier to switch from a Document to a Relational database (or vice-versa).
+Its API is unified across different databases: the same entities and queries transparently work on any supported database, with the dialect-specific SQL (or MongoDB commands) generated under the hood. This makes it easier to switch from a Document to a Relational database (or vice-versa); the [migration guide](https://uql-orm.dev/switching-to-uql) walks through what that move looks like coming from Mongoose.
 
 ### 5. Universal Syntax Across Languages
 

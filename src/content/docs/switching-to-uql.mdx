@@ -25,6 +25,11 @@ ORMs built on a Unit of Work / Identity Map track loaded entities and flush chan
 - **Managed:** `user.name = 'New Name'; await em.flush();` (implicit state tracking)
 - **UQL:** `await querier.updateOneById(User, id, { name: 'New Name' });` (explicit mutation)
 
+### From Mongoose: keep the query style, gain SQL
+Mongoose queries are objects of operators (`$gte`, `$in`, `$regex`, `$elemMatch`, `$or`), and so are UQL's [filters](/querying/comparison-operators). The vocabulary carries over, so the syntax feels familiar from day one. The real shift is what the query targets: Mongoose reads documents, while UQL maps an `@Entity` class to a table and its relations. Because the same query runs on MongoDB *and* every supported SQL engine, UQL is a low-friction path off Mongo: adopt SQL incrementally instead of rewriting your data layer in one jump.
+- **Mongoose:** `User.find({ status: 'active' }).sort('-createdAt').limit(10)`
+- **UQL:** `querier.findMany(User, { $where: { status: 'active' }, $sort: { createdAt: 'desc' }, $limit: 10 })`
+
 ### Connection model: the same default you're used to
 In Prisma, TypeORM, and Sequelize, a plain query grabs its own pooled connection, so `Promise.all` parallelizes. UQL's [pool reads](/querying/querier#choosing-poolx-vs-querierx) work the same way - `pool.findMany(User, {...})` acquires, runs, and releases per call. Reach for `pool.withQuerier` / `pool.transaction` when statements must share one connection or run atomically.
 
@@ -53,6 +58,15 @@ How to handle multiple conditions and range filters.
     db.select().from(users).where(
       and(gte(users.age, 18), eq(users.status, 'active'), like(users.email, '%@uql-orm.dev%'))
     );
+    ```
+  </TabItem>
+  <TabItem label="Mongoose">
+    ```ts
+    User.find({
+      age: { $gte: 18 },
+      status: 'active',
+      email: { $regex: '@uql-orm.dev' }
+    });
     ```
   </TabItem>
   <TabItem label="UQL">
@@ -159,6 +173,7 @@ Once the legacy ORM is no longer used for any queries, remove it from `package.j
 :::warning[Habits to unlearn]
 - **Implicit flushes**: UQL does not track state. Coming from MikroORM or TypeORM, remember that assigning `user.name = 'Bob'` does nothing to the database; call `updateOne` explicitly.
 - **Looking for the schema file**: Coming from Prisma, the `@Entity` class is the schema. If a field or relation is not on the class, it does not exist in the database.
+- **Embedded documents**: Coming from Mongoose, data you nested inside a document becomes either a [JSON column](/querying/json) or a related entity you reach with `$populate`. Use JSON for schemaless blobs; use a relation for anything you filter, sort, or join across.
 - **CommonJS**: UQL is ESM-only. If your project still uses `require()`, migrate to `import` and set `"type": "module"` in `package.json`.
 - **Running a generate step**: There is no codegen. After changing a field, just save the file and generate a [migration](/migrations).
 :::
@@ -166,5 +181,7 @@ Once the legacy ORM is no longer used for any queries, remove it from `package.j
 ## When to Switch (and When Not To)
 
 UQL is a good fit if you want serializable queries, no codegen, [atomic JSON operators](/querying/json), or a unified query API for both SQL and MongoDB. It's an especially strong fit for **[semantic search and RAG](/ai-semantic-search)**: vector fields, similarity ranking, and metadata filtering are first-class parts of the same query, with the identical JSON shape on backend and browser, across pgvector, SQLite, MariaDB, CockroachDB, and MongoDB Atlas. You skip the separate vector store and hand-written vector SQL most ORMs still push you toward. See the [side-by-side comparison](/comparison) for details.
+
+If you're coming from **MongoDB/Mongoose**, it's a natural landing spot: the operator-based query style carries over, and the same query runs on Mongo and SQL, so you can move onto a relational database gradually rather than rewriting your data layer in one release.
 
 It is a poor fit if you depend on MSSQL or Oracle (not supported), or if your codebase relies heavily on Unit of Work semantics that would be costly to make explicit.
