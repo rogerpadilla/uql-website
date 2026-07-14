@@ -204,7 +204,6 @@ Updating a specific key inside a JSONB column without overwriting the whole obje
 <Tabs>
   <TabItem label="Other ORMs (Raw SQL)">
     ```ts
-    // Most ORMs require raw SQL for atomic JSON updates
     await db.execute(
       `UPDATE users SET settings = jsonb_set(settings, '{theme}', '"dark"') WHERE id = 1`
     );
@@ -212,7 +211,6 @@ Updating a specific key inside a JSONB column without overwriting the whole obje
   </TabItem>
   <TabItem label="UQL (Native)">
     ```ts
-    // Atomic JSON update via the $merge operator
     await querier.updateOneById(User, 1, {
       settings: { $merge: { theme: 'dark' } }
     });
