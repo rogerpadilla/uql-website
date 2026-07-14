@@ -10,3 +10,4 @@ data
 out
 .astro
 .vercel
+.env*
