@@ -73,14 +73,16 @@ if (isHome) {
 }
 
 <script>
-  // Vercel Web Analytics. Pageviews are driven off `astro:page-load` (same hook
-  // as gtag) so client-side navigations are tracked, not just hard loads.
-  import { computeRoute, inject, pageview } from '@vercel/analytics';
+  // PostHog product analytics. Runs once; `defaults` enables History API pageview
+  // capture, so SPA navigations (astro-vtbot / ClientRouter) are tracked too.
+  // api_host is a same-origin proxy (see /ingest rewrites in vercel.json) to stay
+  // resilient to ad blockers; ui_host points PostHog app links at the real host.
+  import posthog from 'posthog-js';
 
-  inject({ disableAutoTrack: true });
-
-  document.addEventListener('astro:page-load', () => {
-    const path = window.location.pathname;
-    pageview({ route: computeRoute(path, {}), path });
+  posthog.init('phc_Av42RLeafnQGdW9Ex3gYKoa9oBCygcNzRd7MSyQYqNZz', {
+    api_host: '/ingest',
+    ui_host: 'https://us.posthog.com',
+    defaults: '2026-05-30',
+    person_profiles: 'identified_only',
   });
 </script>

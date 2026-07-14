@@ -19,27 +19,6 @@ const config: AstroUserConfig = {
       description: projectDescription,
       head: [
         {
-          tag: 'script',
-          attrs: {
-            src: 'https://www.googletagmanager.com/gtag/js?id=G-PE9RVX8QYB',
-            async: true,
-          },
-        },
-        {
-          tag: 'script',
-          content: `
-             window.dataLayer = window.dataLayer || [];
-             function gtag(){dataLayer.push(arguments);}
-             gtag('js', new Date());
-
-             document.addEventListener('astro:page-load', () => {
-                 gtag('config', 'G-PE9RVX8QYB', {
-                     page_path: window.location.pathname,
-                 });
-             });
-           `,
-        },
-        {
           tag: 'meta',
           attrs: {
             property: 'og:image',
