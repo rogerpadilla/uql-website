@@ -173,7 +173,7 @@ Retrieve the top matches by vector similarity, filtered by metadata - the core r
     ```ts
     const results = await em.createQueryBuilder(Article, 'a')
       .where({ category: 'docs' })
-      .orderBy({ ['embedding <=> ?']: [queryEmbedding] })
+      .orderBy({ [cosineDistance('embedding', queryEmbedding)]: 'ASC' })
       .limit(5)
       .getResult();
     ```
