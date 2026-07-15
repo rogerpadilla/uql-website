@@ -58,6 +58,8 @@ How to filter on multiple conditions and ranges, then sort and page the results.
   </TabItem>
   <TabItem label="Drizzle">
     ```ts
+    import { and, gte, eq, like, desc } from 'drizzle-orm';
+
     db.select()
       .from(users)
       .where(and(
@@ -82,6 +84,8 @@ How to filter on multiple conditions and ranges, then sort and page the results.
   </TabItem>
   <TabItem label="TypeORM">
     ```ts
+    import { MoreThanOrEqual, Like } from 'typeorm';
+
     manager.find(User, {
       where: {
         age: MoreThanOrEqual(18),
@@ -136,6 +140,8 @@ Retrieve the top matches by vector similarity, filtered by metadata - the core r
   </TabItem>
   <TabItem label="Drizzle">
     ```ts
+    import { eq, cosineDistance } from 'drizzle-orm';
+
     const results = await db.select()
       .from(articles)
       .where(eq(articles.category, 'docs'))
@@ -171,6 +177,8 @@ Retrieve the top matches by vector similarity, filtered by metadata - the core r
   </TabItem>
   <TabItem label="MikroORM">
     ```ts
+    import { cosineDistance } from 'pgvector/mikro-orm';
+
     const results = await em.createQueryBuilder(Article, 'a')
       .where({ category: 'docs' })
       .orderBy({ [cosineDistance('embedding', queryEmbedding)]: 'ASC' })
