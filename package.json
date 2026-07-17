@@ -18,7 +18,7 @@
     "@astrojs/mdx": "^7.0.3",
     "@astrojs/starlight": "^0.41.3",
     "@astrojs/vercel": "^11.0.3",
-    "astro": "^7.1.0",
+    "astro": "^7.1.1",
     "astro-mermaid": "^2.1.0",
     "posthog-js": "^1.404.0",
     "sharp": "^0.35.3",
@@ -29,6 +29,6 @@
     "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "^2.5.4",
     "astro-vtbot": "^3.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "~6.0.3"
   }
 }
