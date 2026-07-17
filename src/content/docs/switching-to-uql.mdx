@@ -39,7 +39,84 @@ In Prisma, TypeORM, and Sequelize, a plain query grabs its own pooled connection
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-### 1. Complex Filtering & Search
+### 1. Semantic Search (RAG)
+Retrieve the top matches by vector similarity, filtered by metadata - the core retrieval step of any RAG pipeline.
+
+<Tabs>
+  <TabItem label="Prisma">
+    ```ts
+    const results = await prisma.$queryRaw`
+      SELECT id, title FROM "Article"
+      WHERE category = 'docs'
+      ORDER BY embedding <=> ${queryEmbedding}::vector
+      LIMIT 5
+    `;
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    ```ts
+    import { eq, cosineDistance } from 'drizzle-orm';
+
+    const results = await db.select()
+      .from(articles)
+      .where(eq(articles.category, 'docs'))
+      .orderBy(cosineDistance(articles.embedding, queryEmbedding))
+      .limit(5);
+    ```
+  </TabItem>
+  <TabItem label="Mongoose">
+    ```ts
+    const results = await Article.aggregate([
+      {
+        $vectorSearch: {
+          index: 'embedding_index',
+          path: 'embedding',
+          queryVector: queryEmbedding,
+          filter: { category: 'docs' },
+          numCandidates: 100,
+          limit: 5
+        }
+      }
+    ]);
+    ```
+  </TabItem>
+  <TabItem label="TypeORM">
+    ```ts
+    const results = await manager.createQueryBuilder(Article, 'article')
+      .where('article.category = :category', { category: 'docs' })
+      .orderBy('article.embedding <=> :vector')
+      .setParameter('vector', queryEmbedding)
+      .limit(5)
+      .getMany();
+    ```
+  </TabItem>
+  <TabItem label="MikroORM">
+    ```ts
+    import { cosineDistance } from 'pgvector/mikro-orm';
+
+    const results = await em.createQueryBuilder(Article, 'a')
+      .where({ category: 'docs' })
+      .orderBy({ [cosineDistance('embedding', queryEmbedding)]: 'ASC' })
+      .limit(5)
+      .getResult();
+    ```
+  </TabItem>
+  <TabItem label="UQL">
+    ```ts
+    const results = await querier.findMany(Article, {
+      $where: { category: 'docs' },
+      $sort: {
+        embedding: { $vector: queryEmbedding, $distance: 'cosine' }
+      },
+      $limit: 5
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+Only UQL keeps the metadata filter and vector ranking in one type-safe JSON query that runs unchanged across pgvector, CockroachDB, MariaDB, SQLite, and MongoDB Atlas. The others are tied to one database or step outside the type-safe API: Prisma and TypeORM drop to raw SQL, Drizzle and MikroORM use Postgres-only pgvector helpers, and Mongoose needs an Atlas-specific aggregation. See [AI & RAG](/ai-semantic-search) for the full ingestion-to-retrieval walkthrough.
+
+### 2. Complex Filtering & Search
 How to filter on multiple conditions and ranges, then sort and page the results.
 
 <Tabs>
@@ -123,83 +200,6 @@ How to filter on multiple conditions and ranges, then sort and page the results.
     ```
   </TabItem>
 </Tabs>
-
-### 2. Semantic Search (RAG)
-Retrieve the top matches by vector similarity, filtered by metadata - the core retrieval step of any RAG pipeline.
-
-<Tabs>
-  <TabItem label="Prisma">
-    ```ts
-    const results = await prisma.$queryRaw`
-      SELECT id, title FROM "Article"
-      WHERE category = 'docs'
-      ORDER BY embedding <=> ${queryEmbedding}::vector
-      LIMIT 5
-    `;
-    ```
-  </TabItem>
-  <TabItem label="Drizzle">
-    ```ts
-    import { eq, cosineDistance } from 'drizzle-orm';
-
-    const results = await db.select()
-      .from(articles)
-      .where(eq(articles.category, 'docs'))
-      .orderBy(cosineDistance(articles.embedding, queryEmbedding))
-      .limit(5);
-    ```
-  </TabItem>
-  <TabItem label="Mongoose">
-    ```ts
-    const results = await Article.aggregate([
-      {
-        $vectorSearch: {
-          index: 'embedding_index',
-          path: 'embedding',
-          queryVector: queryEmbedding,
-          filter: { category: 'docs' },
-          numCandidates: 100,
-          limit: 5
-        }
-      }
-    ]);
-    ```
-  </TabItem>
-  <TabItem label="TypeORM">
-    ```ts
-    const results = await manager.createQueryBuilder(Article, 'article')
-      .where('article.category = :category', { category: 'docs' })
-      .orderBy('article.embedding <=> :vector')
-      .setParameter('vector', queryEmbedding)
-      .limit(5)
-      .getMany();
-    ```
-  </TabItem>
-  <TabItem label="MikroORM">
-    ```ts
-    import { cosineDistance } from 'pgvector/mikro-orm';
-
-    const results = await em.createQueryBuilder(Article, 'a')
-      .where({ category: 'docs' })
-      .orderBy({ [cosineDistance('embedding', queryEmbedding)]: 'ASC' })
-      .limit(5)
-      .getResult();
-    ```
-  </TabItem>
-  <TabItem label="UQL">
-    ```ts
-    const results = await querier.findMany(Article, {
-      $where: { category: 'docs' },
-      $sort: {
-        embedding: { $vector: queryEmbedding, $distance: 'cosine' }
-      },
-      $limit: 5
-    });
-    ```
-  </TabItem>
-</Tabs>
-
-Only UQL keeps the metadata filter and vector ranking in one type-safe JSON query that runs unchanged across pgvector, CockroachDB, MariaDB, SQLite, and MongoDB Atlas. The others are tied to one database or step outside the type-safe API: Prisma and TypeORM drop to raw SQL, Drizzle and MikroORM use Postgres-only pgvector helpers, and Mongoose needs an Atlas-specific aggregation. See [AI & RAG](/ai-semantic-search) for the full ingestion-to-retrieval walkthrough.
 
 ### 3. Atomic JSON Updates
 Updating a specific key inside a JSONB column without overwriting the whole object.
