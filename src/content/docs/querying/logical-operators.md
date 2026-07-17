@@ -7,7 +7,7 @@ description: Combine conditions with $and, $or, $not, and $nor in UQL queries.
 
 ## Logical Operators
 
-Logical operators allow you to combine multiple conditions in a single query. UQL uses a MongoDB-inspired syntax that is 100% valid JSON.
+Logical operators allow you to combine multiple conditions built with [comparison operators](/querying/comparison-operators) in a single query. UQL uses a MongoDB-inspired syntax that is 100% valid JSON.
 
 | Name   | Description                                                                                    |
 | ------ | ---------------------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@ Logical operators allow you to combine multiple conditions in a single query. UQ
 
 ### Implicit vs Explicit `$and`
 
-The `$and` operator is implicit when you specify multiple fields in the `$where` object.
+The `$and` operator is implicit when you specify multiple fields in the [`$where`](/querying/filters) object.
 
 ```ts title="You write"
 import { User } from './shared/models/index.js';
@@ -123,4 +123,13 @@ const users = await querier.findMany(User, {
 SELECT * FROM "User"
 WHERE NOT ("name" = $1 OR "status" = $2)
 ```
+
+---
+
+## Next Steps
+
+- [Comparison Operators](/querying/comparison-operators): Field-level operators to combine.
+- [Filters (`$where`)](/querying/filters): Where logical operators are used.
+- [Sub-Queries](/querying/sub-queries): Raw conditions inside `$and`/`$or`.
+- [Querier API](/querying/querier): The full query API.
 

@@ -33,16 +33,7 @@ ORDER BY SUM("amount") DESC
 LIMIT 10
 ```
 
-```sql title="Generated SQL (MySQL/MariaDB)"
-SELECT `status`, SUM(`amount`) `total`, COUNT(*) `count`
-FROM `Order`
-GROUP BY `status`
-HAVING COUNT(*) > ?
-ORDER BY SUM(`amount`) DESC
-LIMIT 10
-```
-
-```sql title="Generated SQL (SQLite)"
+```sql title="Generated SQL (MySQL/MariaDB/SQLite)"
 SELECT `status`, SUM(`amount`) `total`, COUNT(*) `count`
 FROM `Order`
 GROUP BY `status`
@@ -89,7 +80,7 @@ SELECT SUM(`amount`) `revenue` FROM `Order`
 
 ### `$where` vs `$having`
 
-- **`$where`**: Filters rows **before** grouping (`WHERE` clause).
+- **[`$where`](/querying/filters)**: Filters rows **before** grouping (`WHERE` clause).
 - **`$having`**: Filters groups **after** aggregation (`HAVING` clause).
 
 ```ts title="You write"
@@ -121,7 +112,7 @@ HAVING COUNT(*) > ?
 
 ### `$having` Operators
 
-The `$having` map supports the same comparison operators as `$where`:
+The `$having` map supports the same [comparison operators](/querying/comparison-operators) as `$where`:
 
 | Operator | SQL | Example |
 | :--- | :--- | :--- |
@@ -170,5 +161,14 @@ SELECT DISTINCT `name` FROM `User`
 ```
 
 :::tip
-`$distinct` is a modifier on `findMany`, not part of the `aggregate()` API. Use `aggregate()` when you need `GROUP BY`, aggregate functions, or `HAVING` filters.
+`$distinct` is a modifier on [`findMany`](/querying/querier), not part of the `aggregate()` API. Use `aggregate()` when you need `GROUP BY`, aggregate functions, or `HAVING` filters.
 :::
+
+---
+
+## Next Steps
+
+- [Querier API](/querying/querier): Full find/select/sort/pagination reference.
+- [Filters (`$where`)](/querying/filters): Filter rows before grouping.
+- [Comparison Operators](/querying/comparison-operators): Every operator usable in `$having`.
+- [Sub-Queries](/querying/sub-queries): Correlated sub-queries and raw SQL fragments.

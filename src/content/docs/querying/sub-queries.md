@@ -7,11 +7,11 @@ description: Write correlated sub-queries and raw SQL fragments with the raw() h
 
 ## Sub-Queries
 
-Sub-queries in UQL are written with `raw` expressions that interact directly with the `QueryContext`. They let you inject raw SQL fragments while still benefiting from UQL's parameterization and dialect-aware engine.
+Sub-queries in UQL are written with [`raw`](/querying/raw-sql) expressions that interact directly with the `QueryContext`. They let you inject raw SQL fragments while still benefiting from UQL's parameterization and dialect-aware engine.
 
 ### Using `raw` in `$where`
 
-The simplest use of a sub-query is adding a raw SQL condition to your `$where` clause.
+The simplest use of a sub-query is adding a raw SQL condition to your [`$where`](/querying/filters) clause.
 
 ```ts title="You write"
 import { raw } from 'uql-orm';
@@ -34,7 +34,7 @@ SELECT "id" FROM "Item" WHERE "companyId" = $1 AND "salePrice" > "cost" * 2
 
 ### Advanced: Context-Aware Sub-Queries (`$exists` / `$nexists`)
 
-For complex sub-queries like `EXISTS` or `IN`, you can pass a callback to `raw`. This callback provides access to the `QueryContext` and the `dialect`, allowing you to generate sub-queries that are correctly prefixed and compatible with your database.
+For complex sub-queries like `EXISTS` or `IN`, you can pass a callback to `raw`. This callback provides access to the `QueryContext` and the `dialect`, allowing you to generate sub-queries that are correctly prefixed and compatible with your database. For `EXISTS` checks driven by entity relations, see the built-in [relation filtering](/querying/relations) helpers.
 
 ```ts title="You write"
 import { raw } from 'uql-orm';
@@ -88,3 +88,12 @@ The callback receives:
 - **`ctx`**: the `QueryContext` for building parameterized SQL via `ctx.append(sql)` and `ctx.value(val)`.
 - **`dialect`**: the current SQL dialect instance for generating nested queries (e.g., `dialect.find(...)`).
 - **`escapedPrefix`**: the escaped alias of the parent table, used to reference parent columns in correlated sub-queries.
+
+---
+
+## Next Steps
+
+- [Raw SQL](/querying/raw-sql): The `raw()` helper and raw statement execution.
+- [Filters (`$where`)](/querying/filters): Where sub-query conditions live.
+- [Relations](/querying/relations): Built-in `EXISTS`/`$size` relation subqueries.
+- [Querier API](/querying/querier): The full query API.
