@@ -17,7 +17,7 @@ This extension is completely optional. UQL works perfectly fine as a standalone 
 ```ts
 import express from 'express';
 import { querierMiddleware } from 'uql-orm/express';
-import { pool } from './uql.config.js';
+import './uql.config.js'; // registers the default querier pool (setQuerierPool)
 import { User, Post } from './shared/models/index.js';
 
 const app = express();

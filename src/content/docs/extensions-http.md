@@ -17,6 +17,8 @@ description: Serve UQL entities over HTTP from any framework with the framework-
 This layer is completely optional. UQL works perfectly fine as a standalone ORM without it.
 :::
 
+The query object you serve here is the same one you write on the server and send from the browser: see [one query, every transport](/querying/querier#the-same-query-every-transport).
+
 ### Quick start (any fetch-native runtime)
 
 ```ts
@@ -63,6 +65,8 @@ export const ALL = ({ request }) => handler(request);
 ```
 
 Use `basePath` to strip a URL prefix when the runtime does not strip it for you (Next.js, SvelteKit, Astro, plain `Bun.serve` under a sub-path).
+
+For a fuller walkthrough with hooks and route composition, see the dedicated [Hono](/hono) and [Elysia](/elysia) recipes.
 
 ### Wire protocol
 
@@ -185,7 +189,7 @@ The handlers intentionally cover only single-entity CRUD: anything else returns 
 
 ### Bridging a non-fetch framework (Fastify example)
 
-`createRequestHandler` takes a plain normalized object, so a bridge is a few lines:
+`createRequestHandler` takes a plain normalized object, so a bridge is a few lines (see the dedicated [Fastify recipe](/fastify) for hooks and error handling):
 
 ```ts
 import { createRequestHandler, toErrorResponse } from 'uql-orm/http';

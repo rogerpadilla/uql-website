@@ -11,12 +11,11 @@ UQL queries are plain JSON, so they pass through tRPC procedures without any ada
 
 ```ts
 import { initTRPC } from '@trpc/server';
-import { getQuerierPool } from 'uql-orm';
 import type { Query, Type } from 'uql-orm/type';
+import { pool } from './uql.config.js';
 import { User } from './shared/models/index.js';
 
 const t = initTRPC.create();
-const pool = getQuerierPool();
 
 function passthrough<T>(): (value: unknown) => T {
   return (value) => value as T;
@@ -38,13 +37,18 @@ export const appRouter = t.router({
 });
 ```
 
-On the client, the query object is fully typed end to end:
+On the client, the whole query - filters, sorting, and nested relation loading - is fully typed end to end and reaches the server as plain JSON, with no per-procedure schema to keep in sync:
 
 ```ts
 const users = await trpc.user.findMany.query({
-  $where: { email: { $endsWith: '@domain.com' } },
+  $select: { id: true, name: true },
+  $where: { status: 'active', email: { $endsWith: '@domain.com' } },
+  // load each user's recent published posts in the same round-trip
+  $populate: { posts: { $select: { title: true }, $where: { published: true }, $sort: { createdAt: 'desc' }, $limit: 5 } },
+  $sort: { createdAt: 'desc' },
   $limit: 10,
 });
+// `users` is fully typed: User[], each with a typed `posts: Post[]`
 ```
 
 :::caution[Validate public inputs]
@@ -52,5 +56,5 @@ const users = await trpc.user.findMany.query({
 :::
 
 :::tip
-Prefer tRPC when you want per-procedure contracts and its client tooling; prefer the [HTTP core](/extensions-http) when you want zero-boilerplate CRUD for many entities. They compose fine in one app.
+Prefer tRPC when you want per-procedure contracts and its client tooling; prefer the [HTTP core](/extensions-http) when you want zero-boilerplate CRUD for many entities. They compose fine in one app, and the query object is identical either way: [one query, every transport](/querying/querier#the-same-query-every-transport).
 :::

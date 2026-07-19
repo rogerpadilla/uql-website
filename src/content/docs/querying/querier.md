@@ -59,6 +59,37 @@ await pool.withQuerier((querier) =>
 );
 ```
 
+### The same query, every transport
+
+A UQL query is a plain object, so the *same* value works unchanged across every layer. There is no per-transport rewriting, no DTO, no second schema to keep in sync, and the result stays fully typed everywhere, including populated relations:
+
+```ts title="Define it once"
+import type { Query } from 'uql-orm/type';
+import { User } from './shared/models/index.js';
+
+// filters, sorting, and nested relation loading - all type-checked against User
+const query: Query<User> = {
+  $select: { id: true, name: true },
+  $where: { status: 'active' },
+  $populate: { posts: { $select: { title: true }, $where: { published: true }, $limit: 5 } },
+  $sort: { createdAt: 'desc' },
+  $limit: 10,
+};
+```
+
+```ts title="Use it everywhere"
+// 1. On the server: straight on the pool (or a querier)
+const onServer = await pool.findMany(User, query);
+
+// 2. From the browser: against your REST API, same object and same types
+const { data: inBrowser } = await httpQuerier.findMany(User, query);
+
+// 3. Across an RPC boundary (tRPC / oRPC): it travels as JSON, untouched
+const overRpc = await trpc.user.findMany.query(query);
+```
+
+The object you type-check on the server is the object the browser sends and the object RPC carries. See the [HTTP core](/extensions-http), [browser client](/extensions-browser), and the [tRPC](/trpc) / [oRPC](/orpc) recipes.
+
 ### Manual Querier Management
 
 For advanced scenarios where you need full control over the querier lifecycle, use `pool.getQuerier()`. Always release it in a `finally` block:

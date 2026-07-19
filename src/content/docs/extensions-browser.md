@@ -125,7 +125,7 @@ const querier = new HttpQuerier('/api', {
 ```
 
 :::tip
-Combined with the server-side hooks of the [HTTP core](/extensions-http), this gives you a type-safe data layer from the browser all the way to the database. Using TanStack Query? See the [React Query recipe](/react-query): the serializable query object doubles as the cache key.
+Combined with the server-side hooks of the [HTTP core](/extensions-http), this gives you a type-safe data layer from the browser all the way to the database: the query you send is the same object the server writes ([one query, every transport](/querying/querier#the-same-query-every-transport)). Using TanStack Query? See the [React Query recipe](/react-query): the serializable query object doubles as the cache key.
 :::
 
 ### Request notifications
