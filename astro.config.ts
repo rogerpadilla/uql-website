@@ -88,7 +88,6 @@ const config: AstroUserConfig = {
             {
               label: 'Switching to UQL',
               link: '/switching-to-uql',
-              badge: { text: 'New', variant: 'success' },
             },
             {
               label: 'AI & RAG',
