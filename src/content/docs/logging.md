@@ -20,7 +20,7 @@ export const pool = new PgQuerierPool(
     // Enable all log levels with colored output
     logger: true,
     // Threshold in ms to log slow queries
-    slowQuery: { threshold: 200 },
+    slowQuery: 200,
   }
 );
 ```
@@ -31,42 +31,53 @@ You can selectively enable log levels by passing an array:
 
 ```ts
 {
-  // Only log errors, warnings, and slow queries
-  logger: ['error', 'warn', 'slowQuery'],
-  slowQuery: { threshold: 100 }
+  // Only log errors and warnings at the regular query level
+  logger: ['error', 'warn'],
+  // Independent of `logger`'s levels: any query at or past 200ms is logged as slow regardless
+  slowQuery: 200
 }
 ```
 
-For production, a common pattern is:
+`slowQuery` doesn't need a matching entry in `logger`'s level array - setting the threshold is what turns slow-query alerts on, on top of whatever regular levels you've enabled.
+
+For production, a common pattern is to go silent except for problems:
 
 ```ts
 {
-  logger: ['error', 'warn', 'slowQuery', 'migration'],
-  slowQuery: { threshold: 1000 }
+  // No regular query/info logging at all
+  logger: ['error', 'warn', 'migration'],
+  // ...but still alert on anything past a second
+  slowQuery: 1000
 }
 ```
 
-### Omitting Parameters from Slow Query Logs
+### Including Bound Values in Logs
 
-For security-sensitive environments, you can suppress query parameters from slow query logs:
+Bound values are **never logged by default** - `logValues` defaults to `false`, so logs carry SQL text only, since query parameters may hold PII or other sensitive data. Opt in explicitly if you want them (e.g. in a local/dev environment):
 
 ```ts
 {
   logger: true,
-  slowQuery: { threshold: 500, logParams: false }
+  slowQuery: 500,
+  logValues: true
 }
 ```
+
+`logValues` applies uniformly to regular query logs and slow-query alerts alike; it isn't tied to `slowQuery` specifically.
 
 ## Log Levels
 
 | Level              | Description                                                                                              |
 | :----------------- | :-------------------------------------------------------------------------------------------------------- |
 | `query`            | Each executed SQL statement/command, with its parameters and execution time.                             |
-| `slowQuery`        | Queries exceeding `slowQuery.threshold`. Use `logParams: false` to omit params.                          |
 | `error` / `warn`   | Error traces and warnings.                                                                               |
 | `migration`        | Step-by-step history of schema changes.                                                                  |
 | `skippedMigration` | Unsafe schema changes blocked during `autoSync`.                                                         |
 | `schema` / `info`  | ORM initialization and sync events.                                                                      |
+
+:::note[Slow-query alerts aren't a log level]
+Queries at or past the `slowQuery` threshold (in milliseconds) are always logged as slow, independent of which levels are enabled in `logger` - there's no `'slowQuery'` entry to add to that array. Use `logValues: true` if you also want bound values included in these alerts.
+:::
 
 ## Output Format
 
@@ -131,6 +142,50 @@ class MyLogger implements Logger {
 }
 ```
 
+### Routing Slow-Query Alerts Elsewhere
+
+`logQuery` and `logSlowQuery` are two separate methods on `Logger`, called independently - so a single logger can already send slow-query alerts somewhere entirely different from regular query logs, with no extra configuration:
+
+```ts
+import type { Logger } from 'uql-orm';
+
+class MyLogger implements Logger {
+  logQuery(query: string, values?: unknown[], duration?: number) {
+    console.log(`query: ${query}`, values, duration);
+  }
+  logSlowQuery(query: string, values?: unknown[], duration?: number) {
+    pagerduty.alert(`Slow query (${duration}ms): ${query}`);
+  }
+}
+
+// In your pool config:
+{
+  logger: new MyLogger(),
+  slowQuery: 500
+}
+```
+
+If you just want to keep `DefaultLogger`'s console formatting for regular queries and only add custom alerting for slow ones, extend it and override a single method - `super.logSlowQuery(...)` keeps the console line too, if you want both:
+
+```ts
+import { DefaultLogger } from 'uql-orm';
+
+class AlertingLogger extends DefaultLogger {
+  override logSlowQuery(query: string, values?: unknown[], duration?: number) {
+    super.logSlowQuery(query, values, duration); // still print to console
+    pagerduty.alert(`Slow query (${duration}ms): ${query}`);
+  }
+}
+
+// In your pool config:
+{
+  logger: new AlertingLogger(),
+  slowQuery: 500
+}
+```
+
+No dedicated "slow-query logger" option is needed for this - it falls directly out of `Logger`'s two independent methods plus `DefaultLogger` being a plain, subclassable class.
+
 :::tip
-With general query logging disabled in production (e.g., `logger: ['error', 'warn', 'slowQuery']`), UQL stays silent until a query exceeds your threshold, which makes it a low-noise way to catch performance regressions.
+With general query-level logging disabled in production (e.g., `logger: ['error', 'warn']`, no `'query'`), setting `slowQuery` keeps UQL silent until a query exceeds your threshold, which makes it a low-noise way to catch performance regressions.
 :::
