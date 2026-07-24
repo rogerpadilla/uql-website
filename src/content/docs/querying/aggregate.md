@@ -13,6 +13,7 @@ Use `querier.aggregate()` for analytics that involve `GROUP BY`, aggregate funct
 
 ```ts title="You write"
 const results = await querier.aggregate(Order, {
+  $where: { amount: { $gt: 0 } },    // WHERE: filter rows before grouping
   $group: { status: true },          // GROUP BY column(s)
   $agg: {
     total: { $sum: 'amount' },       // SUM("amount") AS "total"
@@ -27,8 +28,9 @@ const results = await querier.aggregate(Order, {
 ```sql title="Generated SQL (PostgreSQL)"
 SELECT "status", SUM("amount") "total", COUNT(*) "count"
 FROM "Order"
+WHERE "amount" > $1
 GROUP BY "status"
-HAVING COUNT(*) > $1
+HAVING COUNT(*) > $2
 ORDER BY SUM("amount") DESC
 LIMIT 10
 ```
@@ -36,6 +38,7 @@ LIMIT 10
 ```sql title="Generated SQL (MySQL/MariaDB/SQLite)"
 SELECT `status`, SUM(`amount`) `total`, COUNT(*) `count`
 FROM `Order`
+WHERE `amount` > ?
 GROUP BY `status`
 HAVING COUNT(*) > ?
 ORDER BY SUM(`amount`) DESC
@@ -44,6 +47,7 @@ LIMIT 10
 
 ```json title="Generated MongoDB Pipeline"
 [
+  { "$match": { "amount": { "$gt": 0 } } },
   { "$group": { "_id": { "status": "$status" }, "total": { "$sum": "$amount" }, "count": { "$sum": 1 } } },
   { "$project": { "_id": 0, "status": "$_id.status", "total": 1, "count": 1 } },
   { "$match": { "count": { "$gt": 5 } } },
@@ -51,6 +55,8 @@ LIMIT 10
   { "$limit": 10 }
 ]
 ```
+
+> There is no `$select` in `aggregate()` - the output columns are exactly the `$group` columns plus the `$agg` aliases.
 
 ### `$group` and `$agg`
 
@@ -62,13 +68,38 @@ LIMIT 10
 
 **`$agg`** - computed columns (`alias → aggregate function`):
 
-- **`{ $count: '*' }`**: `COUNT(*)`
+- **`{ $count: '*' }`**: `COUNT(*)` (every row)
+- **`{ $count: 'field' }`**: `COUNT("field")` (non-null values only)
 - **`{ $sum: 'field' }`**: `SUM("field")`
 - **`{ $avg: 'field' }`**: `AVG("field")`
 - **`{ $min: 'field' }`**: `MIN("field")`
 - **`{ $max: 'field' }`**: `MAX("field")`
+- **`{ $countDistinct: 'field' }`**: `COUNT(DISTINCT "field")`
+- **`{ $sumDistinct: 'field' }`**: `SUM(DISTINCT "field")`
+- **`{ $avgDistinct: 'field' }`**: `AVG(DISTINCT "field")`
+
+`{ $count: '*' }` counts every row; `{ $count: 'field' }` counts only rows where the field is non-null - identical on SQL (`COUNT("field")`) and MongoDB.
 
 Both keys are optional: use `$group` alone for a `DISTINCT`-style query, or `$agg` alone for a grand total across all rows.
+
+#### Distinct aggregates
+
+Use the flat `$countDistinct` / `$sumDistinct` / `$avgDistinct` ops to aggregate over a field's distinct values - e.g. how many distinct customers ordered per status:
+
+```ts title="You write"
+const results = await querier.aggregate(Order, {
+  $group: { status: true },
+  $agg: { customers: { $countDistinct: 'customerId' } },
+});
+```
+
+```sql title="Generated SQL (PostgreSQL)"
+SELECT "status", COUNT(DISTINCT "customerId") "customers"
+FROM "Order"
+GROUP BY "status"
+```
+
+On MongoDB this compiles to `$addToSet` + a `$project` reducer (`$size` for `$countDistinct`, `$sum`/`$avg` for `$sumDistinct`/`$avgDistinct`), so the result is identical across dialects. DISTINCT applies only to these numeric aggregates; `$min`/`$max` have no distinct variant.
 
 ```ts title="You write"
 // Total revenue with no grouping
@@ -92,9 +123,9 @@ SELECT SUM(`amount`) `revenue` FROM `Order`
 
 ```ts title="You write"
 const results = await querier.aggregate(Order, {
+  $where: { createdAt: { $gte: new Date('2025-01-01') } },
   $group: { status: true },
   $agg: { count: { $count: '*' } },
-  $where: { createdAt: { $gte: new Date('2025-01-01') } },
   $having: { count: { $gt: 10 } },
 });
 ```
